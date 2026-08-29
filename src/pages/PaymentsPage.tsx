@@ -348,7 +348,7 @@ export function PaymentsPage() {
               className={`w-4 h-4 ${statsQuery.isFetching || ledgerStatsQuery.isFetching || withdrawalsQuery.isFetching ? 'animate-spin' : ''}`}
             />
             Refresh
-          </button>
+        </button>
         }
       />
 
@@ -496,10 +496,10 @@ export function PaymentsPage() {
               className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-ink-200 text-ink-700 text-sm font-medium hover:bg-ink-50 transition-colors disabled:opacity-50"
             >
               <Download className="w-4 h-4" /> Export
-            </button>
-          </div>
+          </button>
+      </div>
 
-          <Card>
+      <Card>
             <DataTable
               columns={columns}
               data={withdrawals}
@@ -518,7 +518,7 @@ export function PaymentsPage() {
               total={total}
               onPageChange={setPage}
             />
-          </Card>
+      </Card>
 
           <Modal
             open={selectedId !== null}
@@ -550,9 +550,9 @@ export function PaymentsPage() {
                     <p className="text-sm text-ink-500">{withdrawalRunnerName(detail)}</p>
                   </div>
                   <Badge status={detail.status} label={titleCase(detail.status.replace(/_/g, ' '))} />
-                </div>
+            </div>
 
-                <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4">
                   <DetailField label="Amount" value={formatCurrency(detail.amount)} />
                   <DetailField label="Fee" value={formatCurrency(detail.fee ?? 0)} />
                   <DetailField label="Bank" value={detail.bank_name || '—'} />
@@ -615,10 +615,10 @@ export function PaymentsPage() {
                       Mark paid manually
                     </button>
                   )}
-                </div>
-              </div>
-            )}
-          </Modal>
+            </div>
+          </div>
+        )}
+      </Modal>
 
           <Modal
             open={rejectingId !== null}

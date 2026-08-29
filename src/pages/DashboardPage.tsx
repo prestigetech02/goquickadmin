@@ -34,6 +34,7 @@ import { AreaChart } from '@/components/ui/AreaChart';
 import { DonutChart } from '@/components/ui/DonutChart';
 import { BarChart } from '@/components/ui/BarChart';
 import { PersonAvatar } from '@/components/ui/PersonAvatar';
+import { useAdminOpsRealtimeStatus } from '@/context/AdminOpsRealtimeContext';
 
 const PERFORMANCE_TABS: { key: PerformanceTab; label: string }[] = [
   { key: 'revenue', label: 'Revenue' },
@@ -69,6 +70,7 @@ function formatSummaryValue(tab: PerformanceTab, value: number): string {
 }
 
 export function DashboardPage() {
+  const { live } = useAdminOpsRealtimeStatus();
   const [performanceTab, setPerformanceTab] = useState<PerformanceTab>('revenue');
   const [performancePeriod, setPerformancePeriod] = useState<PerformancePeriod>('this_week');
 
@@ -143,15 +145,30 @@ export function DashboardPage() {
         title="Dashboard"
         subtitle="Live overview from your GoQuick platform"
         action={
-          <button
-            type="button"
-            onClick={() => void refreshAll()}
-            disabled={refreshing}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-ink-200 text-sm font-semibold text-ink-700 hover:bg-ink-50 disabled:opacity-60"
-          >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
+          <div className="flex items-center gap-2">
+            <span
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                live
+                  ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+                  : 'bg-ink-50 text-ink-500 ring-1 ring-ink-200'
+              }`}
+              title={live ? 'Listening for live errand status updates' : 'Realtime disconnected'}
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${live ? 'bg-emerald-500 animate-pulse' : 'bg-ink-400'}`}
+              />
+              {live ? 'Live' : 'Offline'}
+            </span>
+            <button
+              type="button"
+              onClick={() => void refreshAll()}
+              disabled={refreshing}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-ink-200 text-sm font-semibold text-ink-700 hover:bg-ink-50 disabled:opacity-60"
+            >
+              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+          </div>
         }
       />
 

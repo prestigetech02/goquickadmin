@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/Badge';
 import { StatCard } from '@/components/ui/StatCard';
 import { DataTable, type Column } from '@/components/ui/DataTable';
 import { Modal } from '@/components/ui/Modal';
+import { useAdminOpsRealtimeStatus } from '@/context/AdminOpsRealtimeContext';
 import {
   cancelAdminErrand,
   fetchAdminErrand,
@@ -68,6 +69,7 @@ type InterveneMode = 'cancel' | 'reassign' | 'force-status' | null;
 
 export function ErrandsPage() {
   const queryClient = useQueryClient();
+  const { live } = useAdminOpsRealtimeStatus();
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -271,6 +273,19 @@ export function ErrandsPage() {
         subtitle={`${formatNumber(ops?.active ?? 0)} in-flight · ${formatNumber(ops?.stuck ?? 0)} stuck`}
         action={
           <>
+            <span
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                live
+                  ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+                  : 'bg-ink-50 text-ink-500 ring-1 ring-ink-200'
+              }`}
+              title={live ? 'Listening for live errand status updates' : 'Realtime disconnected'}
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${live ? 'bg-emerald-500 animate-pulse' : 'bg-ink-400'}`}
+              />
+              {live ? 'Live' : 'Offline'}
+            </span>
             <button
               type="button"
               onClick={() => void Promise.all([listQuery.refetch(), opsStatsQuery.refetch()])}

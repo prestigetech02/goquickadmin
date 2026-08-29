@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { AdminNavigationProvider } from '@/context/AdminNavigationContext';
+import { AdminOpsRealtimeProvider } from '@/context/AdminOpsRealtimeContext';
 import { Layout } from '@/components/Layout';
 import {
   canAccessPage,
@@ -111,9 +112,11 @@ function AppContent() {
 
   return (
     <AdminNavigationProvider>
-      <Layout currentPage={page}>
-        {renderPage()}
-      </Layout>
+      <AdminOpsRealtimeProvider>
+        <Layout currentPage={page}>
+          {renderPage()}
+        </Layout>
+      </AdminOpsRealtimeProvider>
     </AdminNavigationProvider>
   );
 }

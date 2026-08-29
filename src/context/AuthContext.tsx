@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { clearAdminToken, getAdminToken, setAdminToken } from '@/lib/auth';
 import { fetchAdminMe, getApiErrorMessage, loginAdmin, logoutAdmin } from '@/lib/adminAuthApi';
+import { disconnectEcho } from '@/lib/echo';
 import { ADMIN_AUTH_EXPIRED_EVENT } from '@/lib/http';
 import { adminDisplayName } from '@/lib/utils';
 import type { AdminUser } from '@/types';
@@ -40,6 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!cancelled) setUser(me);
       } catch {
         clearAdminToken();
+        disconnectEcho();
         if (!cancelled) setUser(null);
       } finally {
         if (!cancelled) setLoading(false);
@@ -49,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     restoreSession();
 
     const onExpired = () => {
+      disconnectEcho();
       setUser(null);
       setLoading(false);
     };
@@ -68,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error: null };
     } catch (err) {
       clearAdminToken();
+      disconnectEcho();
       setUser(null);
       return { error: getApiErrorMessage(err, 'Invalid admin credentials.') };
     }
@@ -80,6 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Best-effort revoke; always clear local session.
     } finally {
       clearAdminToken();
+      disconnectEcho();
       setUser(null);
     }
   }, []);
@@ -87,6 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshUser = useCallback(async () => {
     const token = getAdminToken();
     if (!token) {
+      disconnectEcho();
       setUser(null);
       return;
     }
@@ -96,6 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(me);
     } catch {
       clearAdminToken();
+      disconnectEcho();
       setUser(null);
     }
   }, []);

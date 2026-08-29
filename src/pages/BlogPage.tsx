@@ -249,7 +249,7 @@ function BlogList({
             >
               <RefreshCw className={`w-4 h-4 ${listQuery.isFetching ? 'animate-spin' : ''}`} />
               Refresh
-            </button>
+        </button>
             <button
               type="button"
               onClick={onNew}
@@ -257,7 +257,7 @@ function BlogList({
             >
               <Plus className="w-4 h-4" />
               New post
-            </button>
+          </button>
           </div>
         }
       />
@@ -302,7 +302,7 @@ function BlogList({
               placeholder="Search title, slug, excerpt…"
               className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-ink-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
             />
-          </div>
+                </div>
           <select
             value={publishedFilter}
             onChange={(e) => setPublishedFilter(e.target.value as PublishedFilter)}
@@ -312,8 +312,8 @@ function BlogList({
             <option value="published">Published</option>
             <option value="draft">Draft</option>
           </select>
-        </CardBody>
-      </Card>
+              </CardBody>
+            </Card>
 
       {listQuery.isError ? (
         <Card className="p-8 text-center">
@@ -498,7 +498,7 @@ function BlogEditor({
 
   if (mode === 'edit' && postQuery.isError) {
     return (
-      <div>
+          <div>
         <button type="button" onClick={onBack} className="inline-flex items-center gap-2 text-sm text-ink-500 hover:text-ink-800 mb-4">
           <ArrowLeft className="w-4 h-4" />
           Back to blog
@@ -507,12 +507,12 @@ function BlogEditor({
           <AlertCircle className="w-8 h-8 text-error-400 mx-auto mb-2" />
           <p className="text-error-700">{getApiErrorMessage(postQuery.error, 'Failed to load post.')}</p>
         </Card>
-      </div>
+          </div>
     );
   }
 
   return (
-    <div>
+          <div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <button
           type="button"
@@ -551,14 +551,14 @@ function BlogEditor({
         <div className="mb-4 flex items-start gap-2 rounded-xl bg-success-50 px-4 py-3 text-sm text-success-700">
           <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" />
           <p>{actionSuccess}</p>
-        </div>
+          </div>
       ) : null}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-4">
           <Card>
             <CardBody className="space-y-4">
-            <div>
+          <div>
               <label htmlFor="blog-title" className="block text-sm font-medium text-ink-700 mb-1.5">
                 Title *
               </label>
@@ -571,7 +571,7 @@ function BlogEditor({
                 maxLength={255}
                 className="w-full px-4 py-2.5 rounded-xl border border-ink-200 bg-white focus:outline-none focus:ring-2 focus:ring-brand-500"
               />
-            </div>
+          </div>
 
             <div>
               <label htmlFor="blog-slug" className="block text-sm font-medium text-ink-700 mb-1.5">
@@ -656,7 +656,7 @@ function BlogEditor({
             onImageUrlChange={setImage}
             onImageUpload={handleImageUpload}
           />
-        </div>
+          </div>
 
         <div className="flex flex-wrap gap-2 justify-end">
           <button
