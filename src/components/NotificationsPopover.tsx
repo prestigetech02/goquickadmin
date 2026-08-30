@@ -6,13 +6,16 @@ import {
   fetchInAppUnreadCount,
   markInAppNotificationRead,
 } from '@/api/adminInAppNotificationsApi';
+import { useAuth } from '@/context/AuthContext';
 import { useAdminNavigate } from '@/context/AdminNavigationContext';
+import { canAccessPage } from '@/lib/adminNavigation';
 import { getApiErrorMessage } from '@/lib/adminAuthApi';
 import { queryKeys } from '@/lib/queryKeys';
 import { timeAgo, titleCase } from '@/lib/utils';
-import type { AppNotification } from '@/types/inAppNotification';
+import { relatedSupportTicketId, type AppNotification } from '@/types/inAppNotification';
 
 function notificationIcon(type: string): string {
+  if (type.includes('support_ticket')) return '🎫';
   if (type.includes('chat')) return '💬';
   if (type.includes('offer') || type.includes('errand') || type.includes('proof')) return '📦';
   if (type.includes('payment') || type.includes('escrow') || type.includes('payout')) return '₦';
@@ -25,6 +28,7 @@ function invalidateInAppNotifications(queryClient: ReturnType<typeof useQueryCli
 
 export function NotificationsPopover() {
   const navigate = useAdminNavigate();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const wrapRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -33,6 +37,7 @@ export function NotificationsPopover() {
     queryKey: queryKeys.inAppNotifications.unreadCount,
     queryFn: fetchInAppUnreadCount,
     refetchInterval: 60_000,
+    refetchOnWindowFocus: true,
   });
 
   const previewQuery = useQuery({
@@ -82,6 +87,11 @@ export function NotificationsPopover() {
       }
     }
     setOpen(false);
+    const ticketId = relatedSupportTicketId(notification);
+    if (ticketId && canAccessPage(user, 'tickets')) {
+      navigate('tickets', { openId: ticketId });
+      return;
+    }
     navigate('in-app-notifications');
   };
 

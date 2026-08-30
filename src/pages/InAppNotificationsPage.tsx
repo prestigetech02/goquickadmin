@@ -19,14 +19,18 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Modal } from '@/components/ui/Modal';
 import { StatCard } from '@/components/ui/StatCard';
+import { useAuth } from '@/context/AuthContext';
+import { useAdminNavigate } from '@/context/AdminNavigationContext';
+import { canAccessPage } from '@/lib/adminNavigation';
 import { getApiErrorMessage } from '@/lib/adminAuthApi';
 import { queryKeys } from '@/lib/queryKeys';
 import { formatDateTime, timeAgo, titleCase } from '@/lib/utils';
-import type { AppNotification } from '@/types/inAppNotification';
+import { relatedSupportTicketId, type AppNotification } from '@/types/inAppNotification';
 
 type ReadFilter = 'all' | 'unread' | 'read';
 
 function notificationIcon(type: string): string {
+  if (type.includes('support_ticket')) return '🎫';
   if (type.includes('chat')) return '💬';
   if (type.includes('offer') || type.includes('errand') || type.includes('proof')) return '📦';
   if (type.includes('payment') || type.includes('escrow') || type.includes('payout')) return '₦';
@@ -39,6 +43,8 @@ function invalidateInAppNotifications(queryClient: ReturnType<typeof useQueryCli
 
 export function InAppNotificationsPage() {
   const queryClient = useQueryClient();
+  const navigate = useAdminNavigate();
+  const { user } = useAuth();
   const [page, setPage] = useState(1);
   const [readFilter, setReadFilter] = useState<ReadFilter>('all');
   const [selected, setSelected] = useState<AppNotification | null>(null);
@@ -286,15 +292,30 @@ export function InAppNotificationsPage() {
             <div className="p-4 rounded-xl bg-ink-50">
               <p className="text-sm text-ink-700 whitespace-pre-wrap">{selected.message}</p>
             </div>
-            <button
-              type="button"
-              onClick={() => deleteMutation.mutate(selected.id)}
-              disabled={deleteMutation.isPending}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-error-200 text-sm font-medium text-error-700 hover:bg-error-50 disabled:opacity-60"
-            >
-              <Trash2 className="w-4 h-4" />
-              Delete notification
-            </button>
+            <div className="flex flex-wrap gap-2">
+              {relatedSupportTicketId(selected) && canAccessPage(user, 'tickets') ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const ticketId = relatedSupportTicketId(selected);
+                    setSelected(null);
+                    if (ticketId) navigate('tickets', { openId: ticketId });
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-medium hover:bg-brand-700"
+                >
+                  View ticket
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => deleteMutation.mutate(selected.id)}
+                disabled={deleteMutation.isPending}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-error-200 text-sm font-medium text-error-700 hover:bg-error-50 disabled:opacity-60"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete notification
+              </button>
+            </div>
           </div>
         ) : null}
       </Modal>

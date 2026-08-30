@@ -4,6 +4,14 @@ import type { ErrandDetails, ErrandListItem, Paginated } from '@/types/api';
 import { getEcho } from './echo';
 import { queryKeys } from './queryKeys';
 
+type NotificationPayload = {
+  id?: number;
+  type?: string;
+  title?: string;
+  message?: string;
+  data?: Record<string, unknown> | null;
+};
+
 type ErrandStatusPayload = {
   errand_id?: number;
   status?: string;
@@ -45,10 +53,10 @@ function patchErrandStatusInCaches(
 }
 
 /**
- * Subscribe to private-admin.dashboard for errand status updates.
- * Patches list/detail caches immediately and invalidates ops/dashboard stats.
+ * Subscribe to private-admin.dashboard for errand status, and private-user.{id}
+ * so the header bell updates live when an in-app notification is created.
  */
-export function useAdminOpsRealtime(enabled: boolean) {
+export function useAdminOpsRealtime(enabled: boolean, userId = 0) {
   const qc = useQueryClient();
   const [live, setLive] = useState(false);
 
@@ -64,21 +72,22 @@ export function useAdminOpsRealtime(enabled: boolean) {
       return;
     }
 
-    const channelName = 'admin.dashboard';
+    const dashboardChannel = 'admin.dashboard';
+    const userChannel = userId > 0 ? `user.${userId}` : null;
     let cancelled = false;
 
     try {
-      const channel = echo.private(channelName);
+      const dashboard = echo.private(dashboardChannel);
       setLive(false);
 
-      channel.subscribed(() => {
+      dashboard.subscribed(() => {
         if (!cancelled) setLive(true);
       });
-      channel.error(() => {
+      dashboard.error(() => {
         if (!cancelled) setLive(false);
       });
 
-      channel.listen('.errand.status.updated', (payload: ErrandStatusPayload) => {
+      dashboard.listen('.errand.status.updated', (payload: ErrandStatusPayload) => {
         if (cancelled) return;
 
         const errandId = Number(payload?.errand_id) || 0;
@@ -93,6 +102,21 @@ export function useAdminOpsRealtime(enabled: boolean) {
         void qc.invalidateQueries({ queryKey: queryKeys.dashboard.stats });
         void qc.invalidateQueries({ queryKey: queryKeys.errands.all });
       });
+
+      if (userChannel) {
+        const personal = echo.private(userChannel);
+        personal.listen('.notification.created', (payload: NotificationPayload) => {
+          if (cancelled) return;
+
+          void qc.invalidateQueries({ queryKey: queryKeys.inAppNotifications.all });
+
+          const nested = payload?.data && typeof payload.data === 'object' ? payload.data : {};
+          const type = String(payload?.type || nested.type || '').toLowerCase();
+          if (type.includes('support_ticket')) {
+            void qc.invalidateQueries({ queryKey: queryKeys.tickets.all });
+          }
+        });
+      }
     } catch {
       setLive(false);
       return;
@@ -102,12 +126,13 @@ export function useAdminOpsRealtime(enabled: boolean) {
       cancelled = true;
       setLive(false);
       try {
-        echo.leave(channelName);
+        echo.leave(dashboardChannel);
+        if (userChannel) echo.leave(userChannel);
       } catch {
         // ignore
       }
     };
-  }, [enabled, qc]);
+  }, [enabled, userId, qc]);
 
   return { live };
 }

@@ -15,6 +15,7 @@ import {
   RefreshCw,
   Scale,
   Settings,
+  Ticket,
   Users,
 } from 'lucide-react';
 import { fetchAdminHelpSupport } from '@/api/adminHelpSupportApi';
@@ -36,6 +37,12 @@ type QuickLink = {
 };
 
 const QUICK_LINKS: QuickLink[] = [
+  {
+    page: 'tickets',
+    label: 'Tickets',
+    description: 'Reply to in-app Help & Support tickets',
+    icon: <Ticket className="w-5 h-5" />,
+  },
   {
     page: 'disputes',
     label: 'Disputes',
@@ -207,7 +214,8 @@ export function SupportPage() {
               </div>
             </div>
             <p className="text-sm text-ink-600">
-              This page does not manage end-user support tickets. Use Disputes, Users, and Notifications for operational issues inside the platform.
+              This page is an internal ops guide. End-user tickets live under Tickets. Use Disputes for
+              errand money or service conflicts.
             </p>
           </CardBody>
         </Card>

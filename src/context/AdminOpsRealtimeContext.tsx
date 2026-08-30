@@ -10,7 +10,10 @@ const AdminOpsRealtimeContext = createContext<AdminOpsRealtimeValue>({ live: fal
 
 export function AdminOpsRealtimeProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const { live } = useAdminOpsRealtime(Boolean(user) && !user?.must_change_password);
+  const { live } = useAdminOpsRealtime(
+    Boolean(user) && !user?.must_change_password,
+    user?.id ?? 0,
+  );
 
   return (
     <AdminOpsRealtimeContext.Provider value={{ live }}>

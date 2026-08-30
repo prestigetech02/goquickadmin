@@ -91,6 +91,8 @@ export function statusColor(status: string): string {
     paid: 'bg-success-100 text-success-700',
     resolved: 'bg-success-100 text-success-700',
     published: 'bg-success-100 text-success-700',
+    awaiting_user: 'bg-warning-100 text-warning-700',
+    closed: 'bg-ink-100 text-ink-600',
     pending: 'bg-warning-100 text-warning-700',
     in_transit: 'bg-brand-100 text-brand-700',
     in_progress: 'bg-brand-100 text-brand-700',

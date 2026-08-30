@@ -458,6 +458,47 @@ export type DisputeListItem = {
   resolvedBy?: DisputeActor | null;
 };
 
+export type SupportTicketStatus = 'open' | 'awaiting_user' | 'resolved' | 'closed' | string;
+
+export type SupportTicketCategory = 'account' | 'errand' | 'payment' | 'kyc' | 'other' | string;
+
+export type SupportTicketUser = {
+  id: number;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  phone?: string | null;
+};
+
+export type SupportTicketMessage = {
+  id: number;
+  ticket_id: number;
+  user_id: number;
+  body: string;
+  attachment_url: string | null;
+  is_staff: boolean;
+  user?: SupportTicketUser | null;
+  created_at: string;
+};
+
+export type SupportTicketListItem = {
+  id: number;
+  public_id: string;
+  category: SupportTicketCategory;
+  subject: string;
+  status: SupportTicketStatus;
+  errand_id: number | null;
+  errand?: DisputeErrand | null;
+  last_replied_at: string | null;
+  created_at: string;
+  updated_at: string;
+  is_locked: boolean;
+  can_reply: boolean;
+  preview?: string | null;
+  user?: SupportTicketUser | null;
+  messages?: SupportTicketMessage[];
+};
+
 export type RunnerVerificationUser = {
   id: number;
   first_name: string | null;

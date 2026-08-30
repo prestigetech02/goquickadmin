@@ -8,6 +8,7 @@ export type PageKey =
   | 'users'
   | 'payments'
   | 'disputes'
+  | 'tickets'
   | 'analytics'
   | 'blog'
   | 'notifications'
@@ -43,6 +44,7 @@ export const ADMIN_PAGES: AdminPageDefinition[] = [
   { key: 'users', label: 'Users', path: '/users', section: 'Operations', access: 'operations', visibility: 'sidebar' },
   { key: 'payments', label: 'Payments', path: '/payments', section: 'Financials', access: 'finance', visibility: 'sidebar' },
   { key: 'disputes', label: 'Disputes', path: '/disputes', section: 'Operations', access: 'operations', visibility: 'sidebar' },
+  { key: 'tickets', label: 'Tickets', path: '/tickets', section: 'Operations', access: 'operations', visibility: 'sidebar' },
   { key: 'analytics', label: 'Analytics', path: '/analytics', section: 'Insights', access: 'operations', visibility: 'sidebar' },
   { key: 'blog', label: 'Blog', path: '/blog', section: 'Content', access: 'operations', visibility: 'sidebar' },
   { key: 'notifications', label: 'Notifications', path: '/notifications', section: 'Content', access: 'operations', visibility: 'sidebar' },

@@ -48,6 +48,11 @@ export const queryKeys = {
     list: (params: Record<string, unknown>) => ['admin-disputes', 'list', params] as const,
     detail: (id: number) => ['admin-disputes', 'detail', id] as const,
   },
+  tickets: {
+    all: ['admin-tickets'] as const,
+    list: (params: Record<string, unknown>) => ['admin-tickets', 'list', params] as const,
+    detail: (id: number) => ['admin-tickets', 'detail', id] as const,
+  },
   pricing: {
     all: ['admin-pricing'] as const,
     list: (params: Record<string, unknown>) => ['admin-pricing', 'list', params] as const,
