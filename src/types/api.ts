@@ -623,6 +623,26 @@ export type PricingRuleInput = {
   is_active?: boolean;
 };
 
+export type PlatformFees = {
+  cancellation_fee_percent: number;
+  runner_commission_percent: number;
+  withdrawal_fee_percent: number;
+  referral_requester_discount_amount: number;
+  referral_referrer_bonus_amount: number;
+};
+
+export type PlatformFeeField = {
+  key: keyof PlatformFees;
+  label: string;
+  unit: 'percent' | 'naira';
+  help: string;
+};
+
+export type PlatformFeesResponse = {
+  fees: PlatformFees;
+  fields: PlatformFeeField[];
+};
+
 export const ERRAND_TYPES = [
   'shopping',
   'pickup_drop',

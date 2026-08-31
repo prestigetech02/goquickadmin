@@ -19,7 +19,7 @@ import { fetchAdminRunners } from '@/api/adminRunnersApi';
 import { getApiErrorMessage } from '@/lib/adminAuthApi';
 import { queryKeys } from '@/lib/queryKeys';
 import {
-  formatBudgetRange,
+  formatListedAmount,
   formatCurrency,
   formatErrandCode,
   formatNumber,
@@ -376,7 +376,7 @@ export function DashboardPage() {
                       </div>
                       <div className="flex items-center gap-3 flex-shrink-0">
                         <span className="text-sm font-semibold text-ink-700">
-                          {formatBudgetRange(errand.budget_min, errand.budget_max)}
+                          {formatListedAmount(errand)}
                         </span>
                         <Badge status={errand.status} />
                       </div>

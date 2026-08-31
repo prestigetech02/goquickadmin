@@ -23,6 +23,7 @@ import { queryKeys } from '@/lib/queryKeys';
 import {
   downloadCSV,
   formatBudgetRange,
+  formatListedAmount,
   formatDateTime,
   formatErrandCode,
   formatNumber,
@@ -225,7 +226,7 @@ export function ErrandsPage() {
       header: 'Budget',
       render: (row) => (
         <span className="font-semibold text-ink-900">
-          {formatBudgetRange(row.budget_min, row.budget_max ?? row.base_price)}
+          {formatListedAmount(row)}
         </span>
       ),
     },
@@ -525,7 +526,7 @@ function ErrandDetailBody({
         <Info label="Buyer" value={partyDisplayName(detail.buyer) || '—'} />
         <Info label="Runner" value={partyDisplayName(detail.runner) || 'Unassigned'} />
         <Info label="Category" value={detail.category || '—'} />
-        <Info label="Budget" value={formatBudgetRange(detail.budget_min, detail.budget_max ?? detail.base_price)} />
+        <Info label="Budget" value={formatListedAmount(detail)} />
         <Info label="Pickup" value={detail.pickup_address || '—'} />
         <Info label="Drop-off" value={detail.dropoff_address || '—'} />
         <Info label="Updated" value={detail.updated_at ? formatDateTime(detail.updated_at) : '—'} />

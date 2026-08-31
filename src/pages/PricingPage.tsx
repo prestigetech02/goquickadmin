@@ -12,19 +12,21 @@ import {
 import {
   createAdminPricingRule,
   deleteAdminPricingRule,
+  fetchAdminPlatformFees,
   fetchAdminPricingRules,
+  updateAdminPlatformFees,
   updateAdminPricingRule,
   type PricingRuleItem,
 } from '@/api/adminPricingApi';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { Card, CardBody } from '@/components/ui/Card';
+import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { StatCard } from '@/components/ui/StatCard';
 import { Drawer } from '@/components/ui/Drawer';
 import { getApiErrorMessage } from '@/lib/adminAuthApi';
 import { queryKeys } from '@/lib/queryKeys';
 import { formatCurrency, titleCase } from '@/lib/utils';
-import { ERRAND_TYPES } from '@/types/api';
+import { ERRAND_TYPES, type PlatformFees } from '@/types/api';
 
 type ActiveFilter = 'all' | 'active' | 'inactive';
 
@@ -220,7 +222,7 @@ export function PricingPage() {
     <div>
       <PageHeader
         title="Pricing Rules"
-        subtitle="Set base fare, per km, per minute and surge. Scope rules by city, zone or errand type."
+        subtitle="Set errand fares, platform fees, cancellation charges, withdrawal commission, and referral bonuses."
         action={
           <button
             type="button"
@@ -231,6 +233,13 @@ export function PricingPage() {
           </button>
         }
       />
+
+      <PlatformFeesCard />
+
+      <h2 className="text-base font-semibold text-ink-900 mb-1">Fare rules</h2>
+      <p className="text-sm text-ink-500 mb-4">
+        Set base fare, per km, per minute and surge. Scope rules by city, zone or errand type.
+      </p>
 
       {actionError ? (
         <div className="mb-4 flex items-start gap-2 p-3 rounded-xl bg-error-50 text-error-700 text-sm">
@@ -544,5 +553,128 @@ export function PricingPage() {
         </div>
       </Drawer>
     </div>
+  );
+}
+
+const emptyFees: PlatformFees = {
+  cancellation_fee_percent: 5,
+  runner_commission_percent: 0,
+  withdrawal_fee_percent: 0.1,
+  referral_requester_discount_amount: 500,
+  referral_referrer_bonus_amount: 1000,
+};
+
+function PlatformFeesCard() {
+  const queryClient = useQueryClient();
+  const [form, setForm] = useState<PlatformFees>(emptyFees);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const feesQuery = useQuery({
+    queryKey: queryKeys.pricing.fees,
+    queryFn: fetchAdminPlatformFees,
+  });
+
+  useEffect(() => {
+    if (feesQuery.data?.fees) {
+      setForm(feesQuery.data.fees);
+    }
+  }, [feesQuery.data]);
+
+  const saveMutation = useMutation({
+    mutationFn: () => updateAdminPlatformFees(form),
+    onSuccess: (data) => {
+      setForm(data.fees);
+      setError(null);
+      setSuccess('Platform fees saved.');
+      queryClient.invalidateQueries({ queryKey: queryKeys.pricing.fees });
+    },
+    onError: (err) => {
+      setSuccess(null);
+      setError(getApiErrorMessage(err, 'Failed to save platform fees.'));
+    },
+  });
+
+  const fields = feesQuery.data?.fields ?? [];
+
+  return (
+    <Card className="mb-6">
+      <CardHeader
+        title="Fees & charges"
+        subtitle="These apply platform-wide: cancellation, errand commission, withdrawals, and referrals."
+      />
+      <CardBody className="space-y-4">
+        {feesQuery.isLoading ? (
+          <div className="flex items-center gap-3 text-sm text-ink-500 py-4">
+            <span className="w-5 h-5 border-2 border-brand-200 border-t-brand-600 rounded-full animate-spin" />
+            Loading current fees…
+          </div>
+        ) : null}
+
+        {feesQuery.isError ? (
+          <div className="flex items-start gap-2 p-3 rounded-xl bg-error-50 text-error-700 text-sm">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <p>{getApiErrorMessage(feesQuery.error, 'Failed to load platform fees.')}</p>
+          </div>
+        ) : null}
+
+        {error ? (
+          <div className="flex items-start gap-2 p-3 rounded-xl bg-error-50 text-error-700 text-sm">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <p>{error}</p>
+          </div>
+        ) : null}
+
+        {success ? (
+          <div className="flex items-start gap-2 p-3 rounded-xl bg-success-50 text-success-700 text-sm">
+            <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <p>{success}</p>
+          </div>
+        ) : null}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {fields.map((field) => {
+            const value = form[field.key];
+            const isMoney = field.unit === 'naira';
+            return (
+              <label key={field.key} className="block">
+                <span className="block text-sm font-medium text-ink-700 mb-1.5">
+                  {field.label} {isMoney ? '(₦)' : '(%)'}
+                </span>
+                <input
+                  type="number"
+                  min={0}
+                  max={isMoney ? undefined : 100}
+                  step={isMoney ? '1' : '0.1'}
+                  value={Number.isFinite(value) ? value : ''}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      [field.key]: e.target.value === '' ? 0 : Number(e.target.value),
+                    })
+                  }
+                  className="w-full px-4 py-2.5 rounded-xl border border-ink-200 bg-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+                />
+                <span className="mt-1.5 block text-xs text-ink-500">{field.help}</span>
+              </label>
+            );
+          })}
+        </div>
+
+        <div className="flex justify-end">
+          <button
+            type="button"
+            disabled={saveMutation.isPending || feesQuery.isLoading || feesQuery.isError}
+            onClick={() => {
+              setSuccess(null);
+              saveMutation.mutate();
+            }}
+            className="px-4 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 disabled:opacity-60"
+          >
+            {saveMutation.isPending ? 'Saving…' : 'Save fees'}
+          </button>
+        </div>
+      </CardBody>
+    </Card>
   );
 }

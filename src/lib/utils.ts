@@ -19,8 +19,8 @@ export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('en-NG', {
     style: 'currency',
     currency: 'NGN',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(amount);
 }
 
@@ -38,10 +38,20 @@ export function partyDisplayName(
   return name || party.email || '';
 }
 
+export function formatListedAmount(errand: {
+  base_price?: number | null;
+  budget_min?: number | null;
+  budget_max?: number | null;
+}): string {
+  const amount = errand.base_price ?? errand.budget_min ?? errand.budget_max;
+  if (amount == null || !Number.isFinite(Number(amount))) return '—';
+  return formatCurrency(Number(amount));
+}
+
 export function formatBudgetRange(min: number | null | undefined, max: number | null | undefined): string {
   if (min == null && max == null) return '—';
   if (min != null && max != null) {
-    if (min === max) return formatCurrency(min);
+    if (Math.abs(min - max) < 0.005) return formatCurrency(min);
     return `${formatCurrency(min)} – ${formatCurrency(max)}`;
   }
   if (min != null) return formatCurrency(min);

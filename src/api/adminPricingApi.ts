@@ -2,6 +2,8 @@ import { http } from '@/lib/http';
 import {
   unwrapApiData,
   type ListQueryParams,
+  type PlatformFees,
+  type PlatformFeesResponse,
   type PricingRuleInput,
   type PricingRuleItem,
   type PricingRuleListResponse,
@@ -35,4 +37,14 @@ export async function deleteAdminPricingRule(id: number) {
   if (!data.success) {
     throw new Error(data.error?.message || data.message || 'Failed to delete pricing rule.');
   }
+}
+
+export async function fetchAdminPlatformFees() {
+  const { data } = await http.get<ApiResponse<PlatformFeesResponse>>('/admin/platform-fees');
+  return unwrapApiData(data, 'Failed to load platform fees.');
+}
+
+export async function updateAdminPlatformFees(input: PlatformFees) {
+  const { data } = await http.put<ApiResponse<PlatformFeesResponse>>('/admin/platform-fees', input);
+  return unwrapApiData(data, 'Failed to update platform fees.');
 }
