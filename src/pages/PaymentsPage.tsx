@@ -43,6 +43,12 @@ import {
 
 type PaymentsTab = 'ledger' | 'withdrawals';
 type WithdrawalStatusFilter = 'all' | 'pending' | 'approved' | 'rejected' | 'paid' | 'cancelled';
+type ConfirmPrompt = {
+  item: WithdrawalListItem;
+  action: 'approve' | 'mark-paid';
+  title: string;
+  message: string;
+};
 
 function withdrawalRunnerName(item: WithdrawalListItem): string {
   const user = item.wallet?.user;
@@ -79,6 +85,7 @@ export function PaymentsPage() {
   const [rejectingId, setRejectingId] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [actionError, setActionError] = useState<string | null>(null);
+  const [confirmPrompt, setConfirmPrompt] = useState<ConfirmPrompt | null>(null);
 
   useEffect(() => {
     const openParam = searchParams.get('open');
@@ -142,6 +149,7 @@ export function PaymentsPage() {
     },
     onSuccess: async (_data, variables) => {
       setActionError(null);
+      setConfirmPrompt(null);
       if (variables.action === 'reject') {
         setRejectingId(null);
         setRejectReason('');
@@ -149,6 +157,7 @@ export function PaymentsPage() {
       await invalidatePayments(variables.id);
     },
     onError: (err) => {
+      setConfirmPrompt(null);
       setActionError(getApiErrorMessage(err, 'Action failed.'));
     },
   });
@@ -183,15 +192,27 @@ export function PaymentsPage() {
     ]);
   };
 
+  const actingId = actionMutation.isPending ? actionMutation.variables?.id : undefined;
+  const actingAction = actionMutation.isPending ? actionMutation.variables?.action : undefined;
+  const isActingOn = (id: number, action?: 'approve' | 'reject' | 'mark-paid') =>
+    actingId === id && (action == null || actingAction === action);
+
   const runAction = (
     item: WithdrawalListItem,
-    action: 'approve' | 'reject' | 'mark-paid',
+    action: 'approve' | 'mark-paid',
     copy: { title: string; message: string },
   ) => {
-    if (actionMutation.isPending) return;
-    if (!window.confirm(`${copy.title}\n\n${copy.message}`)) return;
+    if (actionMutation.isPending) {
+      setActionError('Wait for the current payout to finish before starting another.');
+      return;
+    }
     setActionError(null);
-    actionMutation.mutate({ action, id: item.id });
+    setConfirmPrompt({ item, action, title: copy.title, message: copy.message });
+  };
+
+  const confirmAction = () => {
+    if (!confirmPrompt || actionMutation.isPending) return;
+    actionMutation.mutate({ action: confirmPrompt.action, id: confirmPrompt.item.id });
   };
 
   const submitReject = () => {
@@ -265,8 +286,9 @@ export function PaymentsPage() {
           {(row.status === 'pending' || row.status === 'approved') && row.payout_status !== 'pending' && (
             <button
               type="button"
-              disabled={actionMutation.isPending}
-              onClick={() => {
+              disabled={isActingOn(row.id)}
+              onClick={(e) => {
+                e.stopPropagation();
                 setActionError(null);
                 setRejectingId(row.id);
                 setRejectReason('');
@@ -279,31 +301,37 @@ export function PaymentsPage() {
           {canPayViaPaystack(row) && (
             <button
               type="button"
-              disabled={actionMutation.isPending}
-              onClick={() =>
+              disabled={isActingOn(row.id, 'approve')}
+              onClick={(e) => {
+                e.stopPropagation();
                 runAction(row, 'approve', {
                   title: row.status === 'approved' ? 'Pay via Paystack' : 'Approve & pay',
                   message: payConfirmMessage(row),
-                })
-              }
+                });
+              }}
               className="px-2.5 py-1 rounded-lg text-xs font-medium bg-brand-600 text-white hover:bg-brand-700 disabled:opacity-50"
             >
-              {row.status === 'approved' ? 'Pay via Paystack' : 'Approve & pay'}
+              {isActingOn(row.id, 'approve')
+                ? 'Paying…'
+                : row.status === 'approved'
+                  ? 'Pay via Paystack'
+                  : 'Approve & pay'}
             </button>
           )}
           {row.status === 'approved' && row.payout_status !== 'success' && (
             <button
               type="button"
-              disabled={actionMutation.isPending}
-              onClick={() =>
+              disabled={isActingOn(row.id, 'mark-paid')}
+              onClick={(e) => {
+                e.stopPropagation();
                 runAction(row, 'mark-paid', {
                   title: 'Mark paid manually',
                   message: 'Use this only if you already paid the runner outside Paystack.',
-                })
-              }
+                });
+              }}
               className="px-2.5 py-1 rounded-lg text-xs font-medium border border-success-200 text-success-700 hover:bg-success-50 disabled:opacity-50"
             >
-              Mark paid
+              {isActingOn(row.id, 'mark-paid') ? 'Saving…' : 'Mark paid'}
             </button>
           )}
         </div>
@@ -461,7 +489,10 @@ export function PaymentsPage() {
           {actionError ? (
             <div className="mb-4 flex items-start gap-2 p-3 rounded-xl bg-error-50 text-error-700 text-sm">
               <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-              <p>{actionError}</p>
+              <div>
+                <p className="font-medium">Paystack payout failed</p>
+                <p className="mt-1">{actionError}</p>
+              </div>
             </div>
           ) : null}
 
@@ -573,7 +604,7 @@ export function PaymentsPage() {
                   {canPayViaPaystack(detail) && (
                     <button
                       type="button"
-                      disabled={actionMutation.isPending}
+                      disabled={isActingOn(detail.id, 'approve')}
                       onClick={() =>
                         runAction(detail, 'approve', {
                           title: detail.status === 'approved' ? 'Pay via Paystack' : 'Approve & pay',
@@ -582,14 +613,18 @@ export function PaymentsPage() {
                       }
                       className="px-4 py-2 rounded-xl text-sm font-medium bg-brand-600 text-white hover:bg-brand-700 disabled:opacity-50"
                     >
-                      {detail.status === 'approved' ? 'Pay via Paystack' : 'Approve & pay'}
+                      {isActingOn(detail.id, 'approve')
+                        ? 'Paying…'
+                        : detail.status === 'approved'
+                          ? 'Pay via Paystack'
+                          : 'Approve & pay'}
                     </button>
                   )}
                   {(detail.status === 'pending' || detail.status === 'approved') &&
                     detail.payout_status !== 'pending' && (
                     <button
                       type="button"
-                      disabled={actionMutation.isPending}
+                      disabled={isActingOn(detail.id)}
                       onClick={() => {
                         setActionError(null);
                         setRejectingId(detail.id);
@@ -603,7 +638,7 @@ export function PaymentsPage() {
                   {detail.status === 'approved' && detail.payout_status !== 'success' && (
                     <button
                       type="button"
-                      disabled={actionMutation.isPending}
+                      disabled={isActingOn(detail.id, 'mark-paid')}
                       onClick={() =>
                         runAction(detail, 'mark-paid', {
                           title: 'Mark paid manually',
@@ -612,13 +647,68 @@ export function PaymentsPage() {
                       }
                       className="px-4 py-2 rounded-xl text-sm font-medium border border-success-200 text-success-700 hover:bg-success-50 disabled:opacity-50"
                     >
-                      Mark paid manually
+                      {isActingOn(detail.id, 'mark-paid') ? 'Saving…' : 'Mark paid manually'}
                     </button>
                   )}
             </div>
           </div>
         )}
       </Modal>
+
+          <Modal
+            open={confirmPrompt !== null}
+            onClose={() => {
+              if (actionMutation.isPending) return;
+              setConfirmPrompt(null);
+            }}
+            title={confirmPrompt?.title ?? 'Confirm'}
+            size="md"
+          >
+            {confirmPrompt ? (
+              <div className="space-y-5">
+                <p className="text-sm text-ink-600 whitespace-pre-line leading-relaxed">
+                  {confirmPrompt.message}
+                </p>
+                <div className="rounded-xl bg-ink-50 px-4 py-3 text-sm text-ink-700">
+                  <p className="font-semibold text-ink-900">
+                    {confirmPrompt.item.reference || `#${confirmPrompt.item.id}`}
+                  </p>
+                  <p className="mt-0.5">{withdrawalRunnerName(confirmPrompt.item)}</p>
+                  <p className="mt-1 font-semibold">{formatCurrency(confirmPrompt.item.amount)}</p>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setConfirmPrompt(null)}
+                    disabled={actionMutation.isPending}
+                    className="px-4 py-2 rounded-xl text-sm font-medium border border-ink-200 text-ink-700 hover:bg-ink-50 disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={confirmAction}
+                    disabled={actionMutation.isPending}
+                    className={
+                      confirmPrompt.action === 'approve'
+                        ? 'px-4 py-2 rounded-xl text-sm font-medium bg-brand-600 text-white hover:bg-brand-700 disabled:opacity-50'
+                        : 'px-4 py-2 rounded-xl text-sm font-medium bg-success-600 text-white hover:bg-success-700 disabled:opacity-50'
+                    }
+                  >
+                    {actionMutation.isPending
+                      ? confirmPrompt.action === 'approve'
+                        ? 'Paying…'
+                        : 'Saving…'
+                      : confirmPrompt.action === 'approve'
+                        ? confirmPrompt.item.status === 'approved'
+                          ? 'Pay via Paystack'
+                          : 'Approve & pay'
+                        : 'Mark paid'}
+                  </button>
+                </div>
+              </div>
+            ) : null}
+          </Modal>
 
           <Modal
             open={rejectingId !== null}

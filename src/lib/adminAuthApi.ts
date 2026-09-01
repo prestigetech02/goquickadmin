@@ -49,9 +49,25 @@ export async function changeAdminPassword(input: {
 export function getApiErrorMessage(error: unknown, fallback = 'Something went wrong'): string {
   if (axios.isAxiosError(error)) {
     const body = error.response?.data as
-      | { error?: { message?: string }; message?: string }
+      | {
+          error?: { message?: string; details?: Record<string, string[] | string> };
+          message?: string;
+          errors?: Record<string, string[] | string>;
+        }
       | undefined;
-    return body?.error?.message || body?.message || fallback;
+    const fromBag = (bag?: Record<string, string[] | string>) => {
+      if (!bag) return undefined;
+      const first = Object.values(bag)[0];
+      if (Array.isArray(first)) return first[0];
+      return typeof first === 'string' ? first : undefined;
+    };
+    return (
+      body?.error?.message ||
+      fromBag(body?.error?.details) ||
+      fromBag(body?.errors) ||
+      body?.message ||
+      fallback
+    );
   }
   if (error instanceof Error) return error.message;
   return fallback;
