@@ -368,7 +368,7 @@ export function DashboardPage() {
                     >
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-ink-900">
-                          {formatErrandCode(errand.id)}
+                          {formatErrandCode(errand.id, errand.created_at, errand.code)}
                         </p>
                         <p className="text-xs text-ink-400 truncate">
                           {errand.title || errand.pickup_address || 'Untitled errand'}

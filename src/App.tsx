@@ -23,6 +23,7 @@ import { AnalyticsPage } from '@/pages/AnalyticsPage';
 import { BlogPage } from '@/pages/BlogPage';
 import { NotificationsPage } from '@/pages/NotificationsPage';
 import { PricingPage } from '@/pages/PricingPage';
+import { CouponsPage } from '@/pages/CouponsPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { UserManagementPage } from '@/pages/UserManagementPage';
 import { SystemLogsPage } from '@/pages/SystemLogsPage';
@@ -98,6 +99,8 @@ function AppContent() {
         return <NotificationsPage />;
       case 'pricing':
         return <PricingPage />;
+      case 'coupons':
+        return <CouponsPage />;
       case 'settings':
         return <SettingsPage />;
       case 'user-management':

@@ -59,6 +59,15 @@ export const queryKeys = {
     detail: (id: number) => ['admin-pricing', 'detail', id] as const,
     fees: ['admin-pricing', 'fees'] as const,
   },
+  coupons: {
+    all: ['admin-coupons'] as const,
+    stats: ['admin-coupons', 'stats'] as const,
+    list: (params: Record<string, unknown>) => ['admin-coupons', 'list', params] as const,
+    detail: (id: number) => ['admin-coupons', 'detail', id] as const,
+    redemptions: (id: number, params: Record<string, unknown>) =>
+      ['admin-coupons', 'redemptions', id, params] as const,
+    users: (search: string) => ['admin-coupons', 'users', search] as const,
+  },
   blog: {
     list: (params: Record<string, unknown>) => ['admin-blog', 'list', params] as const,
     detail: (id: number) => ['admin-blog', 'detail', id] as const,

@@ -24,10 +24,22 @@ export function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
-export function formatErrandCode(id: number | string | null | undefined): string {
+export function formatErrandCode(
+  id: number | string | null | undefined,
+  createdAt?: string | Date | null,
+  code?: string | null,
+): string {
+  if (code && code.trim()) return code.trim();
   const n = Number(id);
   if (!Number.isFinite(n) || n <= 0) return '—';
-  return `ER-${String(Math.trunc(n)).padStart(6, '0')}`;
+  const serial = String(Math.trunc(n)).padStart(3, '0');
+  if (!createdAt) return `ER-${serial}`;
+  const d = createdAt instanceof Date ? createdAt : new Date(createdAt);
+  if (Number.isNaN(d.getTime())) return `ER-${serial}`;
+  const yy = String(d.getFullYear()).slice(-2);
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `ER-${yy}${mm}${dd}${serial}`;
 }
 
 export function partyDisplayName(
@@ -111,6 +123,13 @@ export function statusColor(status: string): string {
     draft: 'bg-ink-100 text-ink-600',
     offline: 'bg-ink-100 text-ink-600',
     inactive: 'bg-ink-100 text-ink-600',
+    paused: 'bg-ink-100 text-ink-600',
+    scheduled: 'bg-brand-100 text-brand-700',
+    expired: 'bg-error-100 text-error-700',
+    exhausted: 'bg-warning-100 text-warning-700',
+    reserved: 'bg-warning-100 text-warning-700',
+    consumed: 'bg-success-100 text-success-700',
+    released: 'bg-ink-100 text-ink-600',
     unpaid: 'bg-error-100 text-error-700',
     cancelled: 'bg-error-100 text-error-700',
     rejected: 'bg-error-100 text-error-700',
@@ -126,6 +145,34 @@ export function statusColor(status: string): string {
     info: 'bg-brand-100 text-brand-700',
   };
   return map[status.toLowerCase()] || 'bg-ink-100 text-ink-600';
+}
+
+export function errandStatusLabel(status: string, category?: string | null): string {
+  const s = status.toLowerCase();
+  const cat = (category ?? '').toLowerCase();
+  if (cat === 'queue' || cat === 'domestic') {
+    switch (s) {
+      case 'pending':
+      case 'searching':
+      case 'draft':
+        return 'Errand submitted';
+      case 'accepted':
+        return 'Runner assigned';
+      case 'on_my_way':
+        return 'On the way';
+      case 'arrived':
+      case 'in_progress':
+        return cat === 'queue' ? 'At queue location' : 'At errand location';
+      case 'delayed':
+        return 'Delayed';
+      case 'completed':
+      case 'delivered':
+        return 'Errand completed';
+      default:
+        return titleCase(status.replace(/_/g, ' '));
+    }
+  }
+  return titleCase(status.replace(/_/g, ' '));
 }
 
 export function titleCase(str: string): string {

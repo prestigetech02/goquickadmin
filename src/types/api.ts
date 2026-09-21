@@ -176,6 +176,7 @@ export type ErrandListItem = {
   dropoff_address: string | null;
   scheduled_at: string | null;
   created_at: string;
+  code?: string | null;
   updated_at?: string;
   estimated_distance_km?: number | null;
   estimated_duration_min?: number | null;
@@ -768,4 +769,116 @@ export type SystemHealthData = {
   endpoints: SystemHealthEndpoint[];
   operational_alerts: SystemHealthAlert[];
   recent_issues: SystemHealthIssue[];
+};
+
+export const COUPON_CATEGORIES = [
+  'shopping',
+  'pharmacy',
+  'food',
+  'queue',
+  'pickup',
+  'pickup_drop',
+  'delivery',
+  'domestic',
+  'custom',
+] as const;
+
+export type CouponDiscountType = 'percent' | 'fixed';
+export type CouponAudience = 'all' | 'new_requesters' | 'specific_users';
+export type CouponLifecycleStatus = 'active' | 'paused' | 'scheduled' | 'expired' | 'exhausted';
+export type CouponRedemptionStatus = 'reserved' | 'consumed' | 'released';
+
+export type CouponAssignedUser = {
+  id: number;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  assigned_at?: string | null;
+};
+
+export type CouponUsage = {
+  reserved: number;
+  consumed: number;
+  released: number;
+  used: number;
+  remaining: number | null;
+};
+
+export type AdminCoupon = {
+  id: number;
+  code: string;
+  name: string;
+  description: string | null;
+  discount_type: CouponDiscountType;
+  discount_value: number;
+  max_discount_amount: number | null;
+  min_order_amount: number | null;
+  starts_at: string | null;
+  expires_at: string | null;
+  max_redemptions: number | null;
+  max_redemptions_per_user: number;
+  audience: CouponAudience;
+  categories: string[];
+  is_active: boolean;
+  status: CouponLifecycleStatus;
+  usage: CouponUsage;
+  subsidy_absorbed: number;
+  assigned_users: CouponAssignedUser[];
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+export type AdminCouponInput = {
+  code: string;
+  name: string;
+  description?: string | null;
+  discount_type: CouponDiscountType;
+  discount_value: number;
+  max_discount_amount?: number | null;
+  min_order_amount?: number | null;
+  starts_at?: string | null;
+  expires_at?: string | null;
+  max_redemptions?: number | null;
+  max_redemptions_per_user?: number;
+  audience: CouponAudience;
+  categories?: string[];
+  user_ids?: number[];
+  is_active?: boolean;
+};
+
+export type AdminCouponListResponse = {
+  coupons: AdminCoupon[];
+  pagination: PaginationMeta;
+};
+
+export type AdminCouponStats = {
+  active_codes: number;
+  paused_codes: number;
+  redemptions: number;
+  reserved: number;
+  subsidy_absorbed: number;
+};
+
+export type AdminCouponRedemption = {
+  id: number;
+  status: CouponRedemptionStatus;
+  code: string;
+  listed_amount: number;
+  discount_amount: number;
+  payable_amount: number;
+  subsidy_amount: number;
+  reserved_at: string | null;
+  consumed_at: string | null;
+  released_at: string | null;
+  user: { id: number; name: string; email: string | null; phone: string | null } | null;
+  errand: { id: number; code: string; title: string | null; status: string | null } | null;
+};
+
+export type AdminCouponRedemptionListResponse = {
+  redemptions: AdminCouponRedemption[];
+  pagination: PaginationMeta;
+};
+
+export type AdminCouponUserSearchResponse = {
+  users: CouponAssignedUser[];
 };

@@ -29,6 +29,7 @@ import {
   formatNumber,
   partyDisplayName,
   titleCase,
+  errandStatusLabel,
 } from '@/lib/utils';
 import type { ErrandDetails, ErrandListItem } from '@/types/api';
 
@@ -198,7 +199,7 @@ export function ErrandsPage() {
       key: 'id',
       header: 'Code',
       render: (row) => (
-        <span className="font-semibold text-ink-900 font-mono text-xs">{formatErrandCode(row.id)}</span>
+        <span className="font-semibold text-ink-900 font-mono text-xs">{formatErrandCode(row.id, row.created_at, row.code)}</span>
       ),
     },
     {
@@ -235,7 +236,7 @@ export function ErrandsPage() {
       header: 'Status',
       render: (row) => (
         <div className="flex flex-col gap-1">
-          <Badge status={row.status} />
+          <Badge status={row.status} label={errandStatusLabel(row.status, row.category)} />
           {row.is_stuck ? <span className="text-[10px] font-semibold uppercase text-warning-700">Stuck</span> : null}
         </div>
       ),
@@ -252,7 +253,7 @@ export function ErrandsPage() {
   const handleExport = () => {
     downloadCSV(
       errands.map((e) => ({
-        code: formatErrandCode(e.id),
+        code: formatErrandCode(e.id, e.created_at, e.code),
         id: e.id,
         title: e.title,
         status: e.status,
@@ -508,12 +509,12 @@ function ErrandDetailBody({
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs font-mono text-ink-400">{formatErrandCode(detail.id)}</p>
+          <p className="text-xs font-mono text-ink-400">{formatErrandCode(detail.id, detail.created_at, detail.code)}</p>
           <h3 className="text-lg font-bold text-ink-900">{detail.title || 'Untitled errand'}</h3>
           <p className="text-sm text-ink-400">{formatDateTime(detail.created_at)}</p>
         </div>
         <div className="flex flex-col items-end gap-1">
-          <Badge status={detail.status} />
+          <Badge status={detail.status} label={errandStatusLabel(detail.status, detail.category)} />
           {detail.is_stuck ? <Badge status="delayed" label="Stuck" /> : null}
         </div>
       </div>
