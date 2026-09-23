@@ -560,6 +560,7 @@ const emptyFees: PlatformFees = {
   cancellation_fee_percent: 5,
   runner_commission_percent: 0,
   withdrawal_fee_percent: 0.1,
+  service_fee_amount: 0,
   referral_requester_discount_amount: 500,
   referral_referrer_bonus_amount: 1000,
 };
@@ -601,7 +602,7 @@ function PlatformFeesCard() {
     <Card className="mb-6">
       <CardHeader
         title="Fees & charges"
-        subtitle="These apply platform-wide: cancellation, errand commission, withdrawals, and referrals."
+        subtitle="These apply platform-wide: cancellation, errand commission, service fee, withdrawals, and referrals."
       />
       <CardBody className="space-y-4">
         {feesQuery.isLoading ? (

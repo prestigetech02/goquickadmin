@@ -628,6 +628,7 @@ export type PlatformFees = {
   cancellation_fee_percent: number;
   runner_commission_percent: number;
   withdrawal_fee_percent: number;
+  service_fee_amount: number;
   referral_requester_discount_amount: number;
   referral_referrer_bonus_amount: number;
 };
