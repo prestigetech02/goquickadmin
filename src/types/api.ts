@@ -145,6 +145,7 @@ export type UserListItem = {
 };
 
 export type UserDetails = UserListItem & {
+  address?: string | null;
   city?: string | null;
   state?: string | null;
   is_available?: boolean;
@@ -152,6 +153,9 @@ export type UserDetails = UserListItem & {
   deactivated_at?: string | null;
   deleted_at?: string | null;
   wallet_balance?: number | null;
+  last_latitude?: number | null;
+  last_longitude?: number | null;
+  last_location_updated_at?: string | null;
 };
 
 export type ErrandParty = {
@@ -290,6 +294,7 @@ export type RunnerProfile = {
   email: string | null;
   phone: string | null;
   avatar_url?: string | null;
+  address?: string | null;
   city: string | null;
   state: string | null;
   is_online: boolean;
@@ -300,7 +305,7 @@ export type RunnerProfile = {
   completion_rate: number;
   verification: string;
   runner_profile?: Record<string, unknown> | null;
-  runner_verification?: Record<string, unknown> | null;
+  runner_verification?: RunnerVerificationItem | Record<string, unknown> | null;
 };
 
 export type RunnerEarnings = {
@@ -882,4 +887,39 @@ export type AdminCouponRedemptionListResponse = {
 
 export type AdminCouponUserSearchResponse = {
   users: CouponAssignedUser[];
+};
+
+export type AdminZone = {
+  id: number;
+  name: string;
+  aliases: string[];
+  base_fee: number;
+  per_km_rate: number;
+  geo_boundary: Record<string, unknown> | null;
+  has_boundary: boolean;
+  active: boolean;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+export type AdminZoneInput = {
+  name: string;
+  aliases?: string[];
+  aliases_text?: string | null;
+  base_fee: number;
+  per_km_rate: number;
+  geo_boundary?: Record<string, unknown> | string | null;
+  active?: boolean;
+};
+
+export type AdminZoneListResponse = {
+  zones: AdminZone[];
+  pagination: PaginationMeta;
+};
+
+export type AdminZoneStats = {
+  total: number;
+  active: number;
+  inactive: number;
+  with_boundary: number;
 };

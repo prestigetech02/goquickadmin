@@ -14,6 +14,7 @@ export type PageKey =
   | 'notifications'
   | 'pricing'
   | 'coupons'
+  | 'zones'
   | 'settings'
   | 'user-management'
   | 'system-logs'
@@ -50,6 +51,7 @@ export const ADMIN_PAGES: AdminPageDefinition[] = [
   { key: 'blog', label: 'Blog', path: '/blog', section: 'Content', access: 'operations', visibility: 'sidebar' },
   { key: 'notifications', label: 'Notifications', path: '/notifications', section: 'Content', access: 'operations', visibility: 'sidebar' },
   { key: 'pricing', label: 'Pricing Rules', path: '/pricing', section: 'Configuration', access: 'finance', visibility: 'sidebar' },
+  { key: 'zones', label: 'Service Zones', path: '/zones', section: 'Configuration', access: 'finance', visibility: 'sidebar' },
   { key: 'coupons', label: 'Coupons', path: '/coupons', section: 'Configuration', access: 'finance', visibility: 'sidebar' },
   { key: 'settings', label: 'Settings', path: '/settings', section: 'Configuration', access: 'all-admins', visibility: 'sidebar' },
   { key: 'user-management', label: 'User Management', path: '/user-management', section: 'System', access: 'super-admin', visibility: 'sidebar' },

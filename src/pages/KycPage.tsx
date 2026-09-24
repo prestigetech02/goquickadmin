@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { AlertCircle, CheckCircle2, Clock, RefreshCw, XCircle } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Card } from '@/components/ui/Card';
@@ -58,6 +59,7 @@ async function refreshKycQueries(
 
 export function KycPage() {
   const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('pending');
@@ -66,6 +68,12 @@ export function KycPage() {
   const [rejectReason, setRejectReason] = useState('');
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    const openParam = searchParams.get('open');
+    const openId = openParam ? Number(openParam) : null;
+    setSelectedId(openId != null && Number.isFinite(openId) ? openId : null);
+  }, [searchParams]);
 
   useEffect(() => {
     const t = window.setTimeout(() => setDebouncedSearch(search.trim()), 300);
@@ -188,14 +196,22 @@ export function KycPage() {
     setActionError(null);
     setActionSuccess(null);
     setRejectReason('');
-    setSelectedId(id);
+    setSearchParams((params) => {
+      const next = new URLSearchParams(params);
+      next.set('open', String(id));
+      return next;
+    });
   }
 
   function closeReview() {
-    setSelectedId(null);
     setActionError(null);
     setActionSuccess(null);
     setRejectReason('');
+    setSearchParams((params) => {
+      const next = new URLSearchParams(params);
+      next.delete('open');
+      return next;
+    });
   }
 
   return (

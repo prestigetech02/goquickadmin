@@ -68,6 +68,12 @@ export const queryKeys = {
       ['admin-coupons', 'redemptions', id, params] as const,
     users: (search: string) => ['admin-coupons', 'users', search] as const,
   },
+  zones: {
+    all: ['admin-zones'] as const,
+    stats: ['admin-zones', 'stats'] as const,
+    list: (params: Record<string, unknown>) => ['admin-zones', 'list', params] as const,
+    detail: (id: number) => ['admin-zones', 'detail', id] as const,
+  },
   blog: {
     list: (params: Record<string, unknown>) => ['admin-blog', 'list', params] as const,
     detail: (id: number) => ['admin-blog', 'detail', id] as const,

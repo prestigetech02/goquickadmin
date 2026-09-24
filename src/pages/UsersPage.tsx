@@ -357,8 +357,22 @@ export function UsersPage() {
             <div className="grid grid-cols-2 gap-3">
               <DetailTile label="User ID" value={`#${detail.id}`} />
               <DetailTile
-                label="Presence"
+                label="Account status"
+                value={detail.is_suspended ? 'Suspended' : 'Active'}
+              />
+              <DetailTile
+                label="Online (presence)"
                 value={detail.is_online ? 'Online' : 'Offline'}
+              />
+              <DetailTile
+                label="Available for jobs"
+                value={
+                  detail.role === 'runner'
+                    ? detail.is_available
+                      ? 'Yes'
+                      : 'No'
+                    : '—'
+                }
               />
               <DetailTile
                 label="Phone verified"
@@ -368,6 +382,12 @@ export function UsersPage() {
                 label="Email verified"
                 value={detail.email_verified_at ? 'Yes' : 'No'}
               />
+              <DetailTile
+                label="Address"
+                value={detail.address?.trim() || '—'}
+              />
+              <DetailTile label="City" value={detail.city?.trim() || '—'} />
+              <DetailTile label="State" value={detail.state?.trim() || '—'} />
               <DetailTile
                 label="Wallet balance"
                 value={formatCurrency(detail.wallet_balance ?? 0)}
@@ -386,8 +406,20 @@ export function UsersPage() {
                 value={detail.suspended_at ? formatDate(detail.suspended_at) : '—'}
               />
               <DetailTile
-                label="Available"
-                value={detail.is_available ? 'Yes' : 'No'}
+                label="Last GPS"
+                value={
+                  detail.last_latitude != null && detail.last_longitude != null
+                    ? `${detail.last_latitude.toFixed(5)}, ${detail.last_longitude.toFixed(5)}`
+                    : '—'
+                }
+              />
+              <DetailTile
+                label="GPS updated"
+                value={
+                  detail.last_location_updated_at
+                    ? formatDate(detail.last_location_updated_at)
+                    : '—'
+                }
               />
             </div>
 

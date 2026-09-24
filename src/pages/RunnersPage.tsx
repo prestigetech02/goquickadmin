@@ -35,8 +35,9 @@ import {
   formatCurrency,
   formatDate,
   formatNumber,
+  titleCase,
 } from '@/lib/utils';
-import type { RunnerListItem, RunnerProfile } from '@/types/api';
+import type { RunnerListItem, RunnerProfile, RunnerVerificationItem } from '@/types/api';
 
 type StatusFilter = 'all' | 'active' | 'inactive' | 'suspended';
 type VerificationFilter = 'all' | 'pending' | 'verified' | 'rejected';
@@ -45,6 +46,22 @@ function runnerDisplayName(runner: Pick<RunnerProfile, 'first_name' | 'last_name
   if (!runner) return 'Runner';
   const name = [runner.first_name, runner.last_name].filter(Boolean).join(' ').trim();
   return name || runner.email || 'Runner';
+}
+
+function asRunnerVerification(
+  value: RunnerProfile['runner_verification'],
+): RunnerVerificationItem | null {
+  if (!value || typeof value !== 'object' || !('id' in value)) return null;
+  return value as RunnerVerificationItem;
+}
+
+function docLabel(type: string | null | undefined) {
+  if (!type?.trim()) return '—';
+  return type
+    .split(/[_-]/)
+    .filter(Boolean)
+    .map((part) => titleCase(part))
+    .join(' ');
 }
 
 export function RunnersPage() {
@@ -374,8 +391,11 @@ export function RunnersPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <Info label="City" value={profile.city || '—'} />
-              <Info label="State" value={profile.state || '—'} />
+              <div className="col-span-2">
+                <Info label="Residential address" value={profile.address?.trim() || '—'} />
+              </div>
+              <Info label="City" value={profile.city?.trim() || '—'} />
+              <Info label="State" value={profile.state?.trim() || '—'} />
               <Info label="Rating" value={`${Number(profile.rating || 0).toFixed(1)} / 5`} />
               <Info label="Completion" value={`${Math.round(profile.completion_rate || 0)}%`} />
               <Info label="Joined" value={profile.joined_date ? formatDate(profile.joined_date) : '—'} />
@@ -384,6 +404,74 @@ export function RunnersPage() {
                 value={formatCurrency(earningsQuery.data?.summary.total_earnings ?? 0)}
               />
             </div>
+
+            {(() => {
+              const kyc = asRunnerVerification(profile.runner_verification);
+              if (!kyc) {
+                return (
+                  <div className="rounded-xl border border-ink-100 p-4">
+                    <p className="text-sm font-semibold text-ink-900">KYC addresses</p>
+                    <p className="mt-1 text-sm text-ink-500">No KYC submission on file.</p>
+                  </div>
+                );
+              }
+              return (
+                <div className="rounded-xl border border-ink-100 p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-semibold text-ink-900">KYC addresses</p>
+                    {kyc.status ? <Badge status={kyc.status} /> : null}
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <Info label="Proof of address type" value={docLabel(kyc.address_document_type)} />
+                    <Info
+                      label="Proof of address file"
+                      value={kyc.proof_of_address ? 'Uploaded' : '—'}
+                    />
+                    <Info label="Next of kin" value={kyc.next_of_kin_name?.trim() || '—'} />
+                    <Info label="Next of kin phone" value={kyc.next_of_kin_phone?.trim() || '—'} />
+                    <div className="sm:col-span-2">
+                      <Info
+                        label="Next of kin address"
+                        value={kyc.next_of_kin_address?.trim() || '—'}
+                      />
+                    </div>
+                    <Info label="Guarantor 1" value={kyc.guarantor1_name?.trim() || '—'} />
+                    <Info label="Guarantor 1 phone" value={kyc.guarantor1_phone?.trim() || '—'} />
+                    <div className="sm:col-span-2">
+                      <Info
+                        label="Guarantor 1 address"
+                        value={kyc.guarantor1_address?.trim() || '—'}
+                      />
+                    </div>
+                    <Info label="Guarantor 2" value={kyc.guarantor2_name?.trim() || '—'} />
+                    <Info label="Guarantor 2 phone" value={kyc.guarantor2_phone?.trim() || '—'} />
+                    <div className="sm:col-span-2">
+                      <Info
+                        label="Guarantor 2 address"
+                        value={kyc.guarantor2_address?.trim() || '—'}
+                      />
+                    </div>
+                  </div>
+                  {kyc.proof_of_address ? (
+                    <a
+                      href={kyc.proof_of_address}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex text-sm font-medium text-brand-700 hover:text-brand-800"
+                    >
+                      Open proof of address
+                    </a>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() => navigate('kyc', { openId: kyc.id })}
+                    className="text-sm font-medium text-ink-600 hover:text-brand-700"
+                  >
+                    Open full KYC review →
+                  </button>
+                </div>
+              );
+            })()}
 
             {profile.verification === 'pending' ? (
               <div className="rounded-xl border border-warning-200 bg-warning-50/50 p-4">
@@ -457,7 +545,7 @@ function Info({ label, value }: { label: string; value: string }) {
   return (
     <div className="p-4 rounded-xl bg-ink-50">
       <p className="text-xs text-ink-400 mb-1">{label}</p>
-      <p className="text-sm font-semibold text-ink-900">{value}</p>
+      <p className="text-sm font-semibold text-ink-900 break-words">{value}</p>
     </div>
   );
 }
