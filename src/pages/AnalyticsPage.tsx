@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { AlertCircle, CreditCard, Package, RefreshCw, Users, Wallet } from 'lucide-react';
+import { AlertCircle, CreditCard, Package, RefreshCw, TrendingUp, Users, Wallet } from 'lucide-react';
 import { fetchDashboardPerformance, fetchDashboardStats } from '@/api/adminDashboardApi';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
@@ -179,7 +179,7 @@ export function AnalyticsPage() {
 
       {stats ? (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
             <StatCard
               label="Total Users"
               value={formatNumber(stats.users.total)}
@@ -193,10 +193,16 @@ export function AnalyticsPage() {
               accent="success"
             />
             <StatCard
-              label="Total Revenue"
+              label="Wallet credits"
               value={formatCurrency(stats.metrics.total_revenue)}
               icon={<CreditCard className="w-5 h-5" />}
               accent="warning"
+            />
+            <StatCard
+              label="Company take"
+              value={formatCurrency(stats.metrics.company_take ?? 0)}
+              icon={<TrendingUp className="w-5 h-5" />}
+              accent="success"
             />
             <StatCard
               label="Wallet Balance"
@@ -351,8 +357,8 @@ export function AnalyticsPage() {
               <CardBody>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
                   <MetricTile label="Completion rate" value={`${completionRate}%`} tone="brand" />
-                  <MetricTile label="Average errand value" value={formatCurrency(avgErrandValue)} tone="warning" />
-                  <MetricTile label="Revenue per user" value={formatCurrency(revenuePerUser)} tone="success" />
+                  <MetricTile label="Avg. wallet credits / errand" value={formatCurrency(avgErrandValue)} tone="warning" />
+                  <MetricTile label="Wallet credits per user" value={formatCurrency(revenuePerUser)} tone="success" />
                   <MetricTile label="Errands per active runner" value={formatNumber(Math.round(errandsPerRunner))} tone="error" />
                   <MetricTile label="Pending KYC reviews" value={formatNumber(stats.operations.pending_runner_verifications)} tone="brand" />
                   <MetricTile label="Active runners" value={formatNumber(stats.metrics.active_runners)} tone="success" />

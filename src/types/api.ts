@@ -74,10 +74,22 @@ export type SettingsData = {
   services: Record<string, SettingsService>;
 };
 
+export type CompanyRevenueBreakdown = {
+  total: number;
+  commission: number;
+  service_fee: number;
+  cancellation_fee: number;
+  withdrawal_fee: number;
+};
+
 export type DashboardStats = {
   metrics: {
     total_revenue: number;
     today_revenue: number;
+    company_take?: number;
+    today_company_take?: number;
+    company_take_breakdown?: CompanyRevenueBreakdown;
+    today_company_take_breakdown?: CompanyRevenueBreakdown;
     active_runners: number;
     pending_errands: number;
     ongoing_errands: number;
@@ -106,6 +118,37 @@ export type DashboardStats = {
   finance: {
     wallet_balance_total: number;
   };
+};
+
+export type CompanyRevenueEntry = {
+  id: number;
+  type: 'commission' | 'service_fee' | 'cancellation_fee' | 'withdrawal_fee' | string;
+  source_key: string;
+  amount: number;
+  currency: string;
+  errand_id: number | null;
+  withdrawal_id: number | null;
+  wallet_transaction_id: number | null;
+  occurred_at: string;
+  meta?: Record<string, unknown> | null;
+  errand?: { id: number; title?: string | null; category?: string | null; status?: string | null } | null;
+  withdrawal?: {
+    id: number;
+    amount?: number;
+    fee?: number | null;
+    status?: string | null;
+    reference?: string | null;
+  } | null;
+};
+
+export type CompanyRevenueResponse = {
+  from: string;
+  to: string;
+  summary: CompanyRevenueBreakdown;
+  ledger_summary: CompanyRevenueBreakdown;
+  using_ledger_for_list: boolean;
+  note?: string | null;
+  entries: Paginated<CompanyRevenueEntry>;
 };
 
 export type PerformanceTab = 'revenue' | 'errand_volume' | 'runner_activity' | 'user_growth';

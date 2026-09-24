@@ -17,6 +17,7 @@ import { RunnersPage } from '@/pages/RunnersPage';
 import { KycPage } from '@/pages/KycPage';
 import { UsersPage } from '@/pages/UsersPage';
 import { PaymentsPage } from '@/pages/PaymentsPage';
+import { CompanyRevenuePage } from '@/pages/CompanyRevenuePage';
 import { DisputesPage } from '@/pages/DisputesPage';
 import { TicketsPage } from '@/pages/TicketsPage';
 import { AnalyticsPage } from '@/pages/AnalyticsPage';
@@ -88,6 +89,8 @@ function AppContent() {
         return <UsersPage />;
       case 'payments':
         return <PaymentsPage />;
+      case 'company-revenue':
+        return <CompanyRevenuePage />;
       case 'disputes':
         return <DisputesPage />;
       case 'tickets':

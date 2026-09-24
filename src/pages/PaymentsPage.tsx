@@ -417,10 +417,15 @@ export function PaymentsPage() {
           icon={<Wallet className="w-5 h-5" />}
         />
         <StatCard
-          label="Today revenue"
-          value={formatCurrency(stats?.metrics.today_revenue ?? 0)}
+          label="Today company take"
+          value={formatCurrency(stats?.metrics.today_company_take ?? 0)}
           icon={<CreditCard className="w-5 h-5" />}
           accent="success"
+        />
+        <StatCard
+          label="Today wallet credits"
+          value={formatCurrency(stats?.metrics.today_revenue ?? 0)}
+          icon={<TrendingUp className="w-5 h-5" />}
         />
         <StatCard
           label="Failed funding (24h)"

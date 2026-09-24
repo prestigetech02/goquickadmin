@@ -42,6 +42,8 @@ export const queryKeys = {
     withdrawals: (params: Record<string, unknown>) =>
       ['admin-payments', 'withdrawals', params] as const,
     withdrawalDetail: (id: number) => ['admin-payments', 'withdrawal', id] as const,
+    companyRevenue: (params: Record<string, unknown>) =>
+      ['admin-payments', 'company-revenue', params] as const,
   },
   disputes: {
     all: ['admin-disputes'] as const,

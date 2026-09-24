@@ -7,6 +7,7 @@ export type PageKey =
   | 'kyc'
   | 'users'
   | 'payments'
+  | 'company-revenue'
   | 'disputes'
   | 'tickets'
   | 'analytics'
@@ -45,6 +46,7 @@ export const ADMIN_PAGES: AdminPageDefinition[] = [
   { key: 'kyc', label: 'Runner KYC', path: '/runner-kyc', section: 'Operations', access: 'operations', visibility: 'sidebar' },
   { key: 'users', label: 'Users', path: '/users', section: 'Operations', access: 'operations', visibility: 'sidebar' },
   { key: 'payments', label: 'Payments', path: '/payments', section: 'Financials', access: 'finance', visibility: 'sidebar' },
+  { key: 'company-revenue', label: 'Company revenue', path: '/company-revenue', section: 'Financials', access: 'finance', visibility: 'sidebar' },
   { key: 'disputes', label: 'Disputes', path: '/disputes', section: 'Operations', access: 'operations', visibility: 'sidebar' },
   { key: 'tickets', label: 'Tickets', path: '/tickets', section: 'Operations', access: 'operations', visibility: 'sidebar' },
   { key: 'analytics', label: 'Analytics', path: '/analytics', section: 'Insights', access: 'operations', visibility: 'sidebar' },
