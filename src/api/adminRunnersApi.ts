@@ -1,6 +1,10 @@
 import { http } from '@/lib/http';
 import {
   type AdminActionResult,
+  type AdminAssignableErrand,
+  type AdminRunnerAssignmentUpdate,
+  type AdminRunnerPayoutRow,
+  type AdminRunnerProfile,
   unwrapApiData,
   type ListQueryParams,
   type Paginated,
@@ -34,8 +38,42 @@ export async function fetchAdminRunnerEarnings(id: number) {
   return unwrapApiData(data, 'Failed to load runner earnings.');
 }
 
-export async function suspendAdminRunner(id: number) {
-  const { data } = await http.post<ApiResponse<AdminActionResult>>(`/admin/runners/${id}/suspend`);
+export async function fetchAdminRunnerProfile(id: number) {
+  const { data } = await http.get<ApiResponse<AdminRunnerProfile>>(`/admin/runners/${id}/profile`);
+  return unwrapApiData(data, 'Failed to load runner profile.');
+}
+
+export async function fetchAdminRunnerPayouts(id: number, params: { page?: number; per_page?: number } = {}) {
+  const { data } = await http.get<ApiResponse<Paginated<AdminRunnerPayoutRow>>>(`/admin/runners/${id}/payouts`, { params });
+  return unwrapApiData(data, 'Failed to load payouts.');
+}
+
+export async function fetchAdminRunnerAssignableErrands(id: number) {
+  const { data } = await http.get<ApiResponse<{ errands: AdminAssignableErrand[]; has_location: boolean }>>(
+    `/admin/runners/${id}/assignable-errands`,
+  );
+  return unwrapApiData(data, 'Failed to load open errands.');
+}
+
+export async function inviteAdminRunner(id: number, errandId: number) {
+  const { data } = await http.post<ApiResponse<{ offer_id: number; amount: number }>>(`/admin/runners/${id}/invite`, {
+    errand_id: errandId,
+  });
+  return unwrapApiData(data, 'Failed to invite runner.');
+}
+
+export async function updateAdminRunnerAssignment(id: number, payload: AdminRunnerAssignmentUpdate) {
+  const { data } = await http.patch<ApiResponse<AdminActionResult>>(`/admin/runners/${id}/assignment`, payload);
+  return unwrapApiData(data, 'Failed to update assignment.');
+}
+
+export async function setAdminRunnerOffline(id: number, reason?: string) {
+  const { data } = await http.post<ApiResponse<AdminActionResult>>(`/admin/runners/${id}/offline`, { reason: reason || undefined });
+  return unwrapApiData(data, 'Failed to set runner offline.');
+}
+
+export async function suspendAdminRunner(id: number, reason?: string) {
+  const { data } = await http.post<ApiResponse<AdminActionResult>>(`/admin/runners/${id}/suspend`, { reason: reason || undefined });
   return unwrapApiData(data, 'Failed to suspend runner.');
 }
 

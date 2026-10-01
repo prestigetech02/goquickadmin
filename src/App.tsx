@@ -3,6 +3,12 @@ import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { AdminNavigationProvider } from '@/context/AdminNavigationContext';
 import { AdminOpsRealtimeProvider } from '@/context/AdminOpsRealtimeContext';
 import { Layout } from '@/components/Layout';
+import { Admin2Layout } from '@/components/admin2/Admin2Layout';
+import { Admin2OverviewPage } from '@/pages/admin2/Admin2OverviewPage';
+import { Admin2UsersPage } from '@/pages/admin2/Admin2UsersPage';
+import { Admin2ErrandDetailsPage } from '@/pages/admin2/Admin2ErrandDetailsPage';
+import { Admin2UserDetailsPage } from '@/pages/admin2/Admin2UserDetailsPage';
+import { Admin2RunnerDetailsPage } from '@/pages/admin2/Admin2RunnerDetailsPage';
 import {
   canAccessPage,
   getDefaultPageForUser,
@@ -125,9 +131,23 @@ function AppContent() {
   return (
     <AdminNavigationProvider>
       <AdminOpsRealtimeProvider>
-        <Layout currentPage={page}>
-          {renderPage()}
-        </Layout>
+        {page === 'admin2' ||
+        page === 'admin2-users' ||
+        page === 'admin2-user' ||
+        page === 'admin2-errand' ||
+        page === 'admin2-runner' ? (
+          <Admin2Layout>
+            {page === 'admin2' ? <Admin2OverviewPage /> : null}
+            {page === 'admin2-users' ? <Admin2UsersPage /> : null}
+            {page === 'admin2-user' ? <Admin2UserDetailsPage /> : null}
+            {page === 'admin2-errand' ? <Admin2ErrandDetailsPage /> : null}
+            {page === 'admin2-runner' ? <Admin2RunnerDetailsPage /> : null}
+          </Admin2Layout>
+        ) : (
+          <Layout currentPage={page}>
+            {renderPage()}
+          </Layout>
+        )}
       </AdminOpsRealtimeProvider>
     </AdminNavigationProvider>
   );

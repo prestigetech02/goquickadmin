@@ -169,6 +169,77 @@ export type DashboardPerformance = {
   summary: { total: number; average: number; max: number };
 };
 
+export type OverviewKpi = {
+  value: number;
+  previous: number;
+  change_pct: number | null;
+};
+
+export type OverviewQueueItem = {
+  id: number;
+  title: string;
+  subtitle?: string;
+  amount?: number;
+  bank_name?: string | null;
+  waiting_since: string | null;
+};
+
+export type OverviewLiveBucket = 'in_progress' | 'matched' | 'awaiting_runner' | 'pending_confirmation';
+
+export type DashboardOverview = {
+  range: {
+    start_date: string;
+    end_date: string;
+    previous_start_date: string;
+    previous_end_date: string;
+  };
+  kpis: {
+    gmv: OverviewKpi;
+    commission: OverviewKpi & { take_rate_pct: number | null };
+    completed_errands: OverviewKpi & { completion_rate_pct: number | null };
+    active_users: OverviewKpi & { requesters: number; runners: number };
+  };
+  volume: {
+    start_date: string;
+    end_date: string;
+    series: Array<{ date: string; errands: number; completed: number; gmv: number }>;
+    errands: number;
+    gmv: number;
+    errands_change_pct: number | null;
+  };
+  live: {
+    total: number;
+    buckets: Record<OverviewLiveBucket, number>;
+    cancellation_rate_pct: number | null;
+  };
+  queues: {
+    kyc: { count: number; over_24h: number; items: OverviewQueueItem[] };
+    disputes: { count: number; held_in_escrow: number; items: OverviewQueueItem[] };
+    withdrawals: { count: number; amount: number; items: OverviewQueueItem[] };
+  };
+  top_runners: Array<{
+    id: number;
+    name: string;
+    completed_errands: number;
+    rating: number | null;
+    on_time_pct: number | null;
+    earnings: number;
+  }>;
+  quality: {
+    avg_rating: number | null;
+    dispute_rate_pct: number | null;
+    avg_match_minutes: number | null;
+  };
+};
+
+export type DashboardBadges = {
+  kyc: number;
+  errands: number;
+  disputes: number;
+  withdrawals: number;
+  tickets: number;
+};
+
 export type UserListItem = {
   id: number;
   name: string | null;
@@ -185,6 +256,34 @@ export type UserListItem = {
   avatar_url?: string | null;
   errands_as_buyer_count: number;
   errands_as_runner_count: number;
+  city?: string | null;
+  state?: string | null;
+  wallet_balance?: number | null;
+  last_active_at?: string | null;
+  kyc_status?: UserKycStatus;
+  account_status?: UserAccountStatus;
+};
+
+export type UserKycStatus = 'verified' | 'pending' | 'needs_review' | 'unverified';
+export type UserAccountStatus = 'active' | 'inactive' | 'suspended' | 'deleted';
+
+export type UsersSummary = {
+  range: { start_date: string; end_date: string };
+  kpis: {
+    total: { value: number; requesters: number; runners: number; growth_pct: number | null };
+    active: { value: number; share_pct: number | null; window_days: number };
+    suspended: { value: number; in_range: number; change_pct: number | null };
+    new: { value: number; requesters: number; runners: number; change_pct: number | null };
+  };
+  tabs: { all: number; buyer: number; runner: number; admin: number };
+  cities: string[];
+  health: {
+    kyc_pending: number;
+    kyc_over_24h: number;
+    users_in_disputes: number;
+    dormant: number;
+    dormant_window_days: number;
+  };
 };
 
 export type UserDetails = UserListItem & {
@@ -237,6 +336,343 @@ export type ErrandListItem = {
     amount: number;
     status: string;
   } | null;
+};
+
+export type AdminErrandNote = {
+  id: string;
+  body: string;
+  admin_id: number;
+  admin_name: string;
+  at: string;
+};
+
+export type AdminUserProfile = {
+  user: {
+    id: number;
+    code: string;
+    name: string;
+    first_name: string | null;
+    last_name: string | null;
+    email: string | null;
+    phone: string | null;
+    role: 'buyer' | 'runner' | 'admin' | string;
+    avatar_url: string | null;
+    account_status: 'active' | 'inactive' | 'suspended' | 'deleted' | string;
+    kyc_status: 'verified' | 'pending' | 'needs_review' | 'unverified' | string;
+    address: string | null;
+    city: string | null;
+    state: string | null;
+    auth_provider: string | null;
+    referral_code: string | null;
+    referred_by: { id: number; name: string } | null;
+    is_suspended: boolean;
+    suspended_at: string | null;
+    deactivated_at: string | null;
+    deleted_at: string | null;
+    created_at: string | null;
+    last_active_at: string | null;
+  };
+  metrics: {
+    errands_total: number;
+    errands_completed: number;
+    errands_cancelled: number;
+    completion_pct: number | null;
+    lifetime_value: number;
+    average_order: number | null;
+    wallet_balance: number | null;
+    pending_withdrawals: { count: number; amount: number };
+  };
+  preferences: { push_enabled: boolean; email_enabled: boolean; has_push_device: boolean };
+  verification: {
+    email_verified: boolean;
+    email_verified_at: string | null;
+    phone_verified: boolean;
+    phone_verified_at: string | null;
+    identity: 'approved' | 'pending' | 'rejected' | 'not_submitted' | 'not_required' | string;
+    payment_method: { label: string; bank: string | null } | null;
+  };
+  health: { score: number; level: 'low' | 'medium' | 'high'; factors: string[] };
+  support: {
+    tickets_total: number;
+    tickets_open: number;
+    disputes_total: number;
+    disputes_open: number;
+    last_ticket: { id: number; code: string; subject: string | null; status: string; created_at: string | null } | null;
+  };
+  notes: AdminErrandNote[];
+  sessions: Array<{ id: number; client: string; created_at: string | null; last_used_at: string | null }>;
+  activity: Array<{
+    kind: 'session' | 'login' | 'verified' | 'suspended' | 'created';
+    title: string;
+    detail: string | null;
+    at: string;
+  }>;
+  saved_places: Array<{ id: string; label: string; address: string; latitude: number | null; longitude: number | null }>;
+};
+
+export type AdminUserErrandRow = {
+  id: number;
+  code: string;
+  title: string | null;
+  category: string | null;
+  status: string;
+  escrow_status: string | null;
+  amount: number | null;
+  /** Runner rows: true when the earning is projected from the job amount rather than paid out. */
+  amount_estimated?: boolean;
+  counterpart: string | null;
+  created_at: string | null;
+};
+
+export type RunnerVerificationState = 'approved' | 'pending' | 'rejected' | 'not_submitted';
+export type RunnerCheckState = 'passed' | 'review' | 'rejected' | 'missing';
+
+export type AdminRunnerProfile = {
+  runner: {
+    id: number;
+    code: string;
+    name: string;
+    first_name: string | null;
+    last_name: string | null;
+    email: string | null;
+    phone: string | null;
+    avatar_url: string | null;
+    address: string | null;
+    city: string | null;
+    state: string | null;
+    is_online: boolean;
+    is_suspended: boolean;
+    suspended_at: string | null;
+    deleted_at: string | null;
+    created_at: string | null;
+    last_seen_at: string | null;
+    last_location_at: string | null;
+    verification_status: RunnerVerificationState;
+  };
+  metrics: {
+    errands_total: number;
+    errands_completed: number;
+    errands_cancelled: number;
+    errands_active: number;
+    completion_pct: number | null;
+    month_earnings: number;
+    previous_month_earnings: number;
+    earnings_change_pct: number | null;
+    median_completion_min: number | null;
+    completion_sample: number;
+    wallet_balance: number;
+    pending_withdrawals: { count: number; amount: number };
+  };
+  ratings: {
+    average: number | null;
+    count: number;
+    top_percent: number | null;
+    recent: Array<{
+      id: number;
+      rating: number;
+      comment: string | null;
+      reviewer: string;
+      errand_id: number | null;
+      errand_code: string | null;
+      created_at: string | null;
+    }>;
+  };
+  active_errand: {
+    id: number;
+    code: string;
+    title: string | null;
+    category: string | null;
+    status: string;
+    requester: { id: number; name: string } | null;
+    pickup_address: string | null;
+    dropoff_address: string | null;
+    distance_km: number | null;
+    accepted_at: string | null;
+    started_at: string | null;
+    sla: { due_at: string | null; basis: 'deadline' | 'scheduled' | 'estimate' | null; estimate_min: number };
+    tracking: 'healthy' | 'stale' | 'none';
+    to_pickup_m: number | null;
+    to_dropoff_m: number | null;
+    earning: number | null;
+    earning_estimated: boolean;
+  } | null;
+  onboarding: Array<{
+    key: 'identity' | 'guarantors' | 'area' | 'payout';
+    label: string;
+    state: RunnerCheckState;
+    detail: string | null;
+    at: string | null;
+  }>;
+  verification: {
+    id: number;
+    status: string;
+    submitted_at: string | null;
+    reviewed_at: string | null;
+    rejection_reason: string | null;
+  } | null;
+  emergency_contact: { name: string | null; phone: string | null; address: string | null } | null;
+  vehicle: {
+    type: string | null;
+    plate_number: string | null;
+    fleet: {
+      id: number;
+      name: string | null;
+      brand: string | null;
+      model: string | null;
+      registration_number: string | null;
+      status: string | null;
+    } | null;
+  };
+  zone: {
+    area: string | null;
+    assigned: { id: number; name: string; active: boolean; has_boundary: boolean } | null;
+    current: { id: number; name: string } | null;
+    inside: boolean | null;
+  };
+  services: Array<{ category: string | null; count: number }>;
+  payout_account: { bank_name: string | null; account_last4: string; account_name: string | null } | null;
+  documents: Array<{
+    key: 'id_front' | 'id_back' | 'selfie' | 'address';
+    label: string;
+    url: string;
+    status: 'verified' | 'review' | 'rejected';
+    uploaded_at: string | null;
+  }>;
+};
+
+export type AdminRunnerPayoutRow = {
+  id: number;
+  code: string;
+  reference: string | null;
+  amount: number;
+  fee: number;
+  status: string;
+  bank_name: string | null;
+  account_last4: string | null;
+  period_start: string | null;
+  errands_count: number;
+  created_at: string | null;
+  processed_at: string | null;
+};
+
+export type AdminAssignableErrand = {
+  id: number;
+  code: string;
+  title: string | null;
+  category: string | null;
+  status: string;
+  pickup_address: string | null;
+  dropoff_address: string | null;
+  requester: string | null;
+  amount: number | null;
+  distance_m: number | null;
+  already_invited: boolean;
+  created_at: string | null;
+};
+
+export type AdminRunnerAssignmentUpdate = Partial<{
+  vehicle_type: string;
+  plate_number: string | null;
+  primary_errand_area: string | null;
+}>;
+
+export type AdminUserProfileUpdate = Partial<{
+  first_name: string;
+  last_name: string;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+}>;
+
+export type AdminErrandTimelineEvent = {
+  key: string;
+  at: string;
+  title: string;
+  detail: string | null;
+  kind: 'system' | 'payment' | 'issue' | 'admin';
+};
+
+export type AdminErrandView = {
+  errand: {
+    id: number;
+    code: string;
+    title: string | null;
+    description: string | null;
+    category: string | null;
+    type: string | null;
+    status: string;
+    city: string | null;
+    zone: string | null;
+    created_at: string | null;
+    updated_at: string | null;
+    scheduled_at: string | null;
+    accepted_at: string | null;
+    started_at: string | null;
+    completed_at: string | null;
+    is_active: boolean;
+    can_intervene: boolean;
+  };
+  route: {
+    pickup: { address: string | null; latitude: number | null; longitude: number | null };
+    dropoff: { address: string | null; latitude: number | null; longitude: number | null };
+    distance_km: number | null;
+    duration_min: number | null;
+    active_leg: string | null;
+  };
+  sla: { due_at: string | null; basis: 'deadline' | 'scheduled' | 'estimate' | null; estimate_min: number };
+  requester: {
+    id: number;
+    name: string;
+    email: string | null;
+    phone: string | null;
+    avatar_url: string | null;
+    errands_count: number;
+    lifetime_spend: number;
+  } | null;
+  runner: {
+    id: number;
+    name: string;
+    email: string | null;
+    phone: string | null;
+    avatar_url: string | null;
+    vehicle: string | null;
+    rating: number | null;
+    completed_jobs: number;
+    location: { latitude: number | null; longitude: number | null; updated_at: string } | null;
+    tracking: 'healthy' | 'stale' | 'none';
+  } | null;
+  items: {
+    list: Array<{ name: string; detail: string | null }>;
+    spending_limit: number | null;
+    instructions: string | null;
+    expected_wait_minutes: number | null;
+  };
+  pricing: {
+    source: 'escrow' | 'quote';
+    status: string;
+    job_amount: number | null;
+    service_fee: number;
+    coupon_code: string | null;
+    coupon_discount: number;
+    subsidy: number;
+    total: number | null;
+    held_at: string | null;
+    released_at: string | null;
+    refunded_at: string | null;
+  };
+  proof: {
+    status: string | null;
+    notes: string | null;
+    photos: string[];
+    submitted_at: string | null;
+    rejection_reason: string | null;
+  } | null;
+  attachments: Array<{ id: number; name: string | null; type: string | null; url: string | null; created_at: string | null }>;
+  dispute: { id: number; status: string; reason: string | null; created_at: string | null } | null;
+  notes: AdminErrandNote[];
+  timeline: AdminErrandTimelineEvent[];
 };
 
 export type ErrandDetails = ErrandListItem & {
@@ -691,6 +1127,33 @@ export type PlatformFeeField = {
 export type PlatformFeesResponse = {
   fees: PlatformFees;
   fields: PlatformFeeField[];
+};
+
+export type ReferralRewardTiming = 'signup' | 'first_errand';
+
+export type ReferralRewardRule = {
+  enabled: boolean;
+  amount: number;
+  timing: ReferralRewardTiming;
+  min_errand_amount: number;
+};
+
+export type ReferralAudienceSettings = {
+  enabled: boolean;
+  new_user: ReferralRewardRule;
+  referrer: ReferralRewardRule;
+  screen_message: string;
+  share_message: string;
+};
+
+export type ReferralProgram = {
+  requester: ReferralAudienceSettings;
+  runner: ReferralAudienceSettings;
+};
+
+export type ReferralProgramResponse = {
+  program: ReferralProgram;
+  placeholders: Array<{ token: string; help: string }>;
 };
 
 export const ERRAND_TYPES = [

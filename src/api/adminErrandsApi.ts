@@ -1,6 +1,8 @@
 import { http } from '@/lib/http';
 import {
   unwrapApiData,
+  type AdminErrandNote,
+  type AdminErrandView,
   type ErrandDetails,
   type ErrandListItem,
   type ErrandOpsStats,
@@ -25,9 +27,20 @@ export async function fetchAdminErrand(id: number) {
   return payload.errand;
 }
 
-export async function refundAdminErrandEscrow(id: number) {
+export async function fetchAdminErrandView(id: number) {
+  const { data } = await http.get<ApiResponse<AdminErrandView>>(`/admin/errands/${id}/details`);
+  return unwrapApiData(data, 'Failed to load errand.');
+}
+
+export async function addAdminErrandNote(id: number, body: string) {
+  const { data } = await http.post<ApiResponse<{ notes: AdminErrandNote[] }>>(`/admin/errands/${id}/notes`, { body });
+  return unwrapApiData(data, 'Failed to add note.');
+}
+
+export async function refundAdminErrandEscrow(id: number, reason?: string) {
   const { data } = await http.post<ApiResponse<{ errand?: ErrandDetails; refunded?: boolean }>>(
     `/admin/errands/${id}/escrow/refund`,
+    reason ? { reason } : undefined,
   );
   return unwrapApiData(data, 'Failed to refund escrow.');
 }
@@ -50,7 +63,7 @@ export async function reassignAdminErrand(id: number, payload: { runner_id: numb
 
 export async function forceAdminErrandStatus(
   id: number,
-  payload: { status: string; reason: string; refund_escrow?: boolean },
+  payload: { status: string; reason: string; refund_escrow?: boolean; release_escrow?: boolean },
 ) {
   const { data } = await http.post<ApiResponse<{ errand: ErrandDetails }>>(
     `/admin/errands/${id}/force-status`,

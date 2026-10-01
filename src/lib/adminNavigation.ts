@@ -2,6 +2,11 @@ import type { AdminModule, AdminUser } from '@/types';
 
 export type PageKey =
   | 'dashboard'
+  | 'admin2'
+  | 'admin2-users'
+  | 'admin2-user'
+  | 'admin2-errand'
+  | 'admin2-runner'
   | 'errands'
   | 'runners'
   | 'kyc'
@@ -41,6 +46,11 @@ export const ADMIN_MODULE_OPTIONS: Array<{ key: AdminModule; label: string }> = 
 
 export const ADMIN_PAGES: AdminPageDefinition[] = [
   { key: 'dashboard', label: 'Dashboard', path: '/dashboard', section: 'Overview', access: 'all-admins', visibility: 'sidebar' },
+  { key: 'admin2', label: 'Admin2 (beta)', path: '/admin2', section: 'Overview', access: 'all-admins', visibility: 'sidebar' },
+  { key: 'admin2-users', label: 'User Management', path: '/admin2/users', access: 'operations', visibility: 'hidden' },
+  { key: 'admin2-user', label: 'User details', path: '/admin2/users/:id', access: 'operations', visibility: 'hidden' },
+  { key: 'admin2-errand', label: 'Errand details', path: '/admin2/errands', access: 'operations', visibility: 'hidden' },
+  { key: 'admin2-runner', label: 'Runner details', path: '/admin2/runners', access: 'operations', visibility: 'hidden' },
   { key: 'errands', label: 'Errands', path: '/errands', section: 'Operations', access: 'operations', visibility: 'sidebar' },
   { key: 'runners', label: 'Runners', path: '/runners', section: 'Operations', access: 'operations', visibility: 'sidebar' },
   { key: 'kyc', label: 'Runner KYC', path: '/runner-kyc', section: 'Operations', access: 'operations', visibility: 'sidebar' },
@@ -81,8 +91,42 @@ export function getPageHref(key: PageKey, options?: { openId?: number | null }):
   return `${url.pathname}${url.search}`;
 }
 
+const ADMIN2_ERRAND_PATH = /^\/admin2\/errands\/(\d+)\/?$/;
+const ADMIN2_USER_PATH = /^\/admin2\/users\/(\d+)\/?$/;
+const ADMIN2_RUNNER_PATH = /^\/admin2\/runners\/(\d+)\/?$/;
+
 export function getPageFromPathname(pathname: string): PageKey | null {
+  if (ADMIN2_ERRAND_PATH.test(pathname)) return 'admin2-errand';
+  if (ADMIN2_USER_PATH.test(pathname)) return 'admin2-user';
+  if (ADMIN2_RUNNER_PATH.test(pathname)) return 'admin2-runner';
   return PAGE_BY_PATH[pathname]?.key ?? null;
+}
+
+export function getAdmin2RunnerId(pathname: string): number | null {
+  const match = ADMIN2_RUNNER_PATH.exec(pathname);
+  return match ? Number(match[1]) : null;
+}
+
+export function getAdmin2RunnerHref(id: number): string {
+  return `${getPagePath('admin2-runner')}/${id}`;
+}
+
+export function getAdmin2UserId(pathname: string): number | null {
+  const match = ADMIN2_USER_PATH.exec(pathname);
+  return match ? Number(match[1]) : null;
+}
+
+export function getAdmin2UserHref(id: number): string {
+  return `${getPagePath('admin2-users')}/${id}`;
+}
+
+export function getAdmin2ErrandId(pathname: string): number | null {
+  const match = ADMIN2_ERRAND_PATH.exec(pathname);
+  return match ? Number(match[1]) : null;
+}
+
+export function getAdmin2ErrandHref(id: number): string {
+  return `${getPagePath('admin2-errand')}/${id}`;
 }
 
 export function isAdminModule(value: string): value is AdminModule {

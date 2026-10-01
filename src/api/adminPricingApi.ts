@@ -4,6 +4,8 @@ import {
   type ListQueryParams,
   type PlatformFees,
   type PlatformFeesResponse,
+  type ReferralProgram,
+  type ReferralProgramResponse,
   type PricingRuleInput,
   type PricingRuleItem,
   type PricingRuleListResponse,
@@ -47,4 +49,14 @@ export async function fetchAdminPlatformFees() {
 export async function updateAdminPlatformFees(input: PlatformFees) {
   const { data } = await http.put<ApiResponse<PlatformFeesResponse>>('/admin/platform-fees', input);
   return unwrapApiData(data, 'Failed to update platform fees.');
+}
+
+export async function fetchAdminReferralProgram() {
+  const { data } = await http.get<ApiResponse<ReferralProgramResponse>>('/admin/referral-program');
+  return unwrapApiData(data, 'Failed to load referral program.');
+}
+
+export async function updateAdminReferralProgram(input: ReferralProgram) {
+  const { data } = await http.put<ApiResponse<ReferralProgramResponse>>('/admin/referral-program', input);
+  return unwrapApiData(data, 'Failed to update referral program.');
 }

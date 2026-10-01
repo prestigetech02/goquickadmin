@@ -26,7 +26,8 @@ function invalidateInAppNotifications(queryClient: ReturnType<typeof useQueryCli
   queryClient.invalidateQueries({ queryKey: queryKeys.inAppNotifications.all });
 }
 
-export function NotificationsPopover() {
+export function NotificationsPopover({ variant = 'default' }: { variant?: 'default' | 'admin2' }) {
+  const isAdmin2 = variant === 'admin2';
   const navigate = useAdminNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -108,15 +109,25 @@ export function NotificationsPopover() {
         aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
         aria-expanded={open}
         aria-haspopup="dialog"
-        className={`relative p-2 rounded-lg text-ink-600 hover:bg-ink-50 transition-colors ${
-          open ? 'bg-ink-50 text-brand-700' : ''
-        }`}
+        className={
+          isAdmin2
+            ? `relative flex size-[40px] items-center justify-center rounded-[8px] border border-[#e2e8e3] bg-white text-[#45514a] hover:bg-[#f8faf8] transition-colors ${
+                open ? 'bg-[#f8faf8] text-[#167d35]' : ''
+              }`
+            : `relative p-2 rounded-lg text-ink-600 hover:bg-ink-50 transition-colors ${open ? 'bg-ink-50 text-brand-700' : ''}`
+        }
       >
-        <Bell className="w-5 h-5" />
+        <Bell className={isAdmin2 ? 'w-[18px] h-[18px]' : 'w-5 h-5'} strokeWidth={isAdmin2 ? 1.8 : 2} />
         {unreadCount > 0 ? (
-          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-error-500 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-white">
-            {badgeLabel}
-          </span>
+          isAdmin2 ? (
+            <span className="absolute -top-[4px] -right-[3px] min-w-[17px] h-[17px] px-[3px] rounded-full border-2 border-white bg-[#b84545] font-inter text-[8px] font-bold leading-none text-white flex items-center justify-center">
+              {badgeLabel}
+            </span>
+          ) : (
+            <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-error-500 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-white">
+              {badgeLabel}
+            </span>
+          )
         ) : null}
       </button>
 

@@ -10,18 +10,25 @@ export const queryKeys = {
     stats: ['admin-dashboard', 'stats'] as const,
     performance: (params: Record<string, unknown>) =>
       ['admin-dashboard', 'performance', params] as const,
+    overview: (params: Record<string, unknown>) => ['admin-dashboard', 'overview', params] as const,
+    badges: ['admin-dashboard', 'badges'] as const,
   },
   users: {
     all: ['admin-users'] as const,
     list: (params: Record<string, unknown>) => ['admin-users', 'list', params] as const,
+    summary: (params: Record<string, unknown>) => ['admin-users', 'summary', params] as const,
     detail: (id: number) => ['admin-users', 'detail', id] as const,
     wallet: (id: number) => ['admin-users', 'wallet', id] as const,
+    profile: (id: number) => ['admin-users', 'profile', id] as const,
+    errands: (id: number, page: number) => ['admin-users', 'errands', id, page] as const,
+    recentWallet: (id: number) => ['admin-users', 'wallet', id, 'recent'] as const,
   },
   errands: {
     all: ['admin-errands'] as const,
     opsStats: ['admin-errands', 'ops-stats'] as const,
     list: (params: Record<string, unknown>) => ['admin-errands', 'list', params] as const,
     detail: (id: number) => ['admin-errands', 'detail', id] as const,
+    view: (id: number) => ['admin-errands', 'view', id] as const,
   },
   runners: {
     all: ['admin-runners'] as const,
@@ -29,6 +36,9 @@ export const queryKeys = {
     list: (params: Record<string, unknown>) => ['admin-runners', 'list', params] as const,
     detail: (id: number) => ['admin-runners', 'detail', id] as const,
     earnings: (id: number) => ['admin-runners', 'earnings', id] as const,
+    profile: (id: number) => ['admin-runners', 'profile', id] as const,
+    payouts: (id: number, page: number) => ['admin-runners', 'payouts', id, page] as const,
+    assignable: (id: number) => ['admin-runners', 'assignable', id] as const,
     verifications: (params: Record<string, unknown>) =>
       ['admin-runners', 'verifications', params] as const,
     verificationMetrics: ['admin-runners', 'verification-metrics'] as const,
@@ -60,6 +70,7 @@ export const queryKeys = {
     list: (params: Record<string, unknown>) => ['admin-pricing', 'list', params] as const,
     detail: (id: number) => ['admin-pricing', 'detail', id] as const,
     fees: ['admin-pricing', 'fees'] as const,
+    referralProgram: ['admin-pricing', 'referral-program'] as const,
   },
   coupons: {
     all: ['admin-coupons'] as const,

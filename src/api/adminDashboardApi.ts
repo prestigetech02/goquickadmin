@@ -1,6 +1,8 @@
 import { http } from '@/lib/http';
 import {
   unwrapApiData,
+  type DashboardBadges,
+  type DashboardOverview,
   type DashboardPerformance,
   type DashboardStats,
   type PerformancePeriod,
@@ -23,4 +25,14 @@ export async function fetchDashboardPerformance(params: {
     params,
   });
   return unwrapApiData(data, 'Failed to load performance data.');
+}
+
+export async function fetchDashboardOverview(params: { start_date?: string; end_date?: string } = {}) {
+  const { data } = await http.get<ApiResponse<DashboardOverview>>('/admin/dashboard/overview', { params });
+  return unwrapApiData(data, 'Failed to load dashboard overview.');
+}
+
+export async function fetchDashboardBadges() {
+  const { data } = await http.get<ApiResponse<DashboardBadges>>('/admin/dashboard/badges');
+  return unwrapApiData(data, 'Failed to load queue counts.');
 }

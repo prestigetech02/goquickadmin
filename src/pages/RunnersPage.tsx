@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   AlertCircle,
   Bike,
@@ -29,6 +29,7 @@ import {
   suspendAdminRunner,
 } from '@/api/adminRunnersApi';
 import { getApiErrorMessage } from '@/lib/adminAuthApi';
+import { getAdmin2RunnerHref } from '@/lib/adminNavigation';
 import { queryKeys } from '@/lib/queryKeys';
 import {
   downloadCSV,
@@ -533,6 +534,12 @@ export function RunnersPage() {
               >
                 Reset password
               </button>
+              <Link
+                to={getAdmin2RunnerHref(profile.id)}
+                className="px-4 py-2 rounded-xl border border-brand-200 text-brand-700 text-sm font-semibold hover:bg-brand-50"
+              >
+                Open full profile
+              </Link>
             </div>
           </div>
         )}

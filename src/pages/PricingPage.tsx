@@ -26,6 +26,7 @@ import { Drawer } from '@/components/ui/Drawer';
 import { getApiErrorMessage } from '@/lib/adminAuthApi';
 import { queryKeys } from '@/lib/queryKeys';
 import { formatCurrency, titleCase } from '@/lib/utils';
+import { ReferralProgramCard } from '@/components/pricing/ReferralProgramCard';
 import { ERRAND_TYPES, type PlatformFees } from '@/types/api';
 
 type ActiveFilter = 'all' | 'active' | 'inactive';
@@ -222,7 +223,7 @@ export function PricingPage() {
     <div>
       <PageHeader
         title="Pricing Rules"
-        subtitle="Set errand fares, platform fees, cancellation charges, withdrawal commission, and referral bonuses."
+        subtitle="Set errand fares, platform fees, cancellation charges, withdrawal commission, and the referral program."
         action={
           <button
             type="button"
@@ -235,6 +236,7 @@ export function PricingPage() {
       />
 
       <PlatformFeesCard />
+      <ReferralProgramCard />
 
       <h2 className="text-base font-semibold text-ink-900 mb-1">Fare rules</h2>
       <p className="text-sm text-ink-500 mb-4">
@@ -602,7 +604,7 @@ function PlatformFeesCard() {
     <Card className="mb-6">
       <CardHeader
         title="Fees & charges"
-        subtitle="These apply platform-wide: cancellation, errand commission, service fee, withdrawals, and referrals."
+        subtitle="These apply platform-wide: cancellation, errand commission, service fee, and withdrawals."
       />
       <CardBody className="space-y-4">
         {feesQuery.isLoading ? (

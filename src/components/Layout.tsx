@@ -21,6 +21,8 @@ import {
   LogOut,
   Menu,
   ChevronLeft,
+  Sparkles,
+  Building2,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useAdminNavigate } from '@/context/AdminNavigationContext';
@@ -41,11 +43,17 @@ interface NavItem {
 
 const NAV_ICONS: Record<PageKey, ReactNode> = {
   dashboard: <LayoutDashboard className="w-[18px] h-[18px]" />,
+  admin2: <Sparkles className="w-[18px] h-[18px]" />,
+  'admin2-users': <Users className="w-[18px] h-[18px]" />,
+  'admin2-user': <Users className="w-[18px] h-[18px]" />,
+  'admin2-runner': <Bike className="w-[18px] h-[18px]" />,
+  'admin2-errand': <Package className="w-[18px] h-[18px]" />,
   errands: <Package className="w-[18px] h-[18px]" />,
   runners: <Bike className="w-[18px] h-[18px]" />,
   kyc: <IdCard className="w-[18px] h-[18px]" />,
   users: <Users className="w-[18px] h-[18px]" />,
   payments: <CreditCard className="w-[18px] h-[18px]" />,
+  'company-revenue': <Building2 className="w-[18px] h-[18px]" />,
   disputes: <Scale className="w-[18px] h-[18px]" />,
   tickets: <Ticket className="w-[18px] h-[18px]" />,
   analytics: <BarChart3 className="w-[18px] h-[18px]" />,

@@ -20,10 +20,14 @@ const SEARCH_DEBOUNCE_MS = 300;
 
 const SEARCH_GROUPS: SearchResultGroupKey[] = ['users', 'runners', 'errands', 'disputes', 'withdrawals'];
 
-export function GlobalSearch() {
+const IS_MAC = typeof navigator !== 'undefined' && /mac|iphone|ipad/i.test(navigator.platform || navigator.userAgent);
+
+export function GlobalSearch({ variant = 'default' }: { variant?: 'default' | 'admin2' }) {
   const { user } = useAuth();
   const navigate = useAdminNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const isAdmin2 = variant === 'admin2';
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [open, setOpen] = useState(false);
@@ -97,6 +101,21 @@ export function GlobalSearch() {
     };
   }, [open]);
 
+  useEffect(() => {
+    if (!isAdmin2) return;
+
+    function onShortcut(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        inputRef.current?.focus();
+        inputRef.current?.select();
+      }
+    }
+
+    document.addEventListener('keydown', onShortcut);
+    return () => document.removeEventListener('keydown', onShortcut);
+  }, [isAdmin2]);
+
   const handleEnter = () => {
     if (!hasResults || !filteredData) return;
 
@@ -110,10 +129,18 @@ export function GlobalSearch() {
   };
 
   return (
-    <div ref={containerRef} className="relative hidden md:block ml-2">
+    <div ref={containerRef} className={isAdmin2 ? 'relative w-full max-w-[386px]' : 'relative hidden md:block ml-2'}>
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-400" />
+        <Search
+          className={
+            isAdmin2
+              ? 'absolute left-[12px] top-1/2 -translate-y-1/2 w-[17px] h-[17px] text-[#7c857f]'
+              : 'absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-400'
+          }
+          strokeWidth={isAdmin2 ? 1.8 : 2}
+        />
         <input
+          ref={inputRef}
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -126,12 +153,21 @@ export function GlobalSearch() {
               handleEnter();
             }
           }}
-          placeholder="Search errands, runners, users..."
+          placeholder={isAdmin2 ? 'Search users, runners, errands or transactions…' : 'Search errands, runners, users...'}
           aria-label="Global search"
           aria-expanded={open && searchEnabled}
           aria-haspopup="listbox"
-          className="w-64 pl-9 pr-4 py-2 text-sm rounded-xl border border-ink-200 bg-ink-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
+          className={
+            isAdmin2
+              ? 'w-full h-[40px] pl-[38px] pr-[64px] text-[12px] text-[#17211b] placeholder:text-[#7c857f] rounded-[8px] border border-[#e2e8e3] bg-[#f8faf8] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#167d35]/30 focus:border-[#167d35] transition-all [&::-webkit-search-cancel-button]:hidden'
+              : 'w-64 pl-9 pr-4 py-2 text-sm rounded-xl border border-ink-200 bg-ink-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all'
+          }
         />
+        {isAdmin2 ? (
+          <kbd className="pointer-events-none absolute right-[10px] top-1/2 -translate-y-1/2 rounded-[6px] border border-[#e2e8e3] bg-white px-[6px] py-[3px] font-inter text-[10px] font-medium leading-none text-[#7c857f]">
+            {IS_MAC ? '⌘ K' : 'Ctrl K'}
+          </kbd>
+        ) : null}
       </div>
 
       {open && searchEnabled ? (
