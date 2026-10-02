@@ -562,6 +562,7 @@ export type AdminWithdrawalsOverview = {
     rejected: { amount: number; count: number; rejected_count: number; failed_count: number; share_pct: number | null };
   };
   urgent: { count: number; items: WithdrawalUrgentItem[] };
+  intake?: { runners: boolean; requesters: boolean };
   health: {
     median_review_minutes: number | null;
     reviewed_count: number;
@@ -2219,6 +2220,14 @@ export type OperationsSettings = {
 export type PayoutSettings = {
   runner_min_withdrawal_amount: number;
   weekend_payouts_enabled: boolean;
+  runner_withdrawals_enabled: boolean;
+  requester_withdrawals_enabled: boolean;
+  withdrawals_paused_message: string;
+};
+
+export type PayoutSettingsSection = SettingsSection<PayoutSettings> & {
+  default_withdrawals_paused_message: string;
+  withdrawals_paused_message_max: number;
 };
 
 export type SettingsLastChange = { updated_at: string | null; updated_by: string | null };
@@ -2272,7 +2281,7 @@ export type ErrandTypeInput = {
 export type AdminSettingsBoard = {
   permissions: { operations: boolean; finance: boolean; super_admin: boolean };
   operations: SettingsSection<OperationsSettings> | null;
-  payouts: SettingsSection<PayoutSettings> | null;
+  payouts: PayoutSettingsSection | null;
   integrations: SettingsIntegration[];
   environment: { app_name: string; environment: string; timezone: string };
 };

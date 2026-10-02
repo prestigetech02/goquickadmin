@@ -5,6 +5,7 @@ import {
   type AdminSettingsBoard,
   type OperationsSettings,
   type PayoutSettings,
+  type PayoutSettingsSection,
   type SettingsSection,
 } from '@/types/api';
 
@@ -19,6 +20,6 @@ export async function updateOperationsSettings(input: OperationsSettings) {
 }
 
 export async function updatePayoutSettings(input: PayoutSettings) {
-  const { data } = await http.put<ApiResponse<SettingsSection<PayoutSettings>>>('/admin/settings/board/payouts', input);
+  const { data } = await http.put<ApiResponse<PayoutSettingsSection>>('/admin/settings/board/payouts', input);
   return unwrapApiData(data, 'Failed to save payout settings.');
 }

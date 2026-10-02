@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Download, ShieldCheck } from 'lucide-react';
+import { Download, PauseCircle, ShieldCheck } from 'lucide-react';
 import { downloadAdminWithdrawalsExport, fetchAdminWithdrawalsOverview, syncAdminWithdrawalPayouts } from '@/api/adminWithdrawalsApi';
 import { formatNaira } from '@/components/admin2/format';
 import { OUTLINE_BUTTON, PageHeader } from '@/components/admin2/shared/PageHeader';
@@ -66,6 +66,17 @@ export function Admin2WithdrawalsPage() {
     refetchInterval: 60_000,
   });
 
+  const intake = overviewQuery.data?.intake;
+  const pausedFor = !intake
+    ? null
+    : !intake.runners && !intake.requesters
+      ? 'runners and customers'
+      : !intake.runners
+        ? 'runners'
+        : !intake.requesters
+          ? 'customers'
+          : null;
+
   const refreshAll = () => {
     void queryClient.invalidateQueries({ queryKey: ['admin-payments'] });
     void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.badges });
@@ -113,6 +124,23 @@ export function Admin2WithdrawalsPage() {
       />
 
       <NoticeBar notice={notice} onDismiss={() => setNotice(null)} />
+      {pausedFor ? (
+        <div className="flex flex-wrap items-center gap-[12px] rounded-[12px] border border-[#f1d9a6] bg-[#fff8e8] px-[16px] py-[12px]">
+          <span className="flex size-[30px] flex-shrink-0 items-center justify-center rounded-[8px] bg-white">
+            <PauseCircle className="size-[16px] text-[#a06d0b]" strokeWidth={1.8} />
+          </span>
+          <p className="min-w-[240px] flex-1 text-[11px] leading-[1.5] text-[#7a5a12]">
+            <span className="font-semibold">Withdrawals are paused for {pausedFor}.</span> No new requests can be made until they're switched back on.
+            Requests already in the queue can still be approved and paid.
+          </p>
+          <Link
+            to={getPagePath('admin2-settings')}
+            className="flex h-[32px] flex-shrink-0 items-center rounded-[8px] border border-[#e6cf9c] bg-white px-[12px] text-[11px] font-semibold text-[#17211b] hover:bg-[#fffdf7]"
+          >
+            Payout settings
+          </Link>
+        </div>
+      ) : null}
       {overviewQuery.isError ? (
         <p className="rounded-[8px] bg-[#fdeded] px-3 py-2 text-[11px] font-medium text-[#b84545]">
           {getApiErrorMessage(overviewQuery.error, 'Could not load payout metrics.')}
