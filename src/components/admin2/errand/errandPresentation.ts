@@ -77,9 +77,17 @@ const CATEGORY_LABELS: Record<string, string> = {
   domestic: 'Domestic help',
 };
 
+/** Names set in Settings › Service categories; filled when the errand types load. */
+const adminCategoryNames = new Map<string, string>();
+
+export function registerCategoryNames(types: Array<{ slug: string; name: string }>): void {
+  adminCategoryNames.clear();
+  types.forEach((type) => adminCategoryNames.set(type.slug, type.name));
+}
+
 export function categoryLabel(category: string | null): string {
   if (!category) return 'Errand';
-  return CATEGORY_LABELS[category] ?? titleCase(category);
+  return adminCategoryNames.get(category) ?? CATEGORY_LABELS[category] ?? titleCase(category);
 }
 
 export function titleCase(value: string): string {

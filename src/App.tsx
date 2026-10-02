@@ -7,8 +7,23 @@ import { Admin2Layout } from '@/components/admin2/Admin2Layout';
 import { Admin2OverviewPage } from '@/pages/admin2/Admin2OverviewPage';
 import { Admin2UsersPage } from '@/pages/admin2/Admin2UsersPage';
 import { Admin2ErrandDetailsPage } from '@/pages/admin2/Admin2ErrandDetailsPage';
+import { Admin2ErrandsPage } from '@/pages/admin2/Admin2ErrandsPage';
 import { Admin2UserDetailsPage } from '@/pages/admin2/Admin2UserDetailsPage';
 import { Admin2RunnerDetailsPage } from '@/pages/admin2/Admin2RunnerDetailsPage';
+import { Admin2RunnersPage } from '@/pages/admin2/Admin2RunnersPage';
+import { Admin2TransactionsPage } from '@/pages/admin2/Admin2TransactionsPage';
+import { Admin2WithdrawalsPage } from '@/pages/admin2/Admin2WithdrawalsPage';
+import { Admin2ZonesPage } from '@/pages/admin2/Admin2ZonesPage';
+import { Admin2NotificationsPage } from '@/pages/admin2/Admin2NotificationsPage';
+import { Admin2VerificationsPage } from '@/pages/admin2/Admin2VerificationsPage';
+import { Admin2DisputesPage } from '@/pages/admin2/Admin2DisputesPage';
+import { Admin2RevenuePage } from '@/pages/admin2/Admin2RevenuePage';
+import { Admin2AnalyticsPage } from '@/pages/admin2/Admin2AnalyticsPage';
+import { Admin2SettingsPage } from '@/pages/admin2/Admin2SettingsPage';
+import { Admin2BlogPage } from '@/pages/admin2/Admin2BlogPage';
+import { Admin2BlogEditorPage } from '@/pages/admin2/Admin2BlogEditorPage';
+import { Admin2CouponsPage } from '@/pages/admin2/Admin2CouponsPage';
+import { Admin2SupportPage } from '@/pages/admin2/Admin2SupportPage';
 import {
   canAccessPage,
   getDefaultPageForUser,
@@ -134,14 +149,44 @@ function AppContent() {
         {page === 'admin2' ||
         page === 'admin2-users' ||
         page === 'admin2-user' ||
+        page === 'admin2-errands' ||
         page === 'admin2-errand' ||
-        page === 'admin2-runner' ? (
+        page === 'admin2-runners' ||
+        page === 'admin2-runner' ||
+        page === 'admin2-transactions' ||
+        page === 'admin2-withdrawals' ||
+        page === 'admin2-zones' ||
+        page === 'admin2-notifications' ||
+        page === 'admin2-verifications' ||
+        page === 'admin2-disputes' ||
+        page === 'admin2-revenue' ||
+        page === 'admin2-analytics' ||
+        page === 'admin2-settings' ||
+        page === 'admin2-blog' ||
+        page === 'admin2-blog-post' ||
+        page === 'admin2-coupons' ||
+        page === 'admin2-support' ? (
           <Admin2Layout>
             {page === 'admin2' ? <Admin2OverviewPage /> : null}
             {page === 'admin2-users' ? <Admin2UsersPage /> : null}
             {page === 'admin2-user' ? <Admin2UserDetailsPage /> : null}
+            {page === 'admin2-errands' ? <Admin2ErrandsPage /> : null}
             {page === 'admin2-errand' ? <Admin2ErrandDetailsPage /> : null}
+            {page === 'admin2-runners' ? <Admin2RunnersPage /> : null}
             {page === 'admin2-runner' ? <Admin2RunnerDetailsPage /> : null}
+            {page === 'admin2-transactions' ? <Admin2TransactionsPage /> : null}
+            {page === 'admin2-withdrawals' ? <Admin2WithdrawalsPage /> : null}
+            {page === 'admin2-zones' ? <Admin2ZonesPage /> : null}
+            {page === 'admin2-notifications' ? <Admin2NotificationsPage /> : null}
+            {page === 'admin2-verifications' ? <Admin2VerificationsPage /> : null}
+            {page === 'admin2-disputes' ? <Admin2DisputesPage /> : null}
+            {page === 'admin2-revenue' ? <Admin2RevenuePage /> : null}
+            {page === 'admin2-analytics' ? <Admin2AnalyticsPage /> : null}
+            {page === 'admin2-settings' ? <Admin2SettingsPage /> : null}
+            {page === 'admin2-blog' ? <Admin2BlogPage /> : null}
+            {page === 'admin2-blog-post' ? <Admin2BlogEditorPage /> : null}
+            {page === 'admin2-coupons' ? <Admin2CouponsPage /> : null}
+            {page === 'admin2-support' ? <Admin2SupportPage /> : null}
           </Admin2Layout>
         ) : (
           <Layout currentPage={page}>

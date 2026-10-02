@@ -4,15 +4,6 @@ export function formatNaira(amount: number): string {
   return `${NAIRA}${Math.round(amount).toLocaleString('en-NG')}`;
 }
 
-/** ₦18.42M, ₦482k, ₦950 */
-export function formatCompactNaira(amount: number): string {
-  const abs = Math.abs(amount);
-  if (abs >= 1_000_000_000) return `${NAIRA}${(amount / 1_000_000_000).toFixed(2)}B`;
-  if (abs >= 1_000_000) return `${NAIRA}${(amount / 1_000_000).toFixed(2)}M`;
-  if (abs >= 1_000) return `${NAIRA}${Math.round(amount / 1_000)}k`;
-  return `${NAIRA}${Math.round(amount)}`;
-}
-
 export function formatCount(value: number): string {
   return value.toLocaleString('en-NG');
 }

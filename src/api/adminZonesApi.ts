@@ -4,6 +4,7 @@ import {
   type AdminZone,
   type AdminZoneInput,
   type AdminZoneListResponse,
+  type AdminZoneRunner,
   type AdminZoneStats,
   type ListQueryParams,
 } from '@/types/api';
@@ -32,6 +33,32 @@ export async function createAdminZone(input: AdminZoneInput) {
 export async function updateAdminZone(id: number, input: AdminZoneInput) {
   const { data } = await http.put<ApiResponse<AdminZone>>(`/admin/zones/${id}`, input);
   return unwrapApiData(data, 'Failed to update zone.');
+}
+
+export async function fetchZoneRunners(zoneId: number) {
+  const { data } = await http.get<ApiResponse<{ runners: AdminZoneRunner[] }>>(`/admin/zones/${zoneId}/runners`);
+  return unwrapApiData(data, 'Failed to load runners in this zone.');
+}
+
+export async function searchZoneRunners(search: string) {
+  const { data } = await http.get<ApiResponse<{ runners: AdminZoneRunner[] }>>('/admin/zones/runner-options', {
+    params: { search },
+  });
+  return unwrapApiData(data, 'Failed to search runners.');
+}
+
+export async function assignZoneRunner(zoneId: number, runnerId: number) {
+  const { data } = await http.post<ApiResponse<AdminZoneRunner>>(`/admin/zones/${zoneId}/runners`, {
+    runner_id: runnerId,
+  });
+  return unwrapApiData(data, 'Failed to assign runner.');
+}
+
+export async function removeZoneRunner(zoneId: number, runnerId: number) {
+  const { data } = await http.delete<ApiResponse<null>>(`/admin/zones/${zoneId}/runners/${runnerId}`);
+  if (!data.success) {
+    throw new Error(data.error?.message || data.message || 'Failed to remove runner.');
+  }
 }
 
 export async function deleteAdminZone(id: number) {

@@ -1,6 +1,9 @@
 import { http } from '@/lib/http';
 import {
   unwrapApiData,
+  type AdminErrandBoardFilters,
+  type AdminErrandBoardRow,
+  type AdminErrandsOverview,
   type AdminErrandNote,
   type AdminErrandView,
   type ErrandDetails,
@@ -10,6 +13,26 @@ import {
   type Paginated,
 } from '@/types/api';
 import type { ApiResponse } from '@/types';
+import { saveBlob } from '@/api/adminTransactionsApi';
+
+export async function fetchAdminErrandsOverview(params: { start_date?: string; end_date?: string } = {}) {
+  const { data } = await http.get<ApiResponse<AdminErrandsOverview>>('/admin/errands/board/overview', { params });
+  return unwrapApiData(data, 'Failed to load errand overview.');
+}
+
+export async function fetchAdminErrandBoard(params: AdminErrandBoardFilters & { page?: number; per_page?: number } = {}) {
+  const { data } = await http.get<ApiResponse<Paginated<AdminErrandBoardRow> & { total_value: number }>>('/admin/errands/board', {
+    params,
+  });
+  return unwrapApiData(data, 'Failed to load errands.');
+}
+
+export async function downloadAdminErrandsExport(params: AdminErrandBoardFilters = {}) {
+  const response = await http.get<Blob>('/admin/errands/board/export', { params, responseType: 'blob' });
+  const disposition = String(response.headers['content-disposition'] ?? '');
+  const filename = /filename="?([^";]+)"?/i.exec(disposition)?.[1] ?? 'goquick-errands.csv';
+  saveBlob(response.data, filename);
+}
 
 export async function fetchAdminErrands(params: ListQueryParams = {}) {
   const { data } = await http.get<ApiResponse<Paginated<ErrandListItem>>>('/admin/errands', { params });

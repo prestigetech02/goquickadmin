@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ComponentType } from 'react';
+import type { ComponentType } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -8,16 +8,15 @@ import {
   Bell,
   Bike,
   Building2,
-  CreditCard,
-  Ellipsis,
   LayoutDashboard,
   LifeBuoy,
-  LogOut,
   MapPin,
   MessageSquareWarning,
+  Newspaper,
   PackageCheck,
   Settings,
   Ticket,
+  UserCog,
   Users,
   WalletCards,
   X,
@@ -28,10 +27,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useAdminOpsRealtimeStatus } from '@/context/AdminOpsRealtimeContext';
 import { canAccessPage, getPagePath, type PageKey } from '@/lib/adminNavigation';
 import { queryKeys } from '@/lib/queryKeys';
-import { adminDisplayName, adminRoleLabel } from '@/lib/utils';
 import type { DashboardBadges } from '@/types/api';
 import goquickLogo from '@/assets/admin2/goquick-logo.png';
-import { personInitials } from './format';
 
 type SidebarItem = {
   label: string;
@@ -49,73 +46,54 @@ const SECTIONS: Array<{ title: string; items: SidebarItem[] }> = [
     items: [
       { label: 'Overview', page: 'admin2', icon: LayoutDashboard },
       { label: 'Users', page: 'admin2-users', icon: Users },
-      { label: 'Runners', page: 'runners', activePrefix: '/admin2/runners/', icon: Bike },
-      { label: 'Verifications', page: 'kyc', icon: BadgeCheck, badge: 'kyc' },
-      { label: 'Errands', page: 'errands', icon: PackageCheck, badge: 'errands' },
-      { label: 'Disputes', page: 'disputes', icon: MessageSquareWarning, badge: 'disputes' },
-      { label: 'Withdrawals', page: 'payments', href: '/payments?tab=withdrawals', icon: WalletCards, badge: 'withdrawals' },
-      { label: 'Transactions', page: 'payments', href: '/payments?tab=ledger', icon: ArrowLeftRight },
-      { label: 'Service Zones', page: 'zones', icon: MapPin },
-      { label: 'Notifications', page: 'notifications', icon: Bell },
+      { label: 'Runners', page: 'admin2-runners', icon: Bike },
+      { label: 'Verifications', page: 'admin2-verifications', icon: BadgeCheck, badge: 'kyc' },
+      { label: 'Errands', page: 'admin2-errands', icon: PackageCheck, badge: 'errands' },
+      { label: 'Disputes', page: 'admin2-disputes', icon: MessageSquareWarning, badge: 'disputes' },
+      { label: 'Withdrawals', page: 'admin2-withdrawals', icon: WalletCards, badge: 'withdrawals' },
+      { label: 'Transactions', page: 'admin2-transactions', icon: ArrowLeftRight },
+      { label: 'Service Zones', page: 'admin2-zones', icon: MapPin },
+      { label: 'Notifications', page: 'admin2-notifications', icon: Bell },
     ],
   },
   {
     title: 'Financials',
     items: [
-      { label: 'Revenue', page: 'company-revenue', icon: Building2 },
-      { label: 'Finance', page: 'payments', icon: CreditCard },
+      { label: 'Revenue', page: 'admin2-revenue', icon: Building2 },
     ],
   },
   {
     title: 'Insights',
     items: [
-      { label: 'Analytics', page: 'analytics', icon: BarChart2 },
-      { label: 'Coupons', page: 'coupons', icon: Ticket },
+      { label: 'Analytics', page: 'admin2-analytics', icon: BarChart2 },
+      { label: 'Coupons', page: 'admin2-coupons', icon: Ticket },
     ],
+  },
+  {
+    title: 'Content',
+    items: [{ label: 'Blog', page: 'admin2-blog', icon: Newspaper }],
   },
   {
     title: 'Administration',
     items: [
-      { label: 'Support Tickets', page: 'tickets', icon: LifeBuoy, badge: 'tickets' },
-      { label: 'Help & Support', page: 'support', icon: LifeBuoy },
-      { label: 'Settings', page: 'settings', icon: Settings },
+      { label: 'Support Tickets', page: 'admin2-support', icon: LifeBuoy, badge: 'tickets' },
+      { label: 'Admin Management', page: 'user-management', icon: UserCog },
+      { label: 'Settings', page: 'admin2-settings', icon: Settings },
     ],
   },
 ];
 
-export function Admin2Sidebar({
-  open,
-  onClose,
-  onRequestLogout,
-}: {
-  open: boolean;
-  onClose: () => void;
-  onRequestLogout: () => void;
-}) {
+export function Admin2Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { live } = useAdminOpsRealtimeStatus();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
   const badgesQuery = useQuery({
     queryKey: queryKeys.dashboard.badges,
     queryFn: fetchDashboardBadges,
     refetchInterval: 60_000,
   });
 
-  useEffect(() => {
-    if (!menuOpen) return;
-    function onDocClick(event: MouseEvent) {
-      if (!menuRef.current?.contains(event.target as Node)) setMenuOpen(false);
-    }
-    document.addEventListener('mousedown', onDocClick);
-    return () => document.removeEventListener('mousedown', onDocClick);
-  }, [menuOpen]);
-
-  const displayName = adminDisplayName(user);
-  const roleLabel = adminRoleLabel(user);
   const sections = SECTIONS.map((section) => ({
     ...section,
     items: section.items.filter((item) => canAccessPage(user, item.page)),
@@ -201,50 +179,6 @@ export function Admin2Sidebar({
         </p>
       </div>
 
-      <div ref={menuRef} className="relative flex w-full items-center gap-[10px] border-t border-[#e2e8e3] px-[4px] pt-[12px]">
-        <div className="flex size-[34px] flex-shrink-0 items-center justify-center rounded-full bg-[#1e2b23] text-[12px] font-semibold text-white">
-          {personInitials(displayName)}
-        </div>
-        <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
-          <p className="truncate text-[12px] font-semibold text-[#17211b]">{displayName}</p>
-          <p className="truncate text-[10px] capitalize text-[#7c857f]">{roleLabel}</p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setMenuOpen((value) => !value)}
-          aria-label="Account menu"
-          aria-expanded={menuOpen}
-          className="rounded-[6px] p-1 text-[#45514a] hover:bg-[#eef1ee]"
-        >
-          <Ellipsis className="size-[16px]" strokeWidth={1.8} />
-        </button>
-        {menuOpen ? (
-          <div className="absolute bottom-full right-0 mb-2 w-[180px] overflow-hidden rounded-[10px] border border-[#e2e8e3] bg-white py-1 shadow-[0px_8px_24px_0px_rgba(16,33,23,0.12)]">
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                navigate(getPagePath('dashboard'));
-              }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] text-[#17211b] hover:bg-[#f8faf8]"
-            >
-              <LayoutDashboard className="size-[14px]" strokeWidth={1.8} />
-              Classic dashboard
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                onRequestLogout();
-              }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] text-[#b84545] hover:bg-[#fff0f0]"
-            >
-              <LogOut className="size-[14px]" strokeWidth={1.8} />
-              Log out
-            </button>
-          </div>
-        ) : null}
-      </div>
     </aside>
   );
 }

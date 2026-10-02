@@ -1,6 +1,6 @@
 import { Banknote, Clock3, PackageCheck, Star } from 'lucide-react';
 import type { AdminRunnerProfile } from '@/types/api';
-import { formatCompactNaira, formatCount, formatNaira, formatSignedPct } from '../format';
+import { formatCount, formatNaira, formatSignedPct } from '../format';
 import { durationLabel } from '../errand/errandPresentation';
 import { MetricCard } from '../userDetails/UserMetricCards';
 
@@ -43,7 +43,7 @@ export function RunnerMetricCards({ profile }: { profile: AdminRunnerProfile }) 
       />
       <MetricCard
         label={`${monthName(0)} earnings`}
-        value={formatCompactNaira(metrics.month_earnings)}
+        value={formatNaira(metrics.month_earnings)}
         sub={earningsSub}
         icon={Banknote}
         iconBg="#eef5fb"

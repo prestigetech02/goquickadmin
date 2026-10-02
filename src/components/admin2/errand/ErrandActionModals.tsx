@@ -11,7 +11,7 @@ import {
 import { fetchAdminRunners } from '@/api/adminRunnersApi';
 import { Modal } from '@/components/ui/Modal';
 import { getApiErrorMessage } from '@/lib/adminAuthApi';
-import { getAdmin2UserHref } from '@/lib/adminNavigation';
+import { getAdmin2UserHref, getPagePath } from '@/lib/adminNavigation';
 import { queryKeys } from '@/lib/queryKeys';
 import type { AdminErrandView } from '@/types/api';
 import { formatNaira } from '../format';
@@ -210,7 +210,14 @@ export function ErrandActionModals({
             <p className="text-[12px] text-[#45514a]">
               Use this when the runner finished the errand but it wasn't closed in the app.
             </p>
-            {openDispute ? <Notice tone="red">This errand has an open dispute. Resolve it before releasing payment.</Notice> : null}
+            {openDispute ? (
+              <Notice tone="red">
+                This errand has an open dispute. Resolve it before releasing payment.{' '}
+                <Link to={`${getPagePath('admin2-disputes')}?open=${dispute.id}`} className="font-semibold underline">
+                  Open the dispute case
+                </Link>
+              </Notice>
+            ) : null}
             {escrowHeld ? (
               <Toggle checked={releaseEscrow} onChange={setReleaseEscrow}>
                 Release {pricing.total != null ? formatNaira(pricing.total) : 'the escrow'} to {runner?.name ?? 'the runner'} now

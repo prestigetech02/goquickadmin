@@ -3,10 +3,12 @@ import {
   unwrapApiData,
   type AdminCoupon,
   type AdminCouponInput,
+  type AdminCouponListParams,
   type AdminCouponListResponse,
   type AdminCouponRedemptionListResponse,
   type AdminCouponStats,
   type AdminCouponUserSearchResponse,
+  type CouponOverview,
   type ListQueryParams,
 } from '@/types/api';
 import type { ApiResponse } from '@/types';
@@ -16,7 +18,17 @@ export async function fetchAdminCouponStats() {
   return unwrapApiData(data, 'Failed to load coupon stats.');
 }
 
-export async function fetchAdminCoupons(params: ListQueryParams = {}) {
+export async function fetchCouponOverview(params: { start_date: string; end_date: string }) {
+  const { data } = await http.get<ApiResponse<CouponOverview>>('/admin/coupons/overview', { params });
+  return unwrapApiData(data, 'Failed to load coupon metrics.');
+}
+
+export async function setAdminCouponActive(id: number, isActive: boolean) {
+  const { data } = await http.patch<ApiResponse<AdminCoupon>>(`/admin/coupons/${id}/status`, { is_active: isActive });
+  return unwrapApiData(data, isActive ? 'Failed to resume coupon.' : 'Failed to pause coupon.');
+}
+
+export async function fetchAdminCoupons(params: ListQueryParams | AdminCouponListParams = {}) {
   const { data } = await http.get<ApiResponse<AdminCouponListResponse>>('/admin/coupons', { params });
   return unwrapApiData(data, 'Failed to load coupons.');
 }

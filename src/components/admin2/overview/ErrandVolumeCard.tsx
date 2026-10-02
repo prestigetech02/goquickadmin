@@ -1,11 +1,12 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Ellipsis } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { canAccessPage, getPagePath } from '@/lib/adminNavigation';
 import type { DashboardOverview } from '@/types/api';
 import gridLine from '@/assets/admin2/grid-line.png';
-import { formatCompactNaira, formatCount, formatSignedPct, parseDate } from '../format';
+import { smoothPath, useElementWidth } from '../chart';
+import { formatNaira, formatCount, formatSignedPct, parseDate } from '../format';
 import { Card, CardTitle, Skeleton } from './primitives';
 
 const CHART_HEIGHT = 190;
@@ -16,59 +17,6 @@ const GRID_STEP = 45;
 const MAX_BAR_HEIGHT = 130;
 const LINE_TOP = 22;
 const LINE_BOTTOM = BASELINE_Y;
-
-function useElementWidth<T extends HTMLElement>() {
-  const ref = useRef<T>(null);
-  const [width, setWidth] = useState(0);
-
-  useLayoutEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-    setWidth(element.clientWidth);
-    const observer = new ResizeObserver(([entry]) => setWidth(entry.contentRect.width));
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
-
-  return [ref, width] as const;
-}
-
-/** Monotone cubic (Fritsch–Carlson): smooth, but never overshoots the data, so ₦0 days stay on the baseline. */
-function smoothPath(points: Array<{ x: number; y: number }>): string {
-  const n = points.length;
-  if (n === 0) return '';
-  if (n < 3) return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-
-  const slopes = points.slice(0, -1).map((p, i) => (points[i + 1].y - p.y) / (points[i + 1].x - p.x));
-  const tangents = points.map((_, i) => {
-    if (i === 0) return slopes[0];
-    if (i === n - 1) return slopes[n - 2];
-    return slopes[i - 1] * slopes[i] <= 0 ? 0 : (slopes[i - 1] + slopes[i]) / 2;
-  });
-  for (let i = 0; i < n - 1; i += 1) {
-    if (slopes[i] === 0) {
-      tangents[i] = 0;
-      tangents[i + 1] = 0;
-      continue;
-    }
-    const a = tangents[i] / slopes[i];
-    const b = tangents[i + 1] / slopes[i];
-    const h = Math.hypot(a, b);
-    if (h > 3) {
-      tangents[i] = (3 / h) * a * slopes[i];
-      tangents[i + 1] = (3 / h) * b * slopes[i];
-    }
-  }
-
-  let d = `M ${points[0].x} ${points[0].y}`;
-  for (let i = 0; i < n - 1; i += 1) {
-    const p1 = points[i];
-    const p2 = points[i + 1];
-    const dx = (p2.x - p1.x) / 3;
-    d += ` C ${p1.x + dx} ${p1.y + tangents[i] * dx}, ${p2.x - dx} ${p2.y - tangents[i + 1] * dx}, ${p2.x} ${p2.y}`;
-  }
-  return d;
-}
 
 function plural(count: number, noun: string): string {
   return `${formatCount(count)} ${noun}${count === 1 ? '' : 's'}`;
@@ -248,7 +196,7 @@ export function ErrandVolumeCard({ data }: { data?: DashboardOverview }) {
             }}
           >
             <p className="text-[10px] font-bold leading-normal text-white">
-              {formatCompactNaira(activeDay.gmv)} <span className="font-normal text-[#c8d3cc]">revenue</span>
+              {formatNaira(activeDay.gmv)} <span className="font-normal text-[#c8d3cc]">revenue</span>
             </p>
             <p className="text-[8px] leading-normal text-[#c8d3cc]">
               {parseDate(activeDay.date).toLocaleDateString('en-GB', { weekday: 'long' })} · {plural(activeDay.errands, 'errand')} ·{' '}
@@ -266,7 +214,7 @@ export function ErrandVolumeCard({ data }: { data?: DashboardOverview }) {
             </p>
             <span className="h-[12px] w-px bg-[#d4ddd6]" />
             <p className="text-[#45514a]">
-              <span className="font-semibold text-[#17211b]">{formatCompactNaira(volume.gmv)} GMV</span> processed
+              <span className="font-semibold text-[#17211b]">{formatNaira(volume.gmv)} GMV</span> processed
             </p>
             <span className="h-[12px] w-px bg-[#d4ddd6]" />
             {volume.errands_change_pct != null ? (

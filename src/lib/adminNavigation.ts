@@ -5,8 +5,23 @@ export type PageKey =
   | 'admin2'
   | 'admin2-users'
   | 'admin2-user'
+  | 'admin2-errands'
   | 'admin2-errand'
+  | 'admin2-runners'
   | 'admin2-runner'
+  | 'admin2-transactions'
+  | 'admin2-withdrawals'
+  | 'admin2-zones'
+  | 'admin2-notifications'
+  | 'admin2-verifications'
+  | 'admin2-disputes'
+  | 'admin2-revenue'
+  | 'admin2-analytics'
+  | 'admin2-settings'
+  | 'admin2-blog'
+  | 'admin2-blog-post'
+  | 'admin2-coupons'
+  | 'admin2-support'
   | 'errands'
   | 'runners'
   | 'kyc'
@@ -49,8 +64,23 @@ export const ADMIN_PAGES: AdminPageDefinition[] = [
   { key: 'admin2', label: 'Admin2 (beta)', path: '/admin2', section: 'Overview', access: 'all-admins', visibility: 'sidebar' },
   { key: 'admin2-users', label: 'User Management', path: '/admin2/users', access: 'operations', visibility: 'hidden' },
   { key: 'admin2-user', label: 'User details', path: '/admin2/users/:id', access: 'operations', visibility: 'hidden' },
-  { key: 'admin2-errand', label: 'Errand details', path: '/admin2/errands', access: 'operations', visibility: 'hidden' },
-  { key: 'admin2-runner', label: 'Runner details', path: '/admin2/runners', access: 'operations', visibility: 'hidden' },
+  { key: 'admin2-errands', label: 'Errands', path: '/admin2/errands', access: 'operations', visibility: 'hidden' },
+  { key: 'admin2-errand', label: 'Errand details', path: '/admin2/errands/:id', access: 'operations', visibility: 'hidden' },
+  { key: 'admin2-runners', label: 'Runners', path: '/admin2/runners', access: 'operations', visibility: 'hidden' },
+  { key: 'admin2-runner', label: 'Runner details', path: '/admin2/runners/:id', access: 'operations', visibility: 'hidden' },
+  { key: 'admin2-transactions', label: 'Transactions', path: '/admin2/transactions', access: 'finance', visibility: 'hidden' },
+  { key: 'admin2-withdrawals', label: 'Withdrawals', path: '/admin2/withdrawals', access: 'finance', visibility: 'hidden' },
+  { key: 'admin2-zones', label: 'Service Zones', path: '/admin2/zones', access: 'all-admins', visibility: 'hidden' },
+  { key: 'admin2-notifications', label: 'Notifications', path: '/admin2/notifications', access: 'operations', visibility: 'hidden' },
+  { key: 'admin2-verifications', label: 'Runner verification', path: '/admin2/verifications', access: 'operations', visibility: 'hidden' },
+  { key: 'admin2-disputes', label: 'Disputes', path: '/admin2/disputes', access: 'operations', visibility: 'hidden' },
+  { key: 'admin2-revenue', label: 'Company revenue', path: '/admin2/revenue', access: 'finance', visibility: 'hidden' },
+  { key: 'admin2-analytics', label: 'Analytics', path: '/admin2/analytics', access: 'operations', visibility: 'hidden' },
+  { key: 'admin2-settings', label: 'Settings', path: '/admin2/settings', access: 'all-admins', visibility: 'hidden' },
+  { key: 'admin2-blog', label: 'Blog', path: '/admin2/blog', access: 'operations', visibility: 'hidden' },
+  { key: 'admin2-blog-post', label: 'Blog post', path: '/admin2/blog/:id', access: 'operations', visibility: 'hidden' },
+  { key: 'admin2-coupons', label: 'Coupons', path: '/admin2/coupons', access: 'finance', visibility: 'hidden' },
+  { key: 'admin2-support', label: 'Support tickets', path: '/admin2/support', access: 'operations', visibility: 'hidden' },
   { key: 'errands', label: 'Errands', path: '/errands', section: 'Operations', access: 'operations', visibility: 'sidebar' },
   { key: 'runners', label: 'Runners', path: '/runners', section: 'Operations', access: 'operations', visibility: 'sidebar' },
   { key: 'kyc', label: 'Runner KYC', path: '/runner-kyc', section: 'Operations', access: 'operations', visibility: 'sidebar' },
@@ -94,8 +124,10 @@ export function getPageHref(key: PageKey, options?: { openId?: number | null }):
 const ADMIN2_ERRAND_PATH = /^\/admin2\/errands\/(\d+)\/?$/;
 const ADMIN2_USER_PATH = /^\/admin2\/users\/(\d+)\/?$/;
 const ADMIN2_RUNNER_PATH = /^\/admin2\/runners\/(\d+)\/?$/;
+const ADMIN2_BLOG_POST_PATH = /^\/admin2\/blog\/(new|\d+)\/?$/;
 
 export function getPageFromPathname(pathname: string): PageKey | null {
+  if (ADMIN2_BLOG_POST_PATH.test(pathname)) return 'admin2-blog-post';
   if (ADMIN2_ERRAND_PATH.test(pathname)) return 'admin2-errand';
   if (ADMIN2_USER_PATH.test(pathname)) return 'admin2-user';
   if (ADMIN2_RUNNER_PATH.test(pathname)) return 'admin2-runner';
@@ -108,7 +140,7 @@ export function getAdmin2RunnerId(pathname: string): number | null {
 }
 
 export function getAdmin2RunnerHref(id: number): string {
-  return `${getPagePath('admin2-runner')}/${id}`;
+  return `${getPagePath('admin2-runners')}/${id}`;
 }
 
 export function getAdmin2UserId(pathname: string): number | null {
@@ -126,7 +158,18 @@ export function getAdmin2ErrandId(pathname: string): number | null {
 }
 
 export function getAdmin2ErrandHref(id: number): string {
-  return `${getPagePath('admin2-errand')}/${id}`;
+  return `${getPagePath('admin2-errands')}/${id}`;
+}
+
+/** Post id from /admin2/blog/:id, or 'new' for the create screen. */
+export function getAdmin2BlogPostId(pathname: string): number | 'new' | null {
+  const match = ADMIN2_BLOG_POST_PATH.exec(pathname);
+  if (!match) return null;
+  return match[1] === 'new' ? 'new' : Number(match[1]);
+}
+
+export function getAdmin2BlogPostHref(id: number | 'new'): string {
+  return `${getPagePath('admin2-blog')}/${id}`;
 }
 
 export function isAdminModule(value: string): value is AdminModule {

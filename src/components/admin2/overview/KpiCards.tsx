@@ -1,7 +1,7 @@
 import type { ComponentType } from 'react';
 import { BadgeDollarSign, CircleCheckBig, Landmark, UsersRound, type LucideProps } from 'lucide-react';
 import type { DashboardOverview } from '@/types/api';
-import { formatCompactNaira, formatCount, formatPct } from '../format';
+import { formatNaira, formatCount, formatPct } from '../format';
 import { Card, DeltaPill, Skeleton } from './primitives';
 
 type KpiCardProps = {
@@ -46,22 +46,22 @@ export function KpiCards({ data }: { data?: DashboardOverview }) {
         icon={Landmark}
         iconColor="#167D35"
         iconBg="#eaf6ed"
-        value={kpis ? formatCompactNaira(kpis.gmv.value) : undefined}
+        value={kpis ? formatNaira(kpis.gmv.value) : undefined}
         change={kpis?.gmv.change_pct}
-        context={kpis ? `vs. ${formatCompactNaira(kpis.gmv.previous)} last period` : undefined}
+        context={kpis ? `vs. ${formatNaira(kpis.gmv.previous)} last period` : undefined}
       />
       <KpiCard
         label="Commission revenue"
         icon={BadgeDollarSign}
         iconColor="#3973A8"
         iconBg="#eef5fb"
-        value={kpis ? formatCompactNaira(kpis.commission.value) : undefined}
+        value={kpis ? formatNaira(kpis.commission.value) : undefined}
         change={kpis?.commission.change_pct}
         context={
           kpis
             ? kpis.commission.take_rate_pct != null
               ? `${formatPct(kpis.commission.take_rate_pct)} effective take rate`
-              : `vs. ${formatCompactNaira(kpis.commission.previous)} last period`
+              : `vs. ${formatNaira(kpis.commission.previous)} last period`
             : undefined
         }
       />

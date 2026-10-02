@@ -76,7 +76,7 @@ export function Admin2ErrandDetailsPage() {
           <button type="button" onClick={() => void viewQuery.refetch()} className="flex items-center gap-1 font-semibold hover:underline">
             <RefreshCw className="size-3.5" /> Retry
           </button>
-          <Link to={getPagePath('errands')} className="flex items-center gap-1 font-semibold hover:underline">
+          <Link to={getPagePath('admin2-errands')} className="flex items-center gap-1 font-semibold hover:underline">
             <ArrowLeft className="size-3.5" /> Back to errands
           </Link>
         </div>
@@ -107,7 +107,7 @@ export function Admin2ErrandDetailsPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex min-w-0 flex-1 flex-col gap-[6px]">
           <p className="text-[10px] font-semibold uppercase text-[#167d35]">
-            <Link to={getPagePath('errands')} className="hover:underline">
+            <Link to={getPagePath('admin2-errands')} className="hover:underline">
               Errands
             </Link>
             <span className="px-[6px] text-[#a3c9ad]">/</span>

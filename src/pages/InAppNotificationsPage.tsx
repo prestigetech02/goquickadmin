@@ -20,9 +20,10 @@ import { Card, CardBody } from '@/components/ui/Card';
 import { Modal } from '@/components/ui/Modal';
 import { StatCard } from '@/components/ui/StatCard';
 import { useAuth } from '@/context/AuthContext';
-import { useAdminNavigate } from '@/context/AdminNavigationContext';
-import { canAccessPage } from '@/lib/adminNavigation';
+import { useNavigate } from 'react-router-dom';
+import { getPageHref } from '@/lib/adminNavigation';
 import { getApiErrorMessage } from '@/lib/adminAuthApi';
+import { notificationHref } from '@/lib/notificationTarget';
 import { queryKeys } from '@/lib/queryKeys';
 import { formatDateTime, timeAgo, titleCase } from '@/lib/utils';
 import { relatedSupportTicketId, type AppNotification } from '@/types/inAppNotification';
@@ -43,8 +44,9 @@ function invalidateInAppNotifications(queryClient: ReturnType<typeof useQueryCli
 
 export function InAppNotificationsPage() {
   const queryClient = useQueryClient();
-  const navigate = useAdminNavigate();
+  const navigate = useNavigate();
   const { user } = useAuth();
+  const inboxHref = getPageHref('in-app-notifications');
   const [page, setPage] = useState(1);
   const [readFilter, setReadFilter] = useState<ReadFilter>('all');
   const [selected, setSelected] = useState<AppNotification | null>(null);
@@ -119,6 +121,7 @@ export function InAppNotificationsPage() {
 
   const unreadCount = unreadQuery.data ?? 0;
   const totalCount = meta?.total ?? filteredItems.length;
+  const selectedHref = selected ? notificationHref(selected, user) : inboxHref;
 
   return (
     <div>
@@ -293,17 +296,16 @@ export function InAppNotificationsPage() {
               <p className="text-sm text-ink-700 whitespace-pre-wrap">{selected.message}</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              {relatedSupportTicketId(selected) && canAccessPage(user, 'tickets') ? (
+              {selectedHref !== inboxHref ? (
                 <button
                   type="button"
                   onClick={() => {
-                    const ticketId = relatedSupportTicketId(selected);
                     setSelected(null);
-                    if (ticketId) navigate('tickets', { openId: ticketId });
+                    navigate(selectedHref);
                   }}
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-medium hover:bg-brand-700"
                 >
-                  View ticket
+                  {relatedSupportTicketId(selected) ? 'View ticket' : 'Open'}
                 </button>
               ) : null}
               <button

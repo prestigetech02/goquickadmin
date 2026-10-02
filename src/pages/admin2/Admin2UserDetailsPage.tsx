@@ -20,6 +20,7 @@ import {
 import { AccountActionsCard, type UserAction } from '@/components/admin2/userDetails/AccountActionsCard';
 import { AccountActivityCard } from '@/components/admin2/userDetails/AccountActivityCard';
 import { IdentityCard } from '@/components/admin2/userDetails/IdentityCard';
+import { ReferralsCard } from '@/components/admin2/userDetails/ReferralsCard';
 import { SavedLocationsCard } from '@/components/admin2/userDetails/SavedLocationsCard';
 import { SupportRiskCard } from '@/components/admin2/userDetails/SupportRiskCard';
 import { UserActionModals, type UserModal } from '@/components/admin2/userDetails/UserActionModals';
@@ -219,6 +220,7 @@ export function Admin2UserDetailsPage() {
             </div>
             <div className="flex w-full flex-col gap-[12px] xl:w-[392px] xl:flex-shrink-0">
               <VerificationCard profile={profile} />
+              {profile.referrals ? <ReferralsCard referrals={profile.referrals} /> : null}
               <SupportRiskCard profile={profile} canOpenTickets={canAccessPage(admin, 'tickets')} />
               <AccountActivityCard profile={profile} onSignOut={() => setModal('sign-out')} />
               <AccountActionsCard

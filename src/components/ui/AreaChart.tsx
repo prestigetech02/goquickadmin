@@ -7,6 +7,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { formatAxisTick, yAxisWidth } from './chartAxis';
 
 type Point = { label: string; value: number };
 
@@ -50,8 +51,8 @@ export function AreaChart({
             tick={{ fill: '#9aa3b2', fontSize: 11 }}
             axisLine={false}
             tickLine={false}
-            width={40}
-            tickFormatter={(v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v))}
+            width={yAxisWidth(data.map((p) => p.value))}
+            tickFormatter={formatAxisTick}
           />
           <Tooltip
             cursor={{ stroke: color, strokeWidth: 1, strokeDasharray: '4 4' }}

@@ -1,7 +1,7 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ExternalLink, Mail, Phone } from 'lucide-react';
+import { Check, Copy, ExternalLink, Mail, Phone } from 'lucide-react';
 import { fetchAdminUser } from '@/api/adminUsersApi';
 import { UserWalletPanel } from '@/components/payments/UserWalletPanel';
 import { Drawer } from '@/components/ui/Drawer';
@@ -9,8 +9,8 @@ import { useAuth } from '@/context/AuthContext';
 import { getApiErrorMessage } from '@/lib/adminAuthApi';
 import { getAdmin2UserHref, getPageHref } from '@/lib/adminNavigation';
 import { queryKeys } from '@/lib/queryKeys';
-import type { UserListItem } from '@/types/api';
-import { formatNaira, personInitials } from '../format';
+import type { UserListItem, UserReferralSummary } from '@/types/api';
+import { formatCount, formatNaira, personInitials } from '../format';
 import { Skeleton } from '../overview/primitives';
 import { KycBadge, RoleBadge, StatusBadge } from './UserBadges';
 import {
@@ -28,6 +28,58 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
     <div className="min-w-0 rounded-[10px] border border-[#e2e8e3] bg-[#f8faf8] px-3 py-2.5">
       <p className="text-[10px] font-medium uppercase tracking-[0.3px] text-[#7c857f]">{label}</p>
       <div className="mt-1 truncate text-[12px] font-semibold text-[#17211b]">{children}</div>
+    </div>
+  );
+}
+
+function ReferralSection({ referrals }: { referrals: UserReferralSummary }) {
+  const [copied, setCopied] = useState(false);
+  const referrer = referrals.referred_by;
+
+  const copy = async () => {
+    if (!referrals.code) return;
+    try {
+      await navigator.clipboard.writeText(referrals.code);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.3px] text-[#7c857f]">Referrals</p>
+      <div className="grid grid-cols-3 gap-2">
+        <Field label="Referral code">
+          {referrals.code ? (
+            <button
+              type="button"
+              onClick={() => void copy()}
+              title="Copy code"
+              className="inline-flex max-w-full items-center gap-1 font-mono tracking-[0.5px] text-[#0d5e27] hover:underline"
+            >
+              <span className="truncate">{referrals.code}</span>
+              {copied ? <Check className="size-[12px] flex-shrink-0" /> : <Copy className="size-[12px] flex-shrink-0 text-[#7c857f]" />}
+            </button>
+          ) : (
+            <span className="font-normal text-[#7c857f]">Not created yet</span>
+          )}
+        </Field>
+        <Field label="Used their code">
+          {formatCount(referrals.used_count)}
+          <span className="ml-1 text-[10px] font-normal text-[#7c857f]">
+            {referrals.pending_count > 0 ? `· ${formatCount(referrals.pending_count)} pending` : ''}
+          </span>
+        </Field>
+        <Field label="Earned">{formatNaira(referrals.earned_total)}</Field>
+      </div>
+      <p className="text-[10px] leading-[1.45] text-[#7c857f]">
+        {formatCount(referrals.used_by.requesters)} requesters and {formatCount(referrals.used_by.runners)} runners signed up with this code;{' '}
+        {formatCount(referrals.qualified_count)} earned a bonus ({formatNaira(referrals.bonus_total)}).
+        {referrals.welcome_total > 0 ? ` Includes their own ${formatNaira(referrals.welcome_total)} sign-up reward.` : ''}
+        {referrer ? ` Referred by ${referrer.name}${referrer.code ? ` (${referrer.code})` : ''}.` : ''}
+      </p>
     </div>
   );
 }
@@ -152,6 +204,8 @@ export function UserDetailsDrawer({
           </Field>
           <Field label="Phone verified">{merged.phone_verified ? 'Yes' : 'No'}</Field>
         </div>
+
+        {!isAdmin && detail?.referrals ? <ReferralSection referrals={detail.referrals} /> : null}
 
         {detailQuery.isLoading ? <Skeleton className="h-[120px] w-full" /> : null}
 

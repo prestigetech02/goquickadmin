@@ -409,7 +409,7 @@ export function RunnerActionModals({
             <Notice tone="gray">Bank details are changed by the runner in the app so payouts always go to an account they control.</Notice>
             {withdrawalsHref ? (
               <Link to={withdrawalsHref} className="inline-block text-[12px] font-semibold text-[#167d35] hover:underline">
-                Review withdrawals in Payments →
+                Review withdrawals →
               </Link>
             ) : null}
           </>

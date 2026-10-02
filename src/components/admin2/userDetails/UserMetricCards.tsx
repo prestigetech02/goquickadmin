@@ -1,7 +1,7 @@
 import type { ComponentType } from 'react';
 import { CreditCard, PackageCheck, ShieldCheck, WalletCards, type LucideProps } from 'lucide-react';
 import type { AdminUserProfile } from '@/types/api';
-import { formatCompactNaira, formatCount, formatNaira } from '../format';
+import { formatCount, formatNaira } from '../format';
 import { Card } from '../overview/primitives';
 import { HEALTH_LEVELS } from './presentation';
 
@@ -57,7 +57,7 @@ export function UserMetricCards({ profile }: { profile: AdminUserProfile }) {
       />
       <MetricCard
         label={isRunner ? 'Lifetime earnings' : 'Lifetime spend'}
-        value={formatCompactNaira(metrics.lifetime_value)}
+        value={formatNaira(metrics.lifetime_value)}
         sub={metrics.average_order != null ? `${formatNaira(metrics.average_order)} average ${isRunner ? 'job' : 'order'}` : 'No completed errands yet'}
         icon={WalletCards}
         iconBg="#eef5fb"

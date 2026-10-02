@@ -56,7 +56,7 @@ function withdrawalRunnerName(item: WithdrawalListItem): string {
   return partyDisplayName(user) || `User #${user.id}`;
 }
 
-function canPayViaPaystack(item: WithdrawalListItem): boolean {
+function canPayViaFlutterwave(item: WithdrawalListItem): boolean {
   if (item.status === 'paid' || item.payout_status === 'success' || item.payout_status === 'pending') {
     return false;
   }
@@ -65,7 +65,7 @@ function canPayViaPaystack(item: WithdrawalListItem): boolean {
 
 function payConfirmMessage(item: WithdrawalListItem): string {
   const dest = [item.account_name, item.bank_name, item.account_number].filter(Boolean).join(' · ') || 'the runner bank account';
-  return `Send ${formatCurrency(item.amount)} to ${dest} via Paystack?\n\nThis uses the platform Paystack balance. The runner wallet was already reserved when they requested payout.`;
+  return `Send ${formatCurrency(item.amount)} to ${dest} via Flutterwave?\n\nThis uses the platform Flutterwave balance. The runner wallet was already reserved when they requested payout.`;
 }
 
 function paymentsTabFromParams(params: URLSearchParams): PaymentsTab {
@@ -298,14 +298,14 @@ export function PaymentsPage() {
               Reject
             </button>
           )}
-          {canPayViaPaystack(row) && (
+          {canPayViaFlutterwave(row) && (
             <button
               type="button"
               disabled={isActingOn(row.id, 'approve')}
               onClick={(e) => {
                 e.stopPropagation();
                 runAction(row, 'approve', {
-                  title: row.status === 'approved' ? 'Pay via Paystack' : 'Approve & pay',
+                  title: row.status === 'approved' ? 'Pay via Flutterwave' : 'Approve & pay',
                   message: payConfirmMessage(row),
                 });
               }}
@@ -314,7 +314,7 @@ export function PaymentsPage() {
               {isActingOn(row.id, 'approve')
                 ? 'Paying…'
                 : row.status === 'approved'
-                  ? 'Pay via Paystack'
+                  ? 'Pay via Flutterwave'
                   : 'Approve & pay'}
             </button>
           )}
@@ -326,7 +326,7 @@ export function PaymentsPage() {
                 e.stopPropagation();
                 runAction(row, 'mark-paid', {
                   title: 'Mark paid manually',
-                  message: 'Use this only if you already paid the runner outside Paystack.',
+                  message: 'Use this only if you already paid the runner outside Flutterwave.',
                 });
               }}
               className="px-2.5 py-1 rounded-lg text-xs font-medium border border-success-200 text-success-700 hover:bg-success-50 disabled:opacity-50"
@@ -359,7 +359,7 @@ export function PaymentsPage() {
   const subtitle =
     tab === 'ledger'
       ? `${formatNumber(ledgerStats?.pending_funding.count ?? 0)} pending funding · wallet transaction ledger`
-      : `${formatNumber(total)} withdrawal requests · approve & pay via Paystack`;
+      : `${formatNumber(total)} withdrawal requests · approve & pay via Flutterwave`;
 
   return (
     <div>
@@ -495,7 +495,7 @@ export function PaymentsPage() {
             <div className="mb-4 flex items-start gap-2 p-3 rounded-xl bg-error-50 text-error-700 text-sm">
               <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium">Paystack payout failed</p>
+                <p className="font-medium">Flutterwave payout failed</p>
                 <p className="mt-1">{actionError}</p>
               </div>
             </div>
@@ -594,7 +594,7 @@ export function PaymentsPage() {
                   <DetailField label="Bank" value={detail.bank_name || '—'} />
                   <DetailField label="Account name" value={detail.account_name || '—'} />
                   <DetailField label="Account number" value={detail.account_number || '—'} />
-                  <DetailField label="Paystack payout" value={detail.payout_status ? titleCase(detail.payout_status) : 'Not sent'} />
+                  <DetailField label="Transfer payout" value={detail.payout_status ? titleCase(detail.payout_status) : 'Not sent'} />
                   <DetailField label="Email" value={detail.wallet?.user?.email || '—'} />
                   <DetailField label="Phone" value={detail.wallet?.user?.phone || '—'} />
                   <DetailField label="Requested" value={formatDateTime(detail.created_at)} />
@@ -606,13 +606,13 @@ export function PaymentsPage() {
                 </div>
 
                 <div className="flex flex-wrap gap-2 pt-2 border-t border-ink-100">
-                  {canPayViaPaystack(detail) && (
+                  {canPayViaFlutterwave(detail) && (
                     <button
                       type="button"
                       disabled={isActingOn(detail.id, 'approve')}
                       onClick={() =>
                         runAction(detail, 'approve', {
-                          title: detail.status === 'approved' ? 'Pay via Paystack' : 'Approve & pay',
+                          title: detail.status === 'approved' ? 'Pay via Flutterwave' : 'Approve & pay',
                           message: payConfirmMessage(detail),
                         })
                       }
@@ -621,7 +621,7 @@ export function PaymentsPage() {
                       {isActingOn(detail.id, 'approve')
                         ? 'Paying…'
                         : detail.status === 'approved'
-                          ? 'Pay via Paystack'
+                          ? 'Pay via Flutterwave'
                           : 'Approve & pay'}
                     </button>
                   )}
@@ -647,7 +647,7 @@ export function PaymentsPage() {
                       onClick={() =>
                         runAction(detail, 'mark-paid', {
                           title: 'Mark paid manually',
-                          message: 'Use this only if you already paid the runner outside Paystack.',
+                          message: 'Use this only if you already paid the runner outside Flutterwave.',
                         })
                       }
                       className="px-4 py-2 rounded-xl text-sm font-medium border border-success-200 text-success-700 hover:bg-success-50 disabled:opacity-50"
@@ -706,7 +706,7 @@ export function PaymentsPage() {
                         : 'Saving…'
                       : confirmPrompt.action === 'approve'
                         ? confirmPrompt.item.status === 'approved'
-                          ? 'Pay via Paystack'
+                          ? 'Pay via Flutterwave'
                           : 'Approve & pay'
                         : 'Mark paid'}
                   </button>

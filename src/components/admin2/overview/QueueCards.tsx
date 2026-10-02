@@ -102,9 +102,9 @@ export function QueueCards({ data }: { data?: DashboardOverview }) {
 
   return (
     <div className="grid w-full grid-cols-1 gap-[12px] md:grid-cols-3">
-      {canAccessPage(user, 'kyc') ? (
+      {canAccessPage(user, 'admin2-verifications') ? (
         <QueueCard
-          page="kyc"
+          page="admin2-verifications"
           icon={BadgeCheck}
           accent="#b06d12"
           accentBg="#fff5e5"
@@ -122,9 +122,9 @@ export function QueueCards({ data }: { data?: DashboardOverview }) {
           emptyText="No verifications waiting"
         />
       ) : null}
-      {canAccessPage(user, 'disputes') ? (
+      {canAccessPage(user, 'admin2-disputes') ? (
         <QueueCard
-          page="disputes"
+          page="admin2-disputes"
           icon={MessageSquareWarning}
           accent="#b84545"
           accentBg="#fff0f0"
@@ -136,9 +136,9 @@ export function QueueCards({ data }: { data?: DashboardOverview }) {
           emptyText="No open disputes"
         />
       ) : null}
-      {canAccessPage(user, 'payments') ? (
+      {canAccessPage(user, 'admin2-withdrawals') ? (
         <QueueCard
-          page="payments"
+          page="admin2-withdrawals"
           icon={WalletCards}
           accent="#3973a8"
           accentBg="#eef5fb"

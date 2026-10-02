@@ -92,7 +92,7 @@ export function Admin2RunnerDetailsPage() {
   const isClosed = runner.deleted_at != null;
   const blocked = isClosed || runner.is_suspended;
   const canFinance = canAccessPage(admin, 'payments');
-  const canReviewKyc = canAccessPage(admin, 'kyc');
+  const canReviewKyc = canAccessPage(admin, 'admin2-verifications');
   const status = presence(runner);
   const verification = VERIFICATION[runner.verification_status];
   const area = profile.zone.assigned?.name ?? profile.zone.area;
@@ -103,7 +103,7 @@ export function Admin2RunnerDetailsPage() {
       : 'No location shared yet';
   const subtitle = [area, runner.created_at ? `Joined ${watDate(runner.created_at)}` : null, lastPing].filter(Boolean).join(' · ');
   const ledgerHref = canFinance ? `${getPagePath('payments')}?tab=ledger&user=${runner.id}` : null;
-  const kycHref = canReviewKyc && profile.verification ? getPageHref('kyc', { openId: profile.verification.id }) : null;
+  const kycHref = canReviewKyc && profile.verification ? getPageHref('admin2-verifications', { openId: profile.verification.id }) : null;
   const errandsFooter = [
     `${formatCount(metrics.errands_completed)} completed`,
     `${formatCount(metrics.errands_cancelled)} cancelled`,
@@ -209,7 +209,7 @@ export function Admin2RunnerDetailsPage() {
         profile={profile}
         modal={modal}
         canManageZones={canAccessPage(admin, 'zones')}
-        withdrawalsHref={canFinance ? getPagePath('payments') : null}
+        withdrawalsHref={canFinance ? getPagePath('admin2-withdrawals') : null}
         onClose={() => setModal(null)}
         onDone={(message) => {
           setModal(null);

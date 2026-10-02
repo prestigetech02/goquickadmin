@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { ADMIN2_RANGE_PRESETS, useAdmin2DateRange } from '@/context/Admin2DateRangeContext';
 import { canAccessPage, getAdmin2RunnerHref } from '@/lib/adminNavigation';
 import type { DashboardOverview } from '@/types/api';
-import { formatCompactNaira, formatCount, formatDateRange, formatMinutes, formatPct, parseDate, personInitials } from '../format';
+import { formatNaira, formatCount, formatDateRange, formatMinutes, formatPct, parseDate, personInitials } from '../format';
 import { Card, CardTitle, Skeleton } from './primitives';
 
 const PERIOD_OPTIONS = ADMIN2_RANGE_PRESETS.filter((preset) => ['this_week', 'this_month', 'last_30'].includes(preset.key));
@@ -126,7 +126,7 @@ export function TopRunnersCard({ data }: { data?: DashboardOverview }) {
                   <span className="text-[10px] font-semibold text-[#17211b]">
                     {runner.on_time_pct != null ? `${Math.round(runner.on_time_pct)}%` : '—'}
                   </span>
-                  <span className="ml-auto text-[11px] font-bold text-[#17211b]">{formatCompactNaira(runner.earnings)}</span>
+                  <span className="ml-auto text-[11px] font-bold text-[#17211b]">{formatNaira(runner.earnings)}</span>
                 </span>
               </button>
             );

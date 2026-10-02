@@ -1,15 +1,21 @@
 import { useState, type ReactNode } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { fetchAdminErrandTypes } from '@/api/adminErrandTypesApi';
 import { useAuth } from '@/context/AuthContext';
+import { queryKeys } from '@/lib/queryKeys';
 import { Admin2DateRangeProvider } from '@/context/Admin2DateRangeContext';
 import { Modal } from '@/components/ui/Modal';
 import { Admin2Sidebar } from './Admin2Sidebar';
 import { Admin2TopBar } from './Admin2TopBar';
+import { LiveAlertToasts } from './LiveAlertToasts';
 
 export function Admin2Layout({ children }: { children: ReactNode }) {
   const { signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  // Loads admin-set errand type names used by categoryLabel() across the admin2 pages.
+  useQuery({ queryKey: queryKeys.settings.errandTypes, queryFn: fetchAdminErrandTypes, staleTime: 5 * 60_000 });
 
   const handleConfirmLogout = async () => {
     setLoggingOut(true);
@@ -28,11 +34,7 @@ export function Admin2Layout({ children }: { children: ReactNode }) {
           <div className="fixed inset-0 z-30 bg-[#17211b]/40 lg:hidden" onClick={() => setSidebarOpen(false)} />
         ) : null}
 
-        <Admin2Sidebar
-          open={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-          onRequestLogout={() => setShowLogoutConfirm(true)}
-        />
+        <Admin2Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
         <div className="flex min-w-0 flex-1 flex-col">
           <Admin2TopBar
@@ -42,6 +44,8 @@ export function Admin2Layout({ children }: { children: ReactNode }) {
           <main className="flex-1 px-[16px] pb-[32px] pt-[26px] sm:px-[28px]">{children}</main>
         </div>
       </div>
+
+      <LiveAlertToasts />
 
       <Modal open={showLogoutConfirm} onClose={() => !loggingOut && setShowLogoutConfirm(false)} title="Log out?" size="sm">
         <p className="mb-6 text-sm text-ink-600">

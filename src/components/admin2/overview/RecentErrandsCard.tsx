@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Check, ChevronLeft, ChevronRight, ListFilter } from 'lucide-react';
 import { fetchAdminErrands } from '@/api/adminErrandsApi';
 import { getApiErrorMessage } from '@/lib/adminAuthApi';
-import { getAdmin2ErrandHref } from '@/lib/adminNavigation';
+import { getAdmin2ErrandHref, getPagePath } from '@/lib/adminNavigation';
 import { queryKeys } from '@/lib/queryKeys';
 import { formatErrandCode, titleCase } from '@/lib/utils';
 import type { ErrandListItem, ListQueryParams } from '@/types/api';
@@ -147,7 +147,7 @@ export function RecentErrandsCard() {
           </div>
           <button
             type="button"
-            onClick={() => navigate(filter.params.scope === 'active' ? '/errands?scope=active' : '/errands')}
+            onClick={() => navigate(`${getPagePath('admin2-errands')}${filter.params.scope === 'active' ? '?tab=live' : ''}`)}
             className="hidden text-[11px] font-semibold text-[#167d35] hover:underline sm:block"
           >
             View all errands →

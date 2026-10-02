@@ -5,11 +5,15 @@ export const queryKeys = {
   },
   settings: {
     all: ['admin-settings'] as const,
+    board: ['admin-settings', 'board'] as const,
+    errandTypes: ['admin-settings', 'errand-types'] as const,
   },
   dashboard: {
     stats: ['admin-dashboard', 'stats'] as const,
     performance: (params: Record<string, unknown>) =>
       ['admin-dashboard', 'performance', params] as const,
+    analyticsOverview: (params: Record<string, unknown>) => ['admin-dashboard', 'analytics-overview', params] as const,
+    analyticsCategories: (params: Record<string, unknown>) => ['admin-dashboard', 'analytics-categories', params] as const,
     overview: (params: Record<string, unknown>) => ['admin-dashboard', 'overview', params] as const,
     badges: ['admin-dashboard', 'badges'] as const,
   },
@@ -29,6 +33,8 @@ export const queryKeys = {
     list: (params: Record<string, unknown>) => ['admin-errands', 'list', params] as const,
     detail: (id: number) => ['admin-errands', 'detail', id] as const,
     view: (id: number) => ['admin-errands', 'view', id] as const,
+    boardOverview: (params: Record<string, unknown>) => ['admin-errands', 'board-overview', params] as const,
+    board: (params: Record<string, unknown>) => ['admin-errands', 'board', params] as const,
   },
   runners: {
     all: ['admin-runners'] as const,
@@ -43,6 +49,11 @@ export const queryKeys = {
       ['admin-runners', 'verifications', params] as const,
     verificationMetrics: ['admin-runners', 'verification-metrics'] as const,
     verificationDetail: (id: number) => ['admin-runners', 'verification', id] as const,
+    kycOverview: (params: Record<string, unknown>) => ['admin-runners', 'kyc-overview', params] as const,
+    kycQueue: (params: Record<string, unknown>) => ['admin-runners', 'kyc-queue', params] as const,
+    kycReview: (id: number) => ['admin-runners', 'kyc-review', id] as const,
+    boardOverview: (params: Record<string, unknown>) => ['admin-runners', 'board-overview', params] as const,
+    directory: (params: Record<string, unknown>) => ['admin-runners', 'directory', params] as const,
   },
   payments: {
     ledgerStats: ['admin-payments', 'ledger-stats'] as const,
@@ -54,16 +65,32 @@ export const queryKeys = {
     withdrawalDetail: (id: number) => ['admin-payments', 'withdrawal', id] as const,
     companyRevenue: (params: Record<string, unknown>) =>
       ['admin-payments', 'company-revenue', params] as const,
+    transactionsOverview: (params: Record<string, unknown>) =>
+      ['admin-payments', 'transactions-overview', params] as const,
+    transactions: (params: Record<string, unknown>) => ['admin-payments', 'transactions', params] as const,
+    revenueOverview: (params: Record<string, unknown>) => ['admin-payments', 'revenue-overview', params] as const,
+    revenueTransactions: (params: Record<string, unknown>) => ['admin-payments', 'revenue-transactions', params] as const,
+    withdrawalsOverview: (params: Record<string, unknown>) =>
+      ['admin-payments', 'withdrawals-overview', params] as const,
+    withdrawalQueue: (params: Record<string, unknown>) => ['admin-payments', 'withdrawal-queue', params] as const,
+    withdrawalReview: (id: number) => ['admin-payments', 'withdrawal-review', id] as const,
   },
   disputes: {
     all: ['admin-disputes'] as const,
     list: (params: Record<string, unknown>) => ['admin-disputes', 'list', params] as const,
     detail: (id: number) => ['admin-disputes', 'detail', id] as const,
+    boardOverview: (params: Record<string, unknown>) => ['admin-disputes', 'board-overview', params] as const,
+    board: (params: Record<string, unknown>) => ['admin-disputes', 'board', params] as const,
+    case: (id: number) => ['admin-disputes', 'case', id] as const,
   },
   tickets: {
     all: ['admin-tickets'] as const,
     list: (params: Record<string, unknown>) => ['admin-tickets', 'list', params] as const,
     detail: (id: number) => ['admin-tickets', 'detail', id] as const,
+    deskOverview: (params: Record<string, unknown>) => ['admin-tickets', 'desk-overview', params] as const,
+    desk: (params: Record<string, unknown>) => ['admin-tickets', 'desk', params] as const,
+    workspace: (id: number) => ['admin-tickets', 'workspace', id] as const,
+    agents: ['admin-tickets', 'agents'] as const,
   },
   pricing: {
     all: ['admin-pricing'] as const,
@@ -75,6 +102,7 @@ export const queryKeys = {
   coupons: {
     all: ['admin-coupons'] as const,
     stats: ['admin-coupons', 'stats'] as const,
+    overview: (params: Record<string, unknown>) => ['admin-coupons', 'overview', params] as const,
     list: (params: Record<string, unknown>) => ['admin-coupons', 'list', params] as const,
     detail: (id: number) => ['admin-coupons', 'detail', id] as const,
     redemptions: (id: number, params: Record<string, unknown>) =>
@@ -90,12 +118,23 @@ export const queryKeys = {
   blog: {
     list: (params: Record<string, unknown>) => ['admin-blog', 'list', params] as const,
     detail: (id: number) => ['admin-blog', 'detail', id] as const,
+    all: ['admin-blog'] as const,
+    overview: (params: Record<string, unknown>) => ['admin-blog', 'overview', params] as const,
+    board: (params: Record<string, unknown>) => ['admin-blog', 'board', params] as const,
+    editor: (id: number) => ['admin-blog', 'editor', id] as const,
+    linkIssues: ['admin-blog', 'link-issues'] as const,
+    calendar: (month: string) => ['admin-blog', 'calendar', month] as const,
   },
   systemHealth: {
     all: ['admin-system-health'] as const,
   },
   notifications: {
     list: (params: Record<string, unknown>) => ['admin-notifications', 'list', params] as const,
+    overview: (params: Record<string, unknown>) => ['admin-notifications', 'overview', params] as const,
+    history: (params: Record<string, unknown>) => ['admin-notifications', 'history', params] as const,
+    campaign: (id: number) => ['admin-notifications', 'campaign', id] as const,
+    group: (type: string, date: string) => ['admin-notifications', 'group', type, date] as const,
+    estimate: (params: Record<string, unknown>) => ['admin-notifications', 'estimate', params] as const,
   },
   admins: {
     all: ['admin-accounts'] as const,

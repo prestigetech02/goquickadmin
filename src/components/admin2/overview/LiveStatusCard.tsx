@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { canAccessPage } from '@/lib/adminNavigation';
+import { canAccessPage, getPagePath } from '@/lib/adminNavigation';
 import type { DashboardOverview, OverviewLiveBucket } from '@/types/api';
 import { formatCount, formatPct } from '../format';
 import { Card, CardTitle, Dot, Skeleton } from './primitives';
@@ -99,10 +99,10 @@ export function LiveStatusCard({ data }: { data?: DashboardOverview }) {
           Cancellation rate{' '}
           <span className="font-semibold text-[#17211b]">{live ? formatPct(live.cancellation_rate_pct) : '—'}</span>
         </p>
-        {canAccessPage(user, 'errands') ? (
+        {canAccessPage(user, 'admin2-errands') ? (
           <button
             type="button"
-            onClick={() => navigate('/errands?scope=active')}
+            onClick={() => navigate(`${getPagePath('admin2-errands')}?tab=live`)}
             className="font-semibold text-[#167d35] hover:underline"
           >
             View errands →
