@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { Download, Scale } from 'lucide-react';
 import { assignAdminDispute, downloadAdminDisputesExport, fetchAdminDisputesOverview } from '@/api/adminDisputesApi';
 import { CaseloadCard } from '@/components/admin2/disputes/CaseloadCard';
@@ -16,15 +16,12 @@ import { OUTLINE_BUTTON, PageHeader } from '@/components/admin2/shared/PageHeade
 import { NoticeBar, type Notice } from '@/components/admin2/shared/TableControls';
 import { useDebounced } from '@/components/admin2/shared/useDebounced';
 import { useAdmin2DateRange } from '@/context/Admin2DateRangeContext';
-import { useAuth } from '@/context/AuthContext';
 import { getApiErrorMessage } from '@/lib/adminAuthApi';
-import { canAccessPage, getPagePath } from '@/lib/adminNavigation';
 import { queryKeys } from '@/lib/queryKeys';
 import type { AdminDisputeRow } from '@/types/api';
 
 export function Admin2DisputesPage() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
   const { range } = useAdmin2DateRange();
   const [searchParams] = useSearchParams();
   const [filters, setFilters] = useState<DisputeFilters>(DEFAULT_DISPUTE_FILTERS);
@@ -180,14 +177,6 @@ export function Admin2DisputesPage() {
           Decisions are final. Refunding returns held escrow to the requester and cancels the errand; paying the runner releases it and completes
           the errand. Both parties are notified with your resolution, and the decision is logged on the errand's timeline with your name.
         </p>
-        {canAccessPage(user, 'disputes') ? (
-          <Link
-            to={getPagePath('disputes')}
-            className="flex h-[34px] flex-shrink-0 items-center rounded-[8px] border border-[#d4ddd6] bg-white px-[12px] text-[11px] font-semibold text-[#17211b] hover:bg-[#f8faf8]"
-          >
-            Classic disputes view
-          </Link>
-        ) : null}
       </div>
 
       {caseId != null ? (

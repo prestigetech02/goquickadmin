@@ -23,6 +23,7 @@ const PREVIEW_SIZE = 8;
 
 export function NotificationsPopover({ variant = 'default' }: { variant?: 'default' | 'admin2' }) {
   const isAdmin2 = variant === 'admin2';
+  const inboxPage = isAdmin2 ? 'admin2-inbox' : 'in-app-notifications';
   const navigate = useNavigate();
   const { user } = useAuth();
   const { live } = useAdminOpsRealtimeStatus();
@@ -88,12 +89,12 @@ export function NotificationsPopover({ variant = 'default' }: { variant?: 'defau
   const handleOpenItem = (notification: AppNotification) => {
     if (!notification.is_read) markReadMutation.mutate(notification.id);
     setOpen(false);
-    navigate(notificationHref(notification, user));
+    navigate(notificationHref(notification, user, inboxPage));
   };
 
   const handleViewAll = () => {
     setOpen(false);
-    navigate(getPageHref('in-app-notifications'));
+    navigate(getPageHref(inboxPage));
   };
 
   const tabClass = (active: boolean) =>

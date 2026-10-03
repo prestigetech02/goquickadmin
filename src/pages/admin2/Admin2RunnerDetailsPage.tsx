@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { AlertCircle, ArrowLeft, Copy, ExternalLink, KeyRound, Pencil, ReceiptText, RefreshCw, ShieldCheck, UserRound } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Copy, KeyRound, Pencil, ReceiptText, RefreshCw, ShieldCheck, UserRound } from 'lucide-react';
 import { fetchAdminRunnerProfile } from '@/api/adminRunnersApi';
 import { Chip } from '@/components/admin2/errand/parts';
 import { formatCount, relativeAgo } from '@/components/admin2/format';
@@ -48,7 +48,7 @@ export function Admin2RunnerDetailsPage() {
     refetchInterval: 30_000,
   });
   const profile = profileQuery.data;
-  const runnersPath = getPagePath('runners');
+  const runnersPath = getPagePath('admin2-runners');
 
   if (runnerId > 0 && (profileQuery.isLoading || (!profile && !profileQuery.isError))) {
     return (
@@ -91,7 +91,7 @@ export function Admin2RunnerDetailsPage() {
   const { runner, metrics } = profile;
   const isClosed = runner.deleted_at != null;
   const blocked = isClosed || runner.is_suspended;
-  const canFinance = canAccessPage(admin, 'payments');
+  const canFinance = canAccessPage(admin, 'admin2-transactions');
   const canReviewKyc = canAccessPage(admin, 'admin2-verifications');
   const status = presence(runner);
   const verification = VERIFICATION[runner.verification_status];
@@ -102,7 +102,7 @@ export function Admin2RunnerDetailsPage() {
       ? `Last seen ${relativeAgo(runner.last_seen_at)}`
       : 'No location shared yet';
   const subtitle = [area, runner.created_at ? `Joined ${watDate(runner.created_at)}` : null, lastPing].filter(Boolean).join(' · ');
-  const ledgerHref = canFinance ? `${getPagePath('payments')}?tab=ledger&user=${runner.id}` : null;
+  const ledgerHref = canFinance ? `${getPagePath('admin2-transactions')}?user=${runner.id}` : null;
   const kycHref = canReviewKyc && profile.verification ? getPageHref('admin2-verifications', { openId: profile.verification.id }) : null;
   const errandsFooter = [
     `${formatCount(metrics.errands_completed)} completed`,
@@ -149,7 +149,6 @@ export function Admin2RunnerDetailsPage() {
               { label: 'Review KYC', icon: ShieldCheck, disabled: !kycHref, onSelect: () => kycHref && navigate(kycHref) },
               { label: 'View wallet ledger', icon: ReceiptText, disabled: !ledgerHref, onSelect: () => ledgerHref && navigate(ledgerHref) },
               { label: 'Open user profile', icon: UserRound, onSelect: () => navigate(getAdmin2UserHref(runner.id)) },
-              { label: 'Open in classic view', icon: ExternalLink, onSelect: () => navigate(getPageHref('runners', { openId: runner.id })) },
             ]}
           >
             More actions

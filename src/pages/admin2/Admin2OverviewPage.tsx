@@ -1,11 +1,11 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { AlertCircle, Plus, RefreshCw } from 'lucide-react';
 import { fetchDashboardOverview } from '@/api/adminDashboardApi';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { useAdminNavigate } from '@/context/AdminNavigationContext';
 import { useAdmin2DateRange } from '@/context/Admin2DateRangeContext';
 import { getApiErrorMessage } from '@/lib/adminAuthApi';
-import { canAccessPage } from '@/lib/adminNavigation';
+import { canAccessPage, getPagePath } from '@/lib/adminNavigation';
 import { queryKeys } from '@/lib/queryKeys';
 import { adminDisplayName } from '@/lib/utils';
 import { KpiCards } from '@/components/admin2/overview/KpiCards';
@@ -23,7 +23,7 @@ function greeting(hour: number): string {
 
 export function Admin2OverviewPage() {
   const { user } = useAuth();
-  const navigate = useAdminNavigate();
+  const navigate = useNavigate();
   const { range } = useAdmin2DateRange();
   const firstName = user?.first_name?.trim() || adminDisplayName(user).split(' ')[0];
 
@@ -45,10 +45,10 @@ export function Admin2OverviewPage() {
           </h1>
           <p className="text-[13px] text-[#6b6f66]">Here’s what needs your attention across GoQuick today.</p>
         </div>
-        {canAccessPage(user, 'notifications') ? (
+        {canAccessPage(user, 'admin2-notifications') ? (
           <button
             type="button"
-            onClick={() => navigate('notifications')}
+            onClick={() => navigate(`${getPagePath('admin2-notifications')}?compose=1`)}
             className="flex flex-shrink-0 items-center gap-[8px] rounded-[8px] bg-[#167d35] px-[14px] py-[10px] text-[12px] font-semibold text-white transition-colors hover:bg-[#126a2c]"
           >
             <Plus className="size-[15px]" strokeWidth={2} />
@@ -85,7 +85,7 @@ export function Admin2OverviewPage() {
         <QueueCards data={data} />
 
         <div className="flex w-full flex-col gap-[12px] xl:flex-row xl:items-stretch">
-          {canAccessPage(user, 'errands') ? <RecentErrandsCard /> : null}
+          {canAccessPage(user, 'admin2-errands') ? <RecentErrandsCard /> : null}
           <TopRunnersCard data={data} />
         </div>
       </div>

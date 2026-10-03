@@ -4,6 +4,7 @@ import { MapPin, Pause, Play, Plus, Search, Users } from 'lucide-react';
 import {
   assignZoneRunner,
   createAdminZone,
+  deleteAdminZone,
   fetchAdminZoneStats,
   fetchAdminZones,
   fetchZoneRunners,
@@ -196,6 +197,11 @@ export function Admin2ZonesPage() {
             saveMutation.mutate();
           }}
           onChanged={refresh}
+          onDeleted={() => {
+            setNotice('Service zone deleted.');
+            setEditing(null);
+            refresh();
+          }}
         />
       ) : null}
     </div>
@@ -211,6 +217,7 @@ function ZoneDrawer({
   onClose,
   onSave,
   onChanged,
+  onDeleted,
 }: {
   zone: AdminZone | null;
   form: ZoneForm;
@@ -220,6 +227,7 @@ function ZoneDrawer({
   onClose: () => void;
   onSave: () => void;
   onChanged: () => void;
+  onDeleted: () => void;
 }) {
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/30" onClick={onClose}>
@@ -259,8 +267,53 @@ function ZoneDrawer({
             </button>
           </div>
           {zone ? <RunnerAssignment zoneId={zone.id} onChanged={onChanged} /> : <p className="text-[12px] text-[#6b6f66]">Save the zone before assigning runners.</p>}
+          {zone ? <DeleteZone zone={zone} onDeleted={onDeleted} /> : null}
         </div>
       </div>
+    </div>
+  );
+}
+
+function DeleteZone({ zone, onDeleted }: { zone: AdminZone; onDeleted: () => void }) {
+  const [confirming, setConfirming] = useState(false);
+  const remove = useMutation({ mutationFn: () => deleteAdminZone(zone.id), onSuccess: onDeleted });
+  const runners = zone.runners_count ?? 0;
+
+  return (
+    <div className="flex flex-col gap-2 rounded-[10px] border border-[#f1d4d4] px-3 py-3">
+      <span className="text-[13px] font-semibold text-[#17211b]">Delete zone</span>
+      <span className="text-[12px] text-[#6b6f66]">
+        Removes the zone for good{runners > 0 ? ` and unassigns its ${runners} ${runners === 1 ? 'runner' : 'runners'}` : ''}. Past errands keep their details. To stop
+        new orders but keep the zone, pause it instead.
+      </span>
+      {remove.isError ? <p className="text-[12px] text-[#b84545]">{getApiErrorMessage(remove.error, 'Could not delete this zone.')}</p> : null}
+      {confirming ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            disabled={remove.isPending}
+            onClick={() => remove.mutate()}
+            className="h-[34px] rounded-[8px] bg-[#b84545] px-3 text-[12px] font-semibold text-white hover:bg-[#9c3a3a] disabled:opacity-50"
+          >
+            {remove.isPending ? 'Deleting…' : `Delete ${zone.city || zone.name}`}
+          </button>
+          <button
+            type="button"
+            onClick={() => setConfirming(false)}
+            className="h-[34px] rounded-[8px] border border-[#d4ddd6] bg-white px-3 text-[12px] font-semibold text-[#17211b] hover:bg-[#f8faf8]"
+          >
+            Keep zone
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setConfirming(true)}
+          className="h-[34px] self-start rounded-[8px] border border-[#e8b4b4] bg-white px-3 text-[12px] font-semibold text-[#b84545] hover:bg-[#fdeded]"
+        >
+          Delete zone…
+        </button>
+      )}
     </div>
   );
 }

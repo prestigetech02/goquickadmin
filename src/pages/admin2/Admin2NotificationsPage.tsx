@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { campaignAction, deleteNotificationCampaign, fetchNotificationsOverview } from '@/api/adminNotificationCenterApi';
 import { AudienceSegmentsCard } from '@/components/admin2/notifications/AudienceSegmentsCard';
@@ -44,7 +45,15 @@ export function Admin2NotificationsPage() {
   const debouncedSearch = useDebounced(search, 350);
   const params = useMemo(() => historyParams(filters, debouncedSearch, range), [filters, debouncedSearch, range]);
   const [notice, setNotice] = useState<Notice | null>(null);
-  const [compose, setCompose] = useState<ComposeRequest | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [compose, setCompose] = useState<ComposeRequest | null>(() => (searchParams.get('compose') ? { id: null } : null));
+
+  useEffect(() => {
+    if (!searchParams.has('compose')) return;
+    const next = new URLSearchParams(searchParams);
+    next.delete('compose');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
   const [detail, setDetail] = useState<DetailTarget | null>(null);
   const [confirm, setConfirm] = useState<{ row: NotificationHistoryRow; action: 'send' | 'delete' } | null>(null);
 

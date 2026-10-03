@@ -22,6 +22,11 @@ export type PageKey =
   | 'admin2-blog-post'
   | 'admin2-coupons'
   | 'admin2-support'
+  | 'admin2-admins'
+  | 'admin2-inbox'
+  | 'admin2-audit'
+  | 'admin2-health'
+  | 'admin2-help'
   | 'errands'
   | 'runners'
   | 'kyc'
@@ -39,6 +44,7 @@ export type PageKey =
   | 'settings'
   | 'user-management'
   | 'system-logs'
+  | 'audit-logs'
   | 'support'
   | 'in-app-notifications';
 
@@ -61,7 +67,7 @@ export const ADMIN_MODULE_OPTIONS: Array<{ key: AdminModule; label: string }> = 
 
 export const ADMIN_PAGES: AdminPageDefinition[] = [
   { key: 'dashboard', label: 'Dashboard', path: '/dashboard', section: 'Overview', access: 'all-admins', visibility: 'sidebar' },
-  { key: 'admin2', label: 'Admin2 (beta)', path: '/admin2', section: 'Overview', access: 'all-admins', visibility: 'sidebar' },
+  { key: 'admin2', label: 'Overview', path: '/admin2', section: 'Overview', access: 'all-admins', visibility: 'hidden' },
   { key: 'admin2-users', label: 'User Management', path: '/admin2/users', access: 'operations', visibility: 'hidden' },
   { key: 'admin2-user', label: 'User details', path: '/admin2/users/:id', access: 'operations', visibility: 'hidden' },
   { key: 'admin2-errands', label: 'Errands', path: '/admin2/errands', access: 'operations', visibility: 'hidden' },
@@ -81,6 +87,11 @@ export const ADMIN_PAGES: AdminPageDefinition[] = [
   { key: 'admin2-blog-post', label: 'Blog post', path: '/admin2/blog/:id', access: 'operations', visibility: 'hidden' },
   { key: 'admin2-coupons', label: 'Coupons', path: '/admin2/coupons', access: 'finance', visibility: 'hidden' },
   { key: 'admin2-support', label: 'Support tickets', path: '/admin2/support', access: 'operations', visibility: 'hidden' },
+  { key: 'admin2-admins', label: 'Admin Management', path: '/admin2/admins', access: 'super-admin', visibility: 'hidden' },
+  { key: 'admin2-inbox', label: 'Inbox', path: '/admin2/inbox', access: 'personal', visibility: 'hidden' },
+  { key: 'admin2-audit', label: 'Audit Log', path: '/admin2/audit-log', access: 'super-admin', visibility: 'hidden' },
+  { key: 'admin2-health', label: 'System Health', path: '/admin2/system-health', access: 'super-admin', visibility: 'hidden' },
+  { key: 'admin2-help', label: 'Help & guide', path: '/admin2/help', access: 'all-admins', visibility: 'hidden' },
   { key: 'errands', label: 'Errands', path: '/errands', section: 'Operations', access: 'operations', visibility: 'sidebar' },
   { key: 'runners', label: 'Runners', path: '/runners', section: 'Operations', access: 'operations', visibility: 'sidebar' },
   { key: 'kyc', label: 'Runner KYC', path: '/runner-kyc', section: 'Operations', access: 'operations', visibility: 'sidebar' },
@@ -98,6 +109,7 @@ export const ADMIN_PAGES: AdminPageDefinition[] = [
   { key: 'settings', label: 'Settings', path: '/settings', section: 'Configuration', access: 'all-admins', visibility: 'sidebar' },
   { key: 'user-management', label: 'User Management', path: '/user-management', section: 'System', access: 'super-admin', visibility: 'sidebar' },
   { key: 'system-logs', label: 'System Health', path: '/system-health', section: 'System', access: 'super-admin', visibility: 'sidebar' },
+  { key: 'audit-logs', label: 'Audit Log', path: '/audit-log', section: 'System', access: 'super-admin', visibility: 'sidebar' },
   { key: 'support', label: 'Help & Support', path: '/support', section: 'System', access: 'all-admins', visibility: 'sidebar' },
   { key: 'in-app-notifications', label: 'My Notifications', path: '/my-notifications', access: 'personal', visibility: 'hidden' },
 ];
@@ -198,18 +210,57 @@ export function canAccessPage(user: AdminUser | null | undefined, page: PageKey)
 }
 
 export function getDefaultPageForUser(user: AdminUser): PageKey {
-  if (canAccessPage(user, 'dashboard')) return 'dashboard';
-  if (canAccessPage(user, 'payments')) return 'payments';
-  if (canAccessPage(user, 'support')) return 'support';
-  return 'in-app-notifications';
+  return canAccessPage(user, 'admin2') ? 'admin2' : 'admin2-inbox';
 }
 
-export function getVisiblePages(user: AdminUser | null | undefined): AdminPageDefinition[] {
-  return ADMIN_PAGES.filter((page) => page.visibility === 'sidebar' && canAccessPage(user, page.key));
+/** Retired classic pages and the admin2 page that replaced each one. */
+const CLASSIC_REPLACEMENTS: Partial<Record<PageKey, PageKey>> = {
+  dashboard: 'admin2',
+  errands: 'admin2-errands',
+  runners: 'admin2-runners',
+  kyc: 'admin2-verifications',
+  users: 'admin2-users',
+  payments: 'admin2-withdrawals',
+  'company-revenue': 'admin2-revenue',
+  disputes: 'admin2-disputes',
+  tickets: 'admin2-support',
+  analytics: 'admin2-analytics',
+  blog: 'admin2-blog',
+  notifications: 'admin2-notifications',
+  pricing: 'admin2-settings',
+  zones: 'admin2-zones',
+  coupons: 'admin2-coupons',
+  settings: 'admin2-settings',
+  'user-management': 'admin2-admins',
+  'system-logs': 'admin2-health',
+  'audit-logs': 'admin2-audit',
+  support: 'admin2-help',
+  'in-app-notifications': 'admin2-inbox',
+};
+
+const CLASSIC_DETAIL_HREFS: Partial<Record<PageKey, (id: number) => string>> = {
+  errands: (id) => getAdmin2ErrandHref(id),
+  runners: (id) => getAdmin2RunnerHref(id),
+  users: (id) => getAdmin2UserHref(id),
+};
+
+/**
+ * Where an old classic URL (bookmarks, emails, older notifications) should go now, keeping the
+ * `?open=<id>` record it pointed at. Null when the page is not a retired classic page.
+ */
+export function classicRedirectHref(page: PageKey, search: string): string | null {
+  const replacement = CLASSIC_REPLACEMENTS[page];
+  if (!replacement) return null;
+
+  const params = new URLSearchParams(search);
+  const openId = Number(params.get('open'));
+  if (Number.isInteger(openId) && openId > 0) {
+    const detail = CLASSIC_DETAIL_HREFS[page];
+    if (detail) return detail(openId);
+    return getPageHref(replacement, { openId });
+  }
+
+  if (page === 'pricing') return `${getPagePath(replacement)}#settings-fare-rules`;
+  return getPagePath(replacement);
 }
 
-export function getAccessibleQuickLinks(user: AdminUser | null | undefined, keys: PageKey[]): AdminPageDefinition[] {
-  return keys
-    .map((key) => getPageDefinition(key))
-    .filter((page) => canAccessPage(user, page.key));
-}

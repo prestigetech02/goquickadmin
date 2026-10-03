@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { AlertCircle, ArrowLeft, Copy, ExternalLink, Mail, RefreshCw, SlidersHorizontal } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Copy, Mail, RefreshCw, SlidersHorizontal } from 'lucide-react';
 import { fetchAdminErrandView } from '@/api/adminErrandsApi';
 import { ActionMenu } from '@/components/admin2/users/ActionMenu';
 import { SendMessageModal } from '@/components/admin2/users/SendMessageModal';
@@ -21,7 +21,7 @@ import { relativeAgo } from '@/components/admin2/format';
 import { Skeleton } from '@/components/admin2/overview/primitives';
 import { useAuth } from '@/context/AuthContext';
 import { getApiErrorMessage } from '@/lib/adminAuthApi';
-import { canAccessPage, getAdmin2ErrandId, getPageHref, getPagePath } from '@/lib/adminNavigation';
+import { canAccessPage, getAdmin2ErrandId, getPagePath } from '@/lib/adminNavigation';
 import { queryKeys } from '@/lib/queryKeys';
 
 const OUTLINE_BUTTON =
@@ -29,7 +29,6 @@ const OUTLINE_BUTTON =
 
 export function Admin2ErrandDetailsPage() {
   const { pathname } = useLocation();
-  const navigate = useNavigate();
   const { user } = useAuth();
   const errandId = getAdmin2ErrandId(pathname) ?? 0;
   const [now, setNow] = useState(() => Date.now());
@@ -86,7 +85,7 @@ export function Admin2ErrandDetailsPage() {
 
   const { errand, runner, requester, pricing } = view;
   const tone = statusTone(errand.status);
-  const canFinance = canAccessPage(user, 'payments');
+  const canFinance = canAccessPage(user, 'admin2-transactions');
   const refundHint = !canFinance
     ? 'Finance access required'
     : pricing.status !== 'held'
@@ -138,11 +137,6 @@ export function Admin2ErrandDetailsPage() {
                   void navigator.clipboard?.writeText(errand.code);
                   setNotice(`Copied ${errand.code}.`);
                 },
-              },
-              {
-                label: 'Open in classic view',
-                icon: ExternalLink,
-                onSelect: () => navigate(getPageHref('errands', { openId: errand.id })),
               },
             ]}
           >

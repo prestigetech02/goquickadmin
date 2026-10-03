@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, LayoutDashboard, LogOut, Menu, Settings } from 'lucide-react';
+import { ChevronDown, HelpCircle, LogOut, Menu, Settings } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { GlobalSearch } from '@/components/GlobalSearch';
 import { NotificationsPopover } from '@/components/NotificationsPopover';
@@ -81,25 +81,13 @@ export function Admin2TopBar({
               <p className="truncate text-[12px] font-semibold text-[#17211b]">{displayName}</p>
               <p className="truncate text-[10px] text-[#7c857f]">{user?.email}</p>
             </div>
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => {
-                setMenuOpen(false);
-                navigate(getPagePath('dashboard'));
-              }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] text-[#17211b] hover:bg-[#f8faf8]"
-            >
-              <LayoutDashboard className="size-[14px]" strokeWidth={1.8} />
-              Classic dashboard
-            </button>
-            {canAccessPage(user, 'settings') ? (
+            {canAccessPage(user, 'admin2-settings') ? (
               <button
                 type="button"
                 role="menuitem"
                 onClick={() => {
                   setMenuOpen(false);
-                  navigate(getPagePath('settings'));
+                  navigate(getPagePath('admin2-settings'));
                 }}
                 className="flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] text-[#17211b] hover:bg-[#f8faf8]"
               >
@@ -107,6 +95,18 @@ export function Admin2TopBar({
                 Settings
               </button>
             ) : null}
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setMenuOpen(false);
+                navigate(getPagePath('admin2-help'));
+              }}
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] text-[#17211b] hover:bg-[#f8faf8]"
+            >
+              <HelpCircle className="size-[14px]" strokeWidth={1.8} />
+              Help & guide
+            </button>
             <button
               type="button"
               role="menuitem"

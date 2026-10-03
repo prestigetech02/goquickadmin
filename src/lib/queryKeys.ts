@@ -128,6 +128,11 @@ export const queryKeys = {
   systemHealth: {
     all: ['admin-system-health'] as const,
   },
+  auditLogs: {
+    list: (params: Record<string, unknown>) => ['admin-audit-logs', 'list', params] as const,
+    options: ['admin-audit-logs', 'options'] as const,
+    summary: ['admin-audit-logs', 'summary'] as const,
+  },
   notifications: {
     list: (params: Record<string, unknown>) => ['admin-notifications', 'list', params] as const,
     overview: (params: Record<string, unknown>) => ['admin-notifications', 'overview', params] as const,

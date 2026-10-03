@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { ShieldCheck } from 'lucide-react';
 import { fetchAdminKycOverview } from '@/api/adminKycApi';
-import { OUTLINE_BUTTON, PageHeader } from '@/components/admin2/shared/PageHeader';
+import { PageHeader } from '@/components/admin2/shared/PageHeader';
 import { NoticeBar, type Notice } from '@/components/admin2/shared/TableControls';
 import { useDebounced } from '@/components/admin2/shared/useDebounced';
 import { AttentionCard } from '@/components/admin2/verifications/AttentionCard';
@@ -14,14 +14,11 @@ import { DEFAULT_QUEUE_FILTERS, queueParams, type QueueFilters } from '@/compone
 import { VerificationKpiCards } from '@/components/admin2/verifications/VerificationKpiCards';
 import { VerificationQueueCard } from '@/components/admin2/verifications/VerificationQueueCard';
 import { useAdmin2DateRange } from '@/context/Admin2DateRangeContext';
-import { useAuth } from '@/context/AuthContext';
 import { getApiErrorMessage } from '@/lib/adminAuthApi';
-import { canAccessPage, getPagePath } from '@/lib/adminNavigation';
 import { queryKeys } from '@/lib/queryKeys';
 
 export function Admin2VerificationsPage() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
   const { range } = useAdmin2DateRange();
   const [searchParams] = useSearchParams();
   const [filters, setFilters] = useState<QueueFilters>(DEFAULT_QUEUE_FILTERS);
@@ -65,13 +62,6 @@ export function Admin2VerificationsPage() {
         eyebrow="Runner onboarding · Trust & safety"
         title="Runner verification"
         subtitle="Review identity documents, guarantors and payout details before runners can go online and accept errands."
-        actions={
-          canAccessPage(user, 'kyc') ? (
-            <Link to={getPagePath('kyc')} className={OUTLINE_BUTTON}>
-              Classic KYC view
-            </Link>
-          ) : undefined
-        }
       />
 
       <NoticeBar notice={notice} onDismiss={() => setNotice(null)} />

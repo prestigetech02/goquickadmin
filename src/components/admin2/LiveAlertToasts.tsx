@@ -75,7 +75,7 @@ export function LiveAlertToasts() {
               onClick={() => {
                 markRead.mutate(alert.id);
                 dismiss(alert.id);
-                navigate(notificationHref(alert, user));
+                navigate(notificationHref(alert, user, 'admin2-inbox'));
               }}
             >
               <p className="truncate text-[12px] font-semibold text-[#17211b]">

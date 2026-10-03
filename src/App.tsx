@@ -1,9 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { AdminNavigationProvider } from '@/context/AdminNavigationContext';
 import { AdminOpsRealtimeProvider } from '@/context/AdminOpsRealtimeContext';
-import { Layout } from '@/components/Layout';
 import { Admin2Layout } from '@/components/admin2/Admin2Layout';
+import { AdminApprovalPrompt } from '@/components/AdminApprovalPrompt';
 import { Admin2OverviewPage } from '@/pages/admin2/Admin2OverviewPage';
 import { Admin2UsersPage } from '@/pages/admin2/Admin2UsersPage';
 import { Admin2ErrandDetailsPage } from '@/pages/admin2/Admin2ErrandDetailsPage';
@@ -24,35 +24,50 @@ import { Admin2BlogPage } from '@/pages/admin2/Admin2BlogPage';
 import { Admin2BlogEditorPage } from '@/pages/admin2/Admin2BlogEditorPage';
 import { Admin2CouponsPage } from '@/pages/admin2/Admin2CouponsPage';
 import { Admin2SupportPage } from '@/pages/admin2/Admin2SupportPage';
+import { Admin2AdminsPage } from '@/pages/admin2/Admin2AdminsPage';
+import { Admin2InboxPage } from '@/pages/admin2/Admin2InboxPage';
+import { Admin2AuditLogPage } from '@/pages/admin2/Admin2AuditLogPage';
+import { Admin2SystemHealthPage } from '@/pages/admin2/Admin2SystemHealthPage';
+import { Admin2HelpPage } from '@/pages/admin2/Admin2HelpPage';
 import {
   canAccessPage,
+  classicRedirectHref,
   getDefaultPageForUser,
   getPageFromPathname,
   getPagePath,
+  type PageKey,
 } from '@/lib/adminNavigation';
 import { LoginPage } from '@/pages/LoginPage';
 import { ChangePasswordPage } from '@/pages/ChangePasswordPage';
-import { DashboardPage } from '@/pages/DashboardPage';
-import { ErrandsPage } from '@/pages/ErrandsPage';
-import { RunnersPage } from '@/pages/RunnersPage';
-import { KycPage } from '@/pages/KycPage';
-import { UsersPage } from '@/pages/UsersPage';
-import { PaymentsPage } from '@/pages/PaymentsPage';
-import { CompanyRevenuePage } from '@/pages/CompanyRevenuePage';
-import { DisputesPage } from '@/pages/DisputesPage';
-import { TicketsPage } from '@/pages/TicketsPage';
-import { AnalyticsPage } from '@/pages/AnalyticsPage';
-import { BlogPage } from '@/pages/BlogPage';
-import { NotificationsPage } from '@/pages/NotificationsPage';
-import { PricingPage } from '@/pages/PricingPage';
-import { CouponsPage } from '@/pages/CouponsPage';
-import { ZonesPage } from '@/pages/ZonesPage';
-import { SettingsPage } from '@/pages/SettingsPage';
-import { UserManagementPage } from '@/pages/UserManagementPage';
-import { SystemLogsPage } from '@/pages/SystemLogsPage';
-import { SupportPage } from '@/pages/SupportPage';
-import { InAppNotificationsPage } from '@/pages/InAppNotificationsPage';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+
+const PAGES: Partial<Record<PageKey, () => ReactNode>> = {
+  admin2: () => <Admin2OverviewPage />,
+  'admin2-users': () => <Admin2UsersPage />,
+  'admin2-user': () => <Admin2UserDetailsPage />,
+  'admin2-errands': () => <Admin2ErrandsPage />,
+  'admin2-errand': () => <Admin2ErrandDetailsPage />,
+  'admin2-runners': () => <Admin2RunnersPage />,
+  'admin2-runner': () => <Admin2RunnerDetailsPage />,
+  'admin2-transactions': () => <Admin2TransactionsPage />,
+  'admin2-withdrawals': () => <Admin2WithdrawalsPage />,
+  'admin2-zones': () => <Admin2ZonesPage />,
+  'admin2-notifications': () => <Admin2NotificationsPage />,
+  'admin2-verifications': () => <Admin2VerificationsPage />,
+  'admin2-disputes': () => <Admin2DisputesPage />,
+  'admin2-revenue': () => <Admin2RevenuePage />,
+  'admin2-analytics': () => <Admin2AnalyticsPage />,
+  'admin2-settings': () => <Admin2SettingsPage />,
+  'admin2-blog': () => <Admin2BlogPage />,
+  'admin2-blog-post': () => <Admin2BlogEditorPage />,
+  'admin2-coupons': () => <Admin2CouponsPage />,
+  'admin2-support': () => <Admin2SupportPage />,
+  'admin2-admins': () => <Admin2AdminsPage />,
+  'admin2-inbox': () => <Admin2InboxPage />,
+  'admin2-audit': () => <Admin2AuditLogPage />,
+  'admin2-health': () => <Admin2SystemHealthPage />,
+  'admin2-help': () => <Admin2HelpPage />,
+};
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -92,107 +107,21 @@ function AppContent() {
     );
   }
 
-  if (!page || !canAccessPage(user, page)) {
-    return <Navigate to={getPagePath(getDefaultPageForUser(user))} replace />;
+  const classicTarget = page ? classicRedirectHref(page, location.search) : null;
+  if (classicTarget) {
+    return <Navigate to={classicTarget} replace />;
   }
 
-  const renderPage = () => {
-    switch (page) {
-      case 'dashboard':
-        return <DashboardPage />;
-      case 'errands':
-        return <ErrandsPage />;
-      case 'runners':
-        return <RunnersPage />;
-      case 'kyc':
-        return <KycPage />;
-      case 'users':
-        return <UsersPage />;
-      case 'payments':
-        return <PaymentsPage />;
-      case 'company-revenue':
-        return <CompanyRevenuePage />;
-      case 'disputes':
-        return <DisputesPage />;
-      case 'tickets':
-        return <TicketsPage />;
-      case 'analytics':
-        return <AnalyticsPage />;
-      case 'blog':
-        return <BlogPage />;
-      case 'notifications':
-        return <NotificationsPage />;
-      case 'pricing':
-        return <PricingPage />;
-      case 'zones':
-        return <ZonesPage />;
-      case 'coupons':
-        return <CouponsPage />;
-      case 'settings':
-        return <SettingsPage />;
-      case 'user-management':
-        return <UserManagementPage />;
-      case 'system-logs':
-        return <SystemLogsPage />;
-      case 'support':
-        return <SupportPage />;
-      case 'in-app-notifications':
-        return <InAppNotificationsPage />;
-      default:
-        return <Navigate to={getPagePath(getDefaultPageForUser(user))} replace />;
-    }
-  };
+  const render = page ? PAGES[page] : undefined;
+  if (!page || !render || !canAccessPage(user, page)) {
+    return <Navigate to={getPagePath(getDefaultPageForUser(user))} replace />;
+  }
 
   return (
     <AdminNavigationProvider>
       <AdminOpsRealtimeProvider>
-        {page === 'admin2' ||
-        page === 'admin2-users' ||
-        page === 'admin2-user' ||
-        page === 'admin2-errands' ||
-        page === 'admin2-errand' ||
-        page === 'admin2-runners' ||
-        page === 'admin2-runner' ||
-        page === 'admin2-transactions' ||
-        page === 'admin2-withdrawals' ||
-        page === 'admin2-zones' ||
-        page === 'admin2-notifications' ||
-        page === 'admin2-verifications' ||
-        page === 'admin2-disputes' ||
-        page === 'admin2-revenue' ||
-        page === 'admin2-analytics' ||
-        page === 'admin2-settings' ||
-        page === 'admin2-blog' ||
-        page === 'admin2-blog-post' ||
-        page === 'admin2-coupons' ||
-        page === 'admin2-support' ? (
-          <Admin2Layout>
-            {page === 'admin2' ? <Admin2OverviewPage /> : null}
-            {page === 'admin2-users' ? <Admin2UsersPage /> : null}
-            {page === 'admin2-user' ? <Admin2UserDetailsPage /> : null}
-            {page === 'admin2-errands' ? <Admin2ErrandsPage /> : null}
-            {page === 'admin2-errand' ? <Admin2ErrandDetailsPage /> : null}
-            {page === 'admin2-runners' ? <Admin2RunnersPage /> : null}
-            {page === 'admin2-runner' ? <Admin2RunnerDetailsPage /> : null}
-            {page === 'admin2-transactions' ? <Admin2TransactionsPage /> : null}
-            {page === 'admin2-withdrawals' ? <Admin2WithdrawalsPage /> : null}
-            {page === 'admin2-zones' ? <Admin2ZonesPage /> : null}
-            {page === 'admin2-notifications' ? <Admin2NotificationsPage /> : null}
-            {page === 'admin2-verifications' ? <Admin2VerificationsPage /> : null}
-            {page === 'admin2-disputes' ? <Admin2DisputesPage /> : null}
-            {page === 'admin2-revenue' ? <Admin2RevenuePage /> : null}
-            {page === 'admin2-analytics' ? <Admin2AnalyticsPage /> : null}
-            {page === 'admin2-settings' ? <Admin2SettingsPage /> : null}
-            {page === 'admin2-blog' ? <Admin2BlogPage /> : null}
-            {page === 'admin2-blog-post' ? <Admin2BlogEditorPage /> : null}
-            {page === 'admin2-coupons' ? <Admin2CouponsPage /> : null}
-            {page === 'admin2-support' ? <Admin2SupportPage /> : null}
-          </Admin2Layout>
-        ) : (
-          <Layout currentPage={page}>
-            {renderPage()}
-          </Layout>
-        )}
+        <Admin2Layout>{render()}</Admin2Layout>
+        <AdminApprovalPrompt />
       </AdminOpsRealtimeProvider>
     </AdminNavigationProvider>
   );

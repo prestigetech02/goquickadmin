@@ -7,7 +7,7 @@ import { UserWalletPanel } from '@/components/payments/UserWalletPanel';
 import { Drawer } from '@/components/ui/Drawer';
 import { useAuth } from '@/context/AuthContext';
 import { getApiErrorMessage } from '@/lib/adminAuthApi';
-import { getAdmin2UserHref, getPageHref } from '@/lib/adminNavigation';
+import { canAccessPage, getAdmin2UserHref, getPageHref } from '@/lib/adminNavigation';
 import { queryKeys } from '@/lib/queryKeys';
 import type { UserListItem, UserReferralSummary } from '@/types/api';
 import { formatCount, formatNaira, personInitials } from '../format';
@@ -114,7 +114,9 @@ export function UserDetailsDrawer({
   const status = accountStatusOf(merged);
   const isAdmin = merged.role === 'admin';
   const location = [detail?.city ?? merged.city, detail?.state ?? merged.state].filter(Boolean).join(', ');
-  const profileHref = isAdmin ? getPageHref('users', { openId: merged.id }) : getAdmin2UserHref(merged.id);
+  const profileHref = isAdmin
+    ? getPageHref(canAccessPage(adminUser, 'admin2-admins') ? 'admin2-admins' : 'users', { openId: merged.id })
+    : getAdmin2UserHref(merged.id);
 
   return (
     <Drawer

@@ -1,6 +1,7 @@
 import { http } from '@/lib/http';
 import {
   type AdminTransactionFilters,
+  type AdminTransactionPage,
   type AdminTransactionRow,
   type AdminTransactionsOverview,
   type Paginated,
@@ -14,9 +15,14 @@ export async function fetchAdminTransactionsOverview(params: { start_date?: stri
   return unwrapApiData(data, 'Failed to load transaction overview.');
 }
 
-export async function fetchAdminTransactions(params: AdminTransactionFilters & { page?: number; per_page?: number } = {}) {
-  const { data } = await http.get<ApiResponse<Paginated<AdminTransactionRow>>>('/admin/finance/transactions', { params });
-  return unwrapApiData(data, 'Failed to load transactions.');
+export async function fetchAdminTransactions(
+  params: AdminTransactionFilters & { page?: number; per_page?: number } = {},
+): Promise<AdminTransactionPage> {
+  const { data } = await http.get<ApiResponse<Paginated<AdminTransactionRow>> & { meta?: { user?: AdminTransactionPage['filter_user'] } }>(
+    '/admin/finance/transactions',
+    { params },
+  );
+  return { ...unwrapApiData(data, 'Failed to load transactions.'), filter_user: data.meta?.user ?? null };
 }
 
 /** Downloads the filtered ledger as CSV (auth header comes from the shared http client). */

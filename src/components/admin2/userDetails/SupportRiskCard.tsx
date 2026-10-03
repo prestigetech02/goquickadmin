@@ -125,7 +125,7 @@ export function SupportRiskCard({ profile, canOpenTickets }: { profile: AdminUse
         <p className="text-[#7c857f]">Last ticket</p>
         {ticket ? (
           canOpenTickets ? (
-            <Link to={getPageHref('tickets', { openId: ticket.id })} className="truncate font-semibold text-[#167d35] hover:underline">
+            <Link to={getPageHref('admin2-support', { openId: ticket.id })} className="truncate font-semibold text-[#167d35] hover:underline">
               {ticket.code} · {titleCase(ticket.status.replace(/_/g, ' '))}
             </Link>
           ) : (

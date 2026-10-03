@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { AlertCircle, ArrowLeft, Bike, Copy, ExternalLink, LogOut, Pencil, ReceiptText, RefreshCw } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Bike, Copy, LogOut, Pencil, ReceiptText, RefreshCw } from 'lucide-react';
 import { fetchAdminUserProfile } from '@/api/adminUsersApi';
 import { Chip } from '@/components/admin2/errand/parts';
 import { formatCount } from '@/components/admin2/format';
@@ -19,6 +19,8 @@ import {
 } from '@/components/admin2/users/userPresentation';
 import { AccountActionsCard, type UserAction } from '@/components/admin2/userDetails/AccountActionsCard';
 import { AccountActivityCard } from '@/components/admin2/userDetails/AccountActivityCard';
+import { AdminActionsCard } from '@/components/admin2/userDetails/AdminActionsCard';
+import { SignInDevicesCard } from '@/components/admin2/userDetails/SignInDevicesCard';
 import { IdentityCard } from '@/components/admin2/userDetails/IdentityCard';
 import { ReferralsCard } from '@/components/admin2/userDetails/ReferralsCard';
 import { SavedLocationsCard } from '@/components/admin2/userDetails/SavedLocationsCard';
@@ -30,7 +32,7 @@ import { VerificationCard } from '@/components/admin2/userDetails/VerificationCa
 import { WalletActivityCard } from '@/components/admin2/userDetails/WalletActivityCard';
 import { useAuth } from '@/context/AuthContext';
 import { getApiErrorMessage } from '@/lib/adminAuthApi';
-import { canAccessPage, getAdmin2RunnerHref, getAdmin2UserId, getPageHref, getPagePath } from '@/lib/adminNavigation';
+import { canAccessPage, getAdmin2RunnerHref, getAdmin2UserId, getPagePath } from '@/lib/adminNavigation';
 import { queryKeys } from '@/lib/queryKeys';
 import type { UserAccountStatus, UserKycStatus } from '@/types/api';
 
@@ -95,7 +97,7 @@ export function Admin2UserDetailsPage() {
   const isAdminAccount = user.role === 'admin';
   const isRunner = user.role === 'runner';
   const isClosed = user.deleted_at != null;
-  const canFinance = canAccessPage(admin, 'payments');
+  const canFinance = canAccessPage(admin, 'admin2-transactions');
   const status = user.account_status as UserAccountStatus;
   const kyc = user.kyc_status as UserKycStatus;
   const subtitle = [
@@ -105,7 +107,7 @@ export function Admin2UserDetailsPage() {
   ]
     .filter(Boolean)
     .join(' · ');
-  const ledgerHref = canFinance ? `${getPagePath('payments')}?tab=ledger&user=${user.id}` : null;
+  const ledgerHref = canFinance ? `${getPagePath('admin2-transactions')}?user=${user.id}` : null;
 
   const handleAction = (action: UserAction) => setModal(action);
 
@@ -150,11 +152,6 @@ export function Admin2UserDetailsPage() {
                 ...(isRunner
                   ? [{ label: 'Open runner profile', icon: Bike, onSelect: () => navigate(getAdmin2RunnerHref(user.id)) }]
                   : []),
-                {
-                  label: 'Open in classic view',
-                  icon: ExternalLink,
-                  onSelect: () => navigate(getPageHref(isRunner ? 'runners' : 'users', { openId: user.id })),
-                },
               ]}
             >
               More actions
@@ -190,11 +187,11 @@ export function Admin2UserDetailsPage() {
         <div className="rounded-[12px] border border-[#e2e8e3] bg-white p-[18px] text-[12px] text-[#45514a]">
           This is a staff admin account. Admin access, modules and passwords are managed from{' '}
           {admin?.permissions.is_super_admin ? (
-            <Link to={getPagePath('user-management')} className="font-semibold text-[#167d35] hover:underline">
-              Settings → User Management
+            <Link to={getPagePath('admin2-admins')} className="font-semibold text-[#167d35] hover:underline">
+              Admin Management
             </Link>
           ) : (
-            'Settings → User Management (super admins only)'
+            'Admin Management (super admins only)'
           )}
           .
         </div>
@@ -221,8 +218,13 @@ export function Admin2UserDetailsPage() {
             <div className="flex w-full flex-col gap-[12px] xl:w-[392px] xl:flex-shrink-0">
               <VerificationCard profile={profile} />
               {profile.referrals ? <ReferralsCard referrals={profile.referrals} /> : null}
-              <SupportRiskCard profile={profile} canOpenTickets={canAccessPage(admin, 'tickets')} />
+              <SupportRiskCard profile={profile} canOpenTickets={canAccessPage(admin, 'admin2-support')} />
               <AccountActivityCard profile={profile} onSignOut={() => setModal('sign-out')} />
+              <SignInDevicesCard logins={profile.logins} />
+              <AdminActionsCard
+                actions={profile.admin_actions}
+                auditLogHref={canAccessPage(admin, 'admin2-audit') ? `${getPagePath('admin2-audit')}?user=${user.id}` : null}
+              />
               <AccountActionsCard
                 hasEmail={Boolean(user.email)}
                 canCredit={canFinance && !isClosed}

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Download, ShieldCheck } from 'lucide-react';
 import { downloadAdminErrandsExport, fetchAdminErrandsOverview } from '@/api/adminErrandsApi';
 import { CategoryMixCard } from '@/components/admin2/errands/CategoryMixCard';
@@ -15,15 +15,13 @@ import { OUTLINE_BUTTON, PageHeader } from '@/components/admin2/shared/PageHeade
 import { NoticeBar, type Notice } from '@/components/admin2/shared/TableControls';
 import { useDebounced } from '@/components/admin2/shared/useDebounced';
 import { useAdmin2DateRange } from '@/context/Admin2DateRangeContext';
-import { useAuth } from '@/context/AuthContext';
 import { getApiErrorMessage } from '@/lib/adminAuthApi';
-import { canAccessPage, getAdmin2ErrandHref, getPagePath } from '@/lib/adminNavigation';
+import { getAdmin2ErrandHref } from '@/lib/adminNavigation';
 import { queryKeys } from '@/lib/queryKeys';
 
 export function Admin2ErrandsPage() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const { range } = useAdmin2DateRange();
   const [searchParams] = useSearchParams();
   const [filters, setFilters] = useState<BoardFilters>(DEFAULT_BOARD_FILTERS);
@@ -142,14 +140,6 @@ export function Admin2ErrandsPage() {
           Every intervention (reassigning, changing status, completing or cancelling) needs a reason and is added to the errand's timeline with
           your name. Cancelling notifies the requester and runner and can refund any held escrow to the requester.
         </p>
-        {canAccessPage(user, 'errands') ? (
-          <Link
-            to={getPagePath('errands')}
-            className="flex h-[34px] flex-shrink-0 items-center rounded-[8px] border border-[#d4ddd6] bg-white px-[12px] text-[11px] font-semibold text-[#17211b] hover:bg-[#f8faf8]"
-          >
-            Classic errands view
-          </Link>
-        ) : null}
       </div>
 
       <ErrandQuickActions

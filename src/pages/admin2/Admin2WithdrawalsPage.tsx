@@ -177,9 +177,9 @@ export function Admin2WithdrawalsPage() {
           Every approval and rejection is logged with the reviewer's name. Approving sends the payout straight away by Flutterwave Transfer from the
           Flutterwave balance. Rejecting returns the amount and the withdrawal fee to the runner's wallet.
         </p>
-        {canAccessPage(user, 'pricing') ? (
+        {canAccessPage(user, 'admin2-settings') ? (
           <Link
-            to={getPagePath('pricing')}
+            to={`${getPagePath('admin2-settings')}#settings-pricing`}
             className="flex h-[34px] flex-shrink-0 items-center rounded-[8px] border border-[#d4ddd6] bg-white px-[12px] text-[11px] font-semibold text-[#17211b] hover:bg-[#f8faf8]"
           >
             Payout fee settings

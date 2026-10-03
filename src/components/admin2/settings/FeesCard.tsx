@@ -45,7 +45,7 @@ function FeesForm({ data, saved, onSavedChange: setSaved }: { data: PlatformFees
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-[14px] sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-[14px] sm:grid-cols-2 xl:grid-cols-4">
         {data.fields.map((field) => {
           const percent = field.unit === 'percent';
           return (

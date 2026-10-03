@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { fetchAdminGlobalSearch } from '@/api/adminSearchApi';
 import { useAuth } from '@/context/AuthContext';
@@ -8,6 +9,8 @@ import { canAccessPage } from '@/lib/adminAccess';
 import { getApiErrorMessage } from '@/lib/adminAuthApi';
 import { queryKeys } from '@/lib/queryKeys';
 import {
+  admin2SearchGroupPage,
+  admin2SearchResultHref,
   parseSearchResultUrl,
   SEARCH_GROUP_LABELS,
   searchGroupPage,
@@ -25,6 +28,7 @@ const IS_MAC = typeof navigator !== 'undefined' && /mac|iphone|ipad/i.test(navig
 export function GlobalSearch({ variant = 'default' }: { variant?: 'default' | 'admin2' }) {
   const { user } = useAuth();
   const navigate = useAdminNavigate();
+  const navigateTo = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const isAdmin2 = variant === 'admin2';
@@ -52,7 +56,9 @@ export function GlobalSearch({ variant = 'default' }: { variant?: 'default' | 'a
     staleTime: 30_000,
   });
 
-  const visibleGroups = SEARCH_GROUPS.filter((key) => canAccessPage(user, searchGroupPage(key)));
+  const visibleGroups = SEARCH_GROUPS.filter((key) =>
+    canAccessPage(user, isAdmin2 ? admin2SearchGroupPage(key) : searchGroupPage(key)),
+  );
 
   const filteredData = searchQuery.data
     ? visibleGroups.reduce((acc, key) => {
@@ -67,17 +73,22 @@ export function GlobalSearch({ variant = 'default' }: { variant?: 'default' | 'a
 
   const handleResultClick = useCallback(
     (item: GlobalSearchResultItem, groupKey: SearchResultGroupKey) => {
-      const target = parseSearchResultUrl(item.url);
-      if (!target || !canAccessPage(user, target.page)) return;
+      if (isAdmin2) {
+        if (!canAccessPage(user, admin2SearchGroupPage(groupKey))) return;
+        navigateTo(admin2SearchResultHref(groupKey, item.id));
+      } else {
+        const target = parseSearchResultUrl(item.url);
+        if (!target || !canAccessPage(user, target.page)) return;
 
-      const openId =
-        target.openId ?? (groupKey === 'withdrawals' ? item.id : undefined);
+        const openId =
+          target.openId ?? (groupKey === 'withdrawals' ? item.id : undefined);
 
-      navigate(target.page, openId != null ? { openId } : undefined);
+        navigate(target.page, openId != null ? { openId } : undefined);
+      }
       setOpen(false);
       setQuery('');
     },
-    [navigate, user],
+    [isAdmin2, navigate, navigateTo, user],
   );
 
   useEffect(() => {
@@ -193,7 +204,7 @@ export function GlobalSearch({ variant = 'default' }: { variant?: 'default' | 'a
                 return (
                   <div key={key} className="px-2 py-1">
                     <p className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-ink-400">
-                      {SEARCH_GROUP_LABELS[key]}
+                      {isAdmin2 && key === 'withdrawals' ? 'Withdrawals' : SEARCH_GROUP_LABELS[key]}
                     </p>
                     <ul>
                       {items.map((item) => (

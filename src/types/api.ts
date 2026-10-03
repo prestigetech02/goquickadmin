@@ -230,6 +230,11 @@ export type AdminTransactionRow = {
   can_verify: boolean;
   withdrawal_id: number | null;
   created_at: string | null;
+  actions?: { mark_failed: boolean; cancel_funding: boolean; reverse: boolean };
+};
+
+export type AdminTransactionPage = Paginated<AdminTransactionRow> & {
+  filter_user: { id: number; name: string; role: string | null } | null;
 };
 
 export type TransactionTab = 'all' | 'payments' | 'escrow' | 'refunds' | 'fees';
@@ -241,6 +246,7 @@ export type AdminTransactionFilters = {
   direction?: 'credit' | 'debit';
   amount?: 'under_5k' | '5k_20k' | '20k_100k' | 'over_100k';
   search?: string;
+  user_id?: number;
   start_date?: string;
   end_date?: string;
 };
@@ -721,7 +727,7 @@ export type AdminKycFilters = {
 };
 
 export type ErrandBoardTab = 'all' | 'live' | 'attention' | 'scheduled' | 'completed' | 'cancelled' | 'disputed';
-export type ErrandFlagKey = 'disputed' | 'overdue' | 'stuck' | 'unmatched' | 'tracking_lost' | 'proof_rejected';
+export type ErrandFlagKey = 'disputed' | 'overdue' | 'no_zone_runners' | 'stuck' | 'unmatched' | 'tracking_lost' | 'proof_rejected';
 export type ErrandPaymentState = 'held' | 'released' | 'refunded' | 'unpaid';
 export type ErrandBoardSort = 'newest' | 'oldest' | 'stale' | 'value' | 'scheduled';
 export type ErrandFlag = { key: ErrandFlagKey; label: string; tone: 'red' | 'amber' };
@@ -1400,6 +1406,72 @@ export type AdminErrandNote = {
   at: string;
 };
 
+export type LoginDeviceType = 'app' | 'desktop' | 'mobile' | 'tablet' | 'other';
+
+export type AdminUserLogin = {
+  id: number;
+  client: string;
+  device: string | null;
+  device_type: LoginDeviceType | null;
+  ip_address: string | null;
+  location: string | null;
+  country_code: string | null;
+  user_agent: string | null;
+  /** The token from this sign-in is still valid. */
+  active: boolean;
+  created_at: string | null;
+};
+
+export type AdminAuditLogEntry = {
+  id: number;
+  admin: { id: number; name: string | null } | null;
+  action: string;
+  resource: string;
+  label: string;
+  method: string;
+  path: string;
+  subject: { type: string; id: number | null } | null;
+  target_user: { id: number; name: string | null; role: string } | null;
+  status_code: number | null;
+  succeeded: boolean;
+  ip_address: string | null;
+  device: string | null;
+  payload: Record<string, unknown> | null;
+  approved_by?: { id: number | null; name: string | null } | null;
+  created_at: string | null;
+};
+
+export type AdminAuditLogSummary = {
+  actions_24h: number;
+  failed_24h: number;
+  active_admins_24h: number;
+  failed_sign_ins_7d: number;
+  approved_actions_7d: number;
+  approvals_denied_7d: number;
+  deletions_7d: number;
+  series: Array<{ date: string; total: number; failed: number }>;
+  top_admins: Array<{ id: number; name: string; count: number }>;
+  top_areas: Array<{ key: string; label: string; count: number }>;
+};
+
+export type AdminAuditLogOptions = {
+  admins: Array<{ id: number; name: string }>;
+  resources: Array<{ key: string; label: string }>;
+};
+
+export type AdminAuditLogFilters = {
+  page?: number;
+  per_page?: number;
+  admin_id?: number;
+  resource?: string;
+  target_user_id?: number;
+  outcome?: 'success' | 'failed';
+  from?: string;
+  to?: string;
+  search?: string;
+  approved?: 1;
+};
+
 export type AdminUserProfile = {
   user: {
     id: number;
@@ -1454,7 +1526,18 @@ export type AdminUserProfile = {
     last_ticket: { id: number; code: string; subject: string | null; status: string; created_at: string | null } | null;
   };
   notes: AdminErrandNote[];
-  sessions: Array<{ id: number; client: string; created_at: string | null; last_used_at: string | null }>;
+  sessions: Array<{
+    id: number;
+    client: string;
+    device: string | null;
+    device_type: LoginDeviceType | null;
+    ip_address: string | null;
+    location: string | null;
+    created_at: string | null;
+    last_used_at: string | null;
+  }>;
+  logins: AdminUserLogin[];
+  admin_actions: Array<{ id: number; label: string; admin_name: string | null; succeeded: boolean; created_at: string | null }>;
   activity: Array<{
     kind: 'session' | 'login' | 'verified' | 'suspended' | 'created';
     title: string;
@@ -2150,6 +2233,28 @@ export type PricingRuleItem = {
 export type PricingRuleListResponse = {
   rules: PricingRuleItem[];
   pagination: PaginationMeta;
+  meta?: {
+    zone_pricing: { enabled: boolean; active_zones: number };
+    defaults: { base_fare: number; per_km: number; per_minute: number; minimum_fare: number };
+    counts: { total: number; active: number };
+  };
+};
+
+export type PricingRulePreviewInput = {
+  city?: string;
+  zone?: string;
+  errand_type?: string;
+  distance_km: number;
+  duration_min: number;
+};
+
+export type PricingRulePreview = {
+  rule: PricingRuleItem | null;
+  base_price: number;
+  suggested_min: number;
+  suggested_max: number;
+  minimum_applied: boolean;
+  zone_pricing_applies: boolean;
 };
 
 export type PricingRuleInput = {
@@ -2461,6 +2566,22 @@ export type SystemHealthComponent = {
   label: string;
   status: 'healthy' | 'configured' | 'missing' | 'degraded' | 'down' | string;
   message: string;
+  latency_ms?: number;
+  pending?: number | null;
+  failed_24h?: number;
+};
+
+export type SystemHealthSecurity = {
+  approval_enabled: boolean;
+  approval_ttl_minutes: number;
+  critical_actions: number;
+  all_deletes_protected: boolean;
+  super_admins: number;
+  failed_sign_ins_24h: number;
+  blocked_sign_ins_24h: number;
+  approvals_granted_7d: number;
+  approvals_denied_7d: number;
+  approved_actions_7d: number;
 };
 
 export type SystemHealthEndpoint = {
@@ -2505,6 +2626,7 @@ export type SystemHealthData = {
   endpoints: SystemHealthEndpoint[];
   operational_alerts: SystemHealthAlert[];
   recent_issues: SystemHealthIssue[];
+  security?: SystemHealthSecurity;
 };
 
 export const COUPON_CATEGORIES = [

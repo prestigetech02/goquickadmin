@@ -9,6 +9,8 @@ import {
   type PricingRuleInput,
   type PricingRuleItem,
   type PricingRuleListResponse,
+  type PricingRulePreview,
+  type PricingRulePreviewInput,
 } from '@/types/api';
 import type { ApiResponse } from '@/types';
 
@@ -17,6 +19,11 @@ export type { PricingRuleItem };
 export async function fetchAdminPricingRules(params: ListQueryParams = {}) {
   const { data } = await http.get<ApiResponse<PricingRuleListResponse>>('/admin/pricing-rules', { params });
   return unwrapApiData(data, 'Failed to load pricing rules.');
+}
+
+export async function previewAdminPricingRule(params: PricingRulePreviewInput) {
+  const { data } = await http.get<ApiResponse<PricingRulePreview>>('/admin/pricing-rules/preview', { params });
+  return unwrapApiData(data, 'Failed to preview the fare.');
 }
 
 export async function fetchAdminPricingRule(id: number) {

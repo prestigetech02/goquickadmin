@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Download, FileBarChart } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import {
   downloadAdminTransactionsExport,
   fetchAdminTransactionsOverview,
@@ -81,10 +82,25 @@ function reconcileSummary(result: TransactionReconcileResult): string {
 export function Admin2TransactionsPage() {
   const queryClient = useQueryClient();
   const { range } = useAdmin2DateRange();
-  const [filters, setFilters] = useState<LedgerFilters>(DEFAULT_LEDGER_FILTERS);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const userParam = Number(searchParams.get('user'));
+  const userId = Number.isInteger(userParam) && userParam > 0 ? userParam : undefined;
+  const [filters, setFilters] = useState<LedgerFilters>(() => ({ ...DEFAULT_LEDGER_FILTERS, useRange: userId === undefined }));
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounced(search, 350);
-  const params = useMemo(() => ledgerParams(filters, debouncedSearch, range), [filters, debouncedSearch, range]);
+  const params = useMemo(
+    () => ({ ...ledgerParams(filters, debouncedSearch, range), ...(userId ? { user_id: userId } : {}) }),
+    [filters, debouncedSearch, range, userId],
+  );
+  const clearUser = () =>
+    setSearchParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        next.delete('user');
+        return next;
+      },
+      { replace: true },
+    );
   const [exporting, setExporting] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
 
@@ -167,6 +183,7 @@ export function Admin2TransactionsPage() {
         rangeLabel={range}
         onReconcile={() => reconcileMutation.mutate()}
         reconciling={reconcileMutation.isPending}
+        onClearUser={clearUser}
       />
     </div>
   );

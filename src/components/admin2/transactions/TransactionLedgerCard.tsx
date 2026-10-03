@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Copy, EllipsisVertical, ExternalLink, PackageCheck, RefreshCw, ShieldCheck, UserRound, WalletCards } from 'lucide-react';
+import { Ban, CircleX, Copy, EllipsisVertical, PackageCheck, RefreshCw, Undo2, ShieldCheck, UserRound, WalletCards, X } from 'lucide-react';
 import { fetchAdminTransactions } from '@/api/adminTransactionsApi';
 import { verifyAdminWalletFunding } from '@/api/adminWalletApi';
 import { useAuth } from '@/context/AuthContext';
@@ -18,6 +18,7 @@ import { Pager } from '../shared/Pager';
 import { CardTabs, DateRangeToggle, NoticeBar, SearchField, TABLE_HEADER, type Notice } from '../shared/TableControls';
 import { ActionMenu, type ActionMenuItem } from '../users/ActionMenu';
 import { FilterDropdown } from '../users/FilterDropdown';
+import { LedgerActionModal, type LedgerAction } from './LedgerActionModal';
 import {
   AMOUNT_OPTIONS,
   DEFAULT_LEDGER_FILTERS,
@@ -54,6 +55,7 @@ export function TransactionLedgerCard({
   rangeLabel,
   onReconcile,
   reconciling,
+  onClearUser,
 }: {
   filters: LedgerFilters;
   onFiltersChange: (filters: LedgerFilters) => void;
@@ -63,11 +65,13 @@ export function TransactionLedgerCard({
   rangeLabel: { start: string; end: string };
   onReconcile: () => void;
   reconciling: boolean;
+  onClearUser: () => void;
 }) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [notice, setNotice] = useState<Notice | null>(null);
+  const [pendingAction, setPendingAction] = useState<{ action: LedgerAction; row: AdminTransactionRow } | null>(null);
 
   const paramsKey = JSON.stringify(params);
   const [pageState, setPageState] = useState({ key: paramsKey, page: 1 });
@@ -98,6 +102,7 @@ export function TransactionLedgerCard({
   });
 
   const rows = listQuery.data?.data ?? [];
+  const filterUser = params.user_id ? listQuery.data?.filter_user : null;
   const total = listQuery.data?.total ?? 0;
   const lastPage = listQuery.data?.last_page ?? 1;
   const hasAnyFilter =
@@ -125,6 +130,15 @@ export function TransactionLedgerCard({
         onSelect: () => verifyMutation.mutate(row),
       });
     }
+    if (row.actions?.mark_failed) {
+      items.push({ label: 'Mark failed', icon: CircleX, onSelect: () => setPendingAction({ action: 'mark-failed', row }) });
+    }
+    if (row.actions?.cancel_funding) {
+      items.push({ label: 'Cancel pending funding', icon: Ban, onSelect: () => setPendingAction({ action: 'cancel', row }) });
+    }
+    if (row.actions?.reverse) {
+      items.push({ label: 'Reverse transaction', icon: Undo2, danger: true, onSelect: () => setPendingAction({ action: 'reverse', row }) });
+    }
     if (row.errand && canOpenOps) {
       const errandId = row.errand.id;
       items.push({ label: 'Open errand', icon: PackageCheck, onSelect: () => navigate(getAdmin2ErrandHref(errandId)) });
@@ -146,7 +160,6 @@ export function TransactionLedgerCard({
       const reference = row.reference;
       items.push({ label: 'Copy reference', icon: Copy, onSelect: () => void copy(reference, 'Reference') });
     }
-    items.push({ label: 'View in classic ledger', icon: ExternalLink, onSelect: () => navigate(`/payments?tab=ledger&tx=${row.id}`) });
     return items;
   };
 
@@ -172,6 +185,20 @@ export function TransactionLedgerCard({
 
       <div className="flex flex-wrap items-center gap-[10px] border-b border-[#e2e8e3] px-[16px] py-[12px]">
         <SearchField value={search} onChange={onSearchChange} placeholder="Search transaction ID, user or errand…" />
+        {params.user_id ? (
+          <span className="flex h-[34px] items-center gap-[6px] rounded-[8px] border border-[#cfe6d6] bg-[#eef7f0] pl-[10px] pr-[6px] text-[11px] font-semibold text-[#167d35]">
+            <UserRound className="size-[13px]" strokeWidth={1.8} />
+            {filterUser?.name ?? `User #${params.user_id}`}
+            <button
+              type="button"
+              onClick={onClearUser}
+              aria-label="Show all users"
+              className="flex size-[20px] items-center justify-center rounded hover:bg-[#dcefe1]"
+            >
+              <X className="size-[12px]" strokeWidth={2} />
+            </button>
+          </span>
+        ) : null}
         <FilterDropdown label="Status" value={filters.status} options={STATUS_OPTIONS} onChange={(v) => update('status', v as LedgerFilters['status'])} />
         <FilterDropdown
           label="Type"
@@ -354,6 +381,18 @@ export function TransactionLedgerCard({
         </p>
         <Pager page={page} lastPage={lastPage} onChange={setPage} />
       </div>
+
+      {pendingAction ? (
+        <LedgerActionModal
+          action={pendingAction.action}
+          row={pendingAction.row}
+          onClose={() => setPendingAction(null)}
+          onDone={(message) => {
+            setPendingAction(null);
+            setNotice({ tone: 'ok', text: message });
+          }}
+        />
+      ) : null}
     </Card>
   );
 }

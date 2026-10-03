@@ -2,12 +2,16 @@ import type { ComponentType } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
+  Activity,
   ArrowLeftRight,
   BadgeCheck,
   BarChart2,
   Bell,
   Bike,
   Building2,
+  CircleHelp,
+  History,
+  Inbox,
   LayoutDashboard,
   LifeBuoy,
   MapPin,
@@ -23,6 +27,7 @@ import {
   type LucideProps,
 } from 'lucide-react';
 import { fetchDashboardBadges } from '@/api/adminDashboardApi';
+import { fetchInAppUnreadCount } from '@/api/adminInAppNotificationsApi';
 import { useAuth } from '@/context/AuthContext';
 import { useAdminOpsRealtimeStatus } from '@/context/AdminOpsRealtimeContext';
 import { canAccessPage, getPagePath, type PageKey } from '@/lib/adminNavigation';
@@ -37,7 +42,7 @@ type SidebarItem = {
   /** Extra admin2 path whose sub-pages also highlight this item. */
   activePrefix?: string;
   icon: ComponentType<LucideProps>;
-  badge?: keyof DashboardBadges;
+  badge?: keyof DashboardBadges | 'inbox';
 };
 
 const SECTIONS: Array<{ title: string; items: SidebarItem[] }> = [
@@ -45,6 +50,7 @@ const SECTIONS: Array<{ title: string; items: SidebarItem[] }> = [
     title: 'Operations',
     items: [
       { label: 'Overview', page: 'admin2', icon: LayoutDashboard },
+      { label: 'Inbox', page: 'admin2-inbox', icon: Inbox, badge: 'inbox' },
       { label: 'Users', page: 'admin2-users', icon: Users },
       { label: 'Runners', page: 'admin2-runners', icon: Bike },
       { label: 'Verifications', page: 'admin2-verifications', icon: BadgeCheck, badge: 'kyc' },
@@ -77,8 +83,11 @@ const SECTIONS: Array<{ title: string; items: SidebarItem[] }> = [
     title: 'Administration',
     items: [
       { label: 'Support Tickets', page: 'admin2-support', icon: LifeBuoy, badge: 'tickets' },
-      { label: 'Admin Management', page: 'user-management', icon: UserCog },
+      { label: 'Admin Management', page: 'admin2-admins', icon: UserCog },
+      { label: 'Audit Log', page: 'admin2-audit', icon: History },
+      { label: 'System Health', page: 'admin2-health', icon: Activity },
       { label: 'Settings', page: 'admin2-settings', icon: Settings },
+      { label: 'Help & guide', page: 'admin2-help', icon: CircleHelp },
     ],
   },
 ];
@@ -92,6 +101,11 @@ export function Admin2Sidebar({ open, onClose }: { open: boolean; onClose: () =>
     queryKey: queryKeys.dashboard.badges,
     queryFn: fetchDashboardBadges,
     refetchInterval: 60_000,
+  });
+  const unreadQuery = useQuery({
+    queryKey: queryKeys.inAppNotifications.unreadCount,
+    queryFn: fetchInAppUnreadCount,
+    refetchInterval: live ? 60_000 : 20_000,
   });
 
   const sections = SECTIONS.map((section) => ({
@@ -134,7 +148,8 @@ export function Admin2Sidebar({ open, onClose }: { open: boolean; onClose: () =>
               (location.pathname === path ||
                 (path !== '/admin2' && location.pathname.startsWith(`${path}/`)) ||
                 (item.activePrefix != null && location.pathname.startsWith(item.activePrefix)));
-            const count = item.badge ? badgesQuery.data?.[item.badge] ?? 0 : 0;
+            const count =
+              item.badge === 'inbox' ? unreadQuery.data ?? 0 : item.badge ? badgesQuery.data?.[item.badge] ?? 0 : 0;
             const Icon = item.icon;
             return (
               <button

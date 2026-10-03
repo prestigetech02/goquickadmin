@@ -7,13 +7,18 @@ import {
 import type { ApiResponse } from '@/types';
 import type { PaginationMeta } from '@/types/api';
 
+export type InboxCategory = 'support' | 'withdrawals' | 'verifications' | 'disputes' | 'zones' | 'other';
+
+export type InboxCategoryCounts = Record<InboxCategory, { total: number; unread: number }>;
+
 export type InAppNotificationListResult = {
   items: AppNotification[];
   meta: PaginationMeta;
+  categories?: InboxCategoryCounts;
 };
 
 type NotificationListResponse = ApiResponse<RawAppNotification[]> & {
-  meta?: Partial<PaginationMeta>;
+  meta?: Partial<PaginationMeta> & { categories?: InboxCategoryCounts };
 };
 
 function parseListResponse(data: NotificationListResponse): InAppNotificationListResult {
@@ -31,6 +36,7 @@ function parseListResponse(data: NotificationListResponse): InAppNotificationLis
       from: data.meta?.from ?? null,
       to: data.meta?.to ?? null,
     },
+    categories: data.meta?.categories,
   };
 }
 
@@ -38,6 +44,9 @@ export async function fetchInAppNotifications(params: {
   page?: number;
   per_page?: number;
   unread_only?: boolean;
+  status?: 'read' | 'unread';
+  category?: InboxCategory;
+  with_counts?: boolean;
 } = {}): Promise<InAppNotificationListResult> {
   const { data } = await http.get<NotificationListResponse>('/notifications', { params });
   return parseListResponse(data);

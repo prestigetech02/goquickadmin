@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { LifeBuoy, RefreshCw } from 'lucide-react';
 import { assignAdminSupportTicket, fetchAdminSupportOverview, updateAdminSupportTicket } from '@/api/adminSupportDeskApi';
 import { SupportAttentionCard } from '@/components/admin2/support/SupportAttentionCard';
@@ -15,9 +15,7 @@ import { OUTLINE_BUTTON, PageHeader } from '@/components/admin2/shared/PageHeade
 import { NoticeBar, type Notice } from '@/components/admin2/shared/TableControls';
 import { useDebounced } from '@/components/admin2/shared/useDebounced';
 import { useAdmin2DateRange } from '@/context/Admin2DateRangeContext';
-import { useAuth } from '@/context/AuthContext';
 import { getApiErrorMessage } from '@/lib/adminAuthApi';
-import { canAccessPage, getPagePath } from '@/lib/adminNavigation';
 import { queryKeys } from '@/lib/queryKeys';
 import type { AdminSupportTicketRow, SupportTicketStatus } from '@/types/api';
 
@@ -25,7 +23,6 @@ type RowAction = { row: AdminSupportTicketRow } & ({ kind: 'take' } | { kind: 'r
 
 export function Admin2SupportPage() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
   const { range } = useAdmin2DateRange();
   const [searchParams] = useSearchParams();
   const [filters, setFilters] = useState<SupportFilters>(DEFAULT_SUPPORT_FILTERS);
@@ -171,14 +168,6 @@ export function Admin2SupportPage() {
           Customers get an in-app notification for every reply and when a ticket is resolved. Internal notes stay inside the team. Replying to an
           unassigned ticket makes you its owner, and a customer reply moves the ticket back to Needs reply.
         </p>
-        {canAccessPage(user, 'tickets') ? (
-          <Link
-            to={getPagePath('tickets')}
-            className="flex h-[34px] flex-shrink-0 items-center rounded-[8px] border border-[#d4ddd6] bg-white px-[12px] text-[11px] font-semibold text-[#17211b] hover:bg-[#f8faf8]"
-          >
-            Classic tickets view
-          </Link>
-        ) : null}
       </div>
 
       {ticketId != null ? (

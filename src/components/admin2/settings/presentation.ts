@@ -1,7 +1,7 @@
 import { relativeAgo } from '../format';
 import type { SettingsLastChange } from '@/types/api';
 
-export type SettingsSectionId = 'pricing' | 'referrals' | 'operations' | 'payouts' | 'categories' | 'zones' | 'security' | 'integrations';
+export type SettingsSectionId = 'pricing' | 'fare-rules' | 'referrals' | 'operations' | 'payouts' | 'categories' | 'zones' | 'security' | 'integrations';
 
 export const FIELD =
   'h-[36px] w-full rounded-[8px] border border-[#d4ddd6] bg-white px-[11px] text-[12px] text-[#17211b] outline-none placeholder:text-[#7c857f] focus:border-[#167d35] disabled:bg-[#f6f8f6] disabled:text-[#7c857f]';

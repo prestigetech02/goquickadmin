@@ -1,4 +1,4 @@
-import { Clock3, Hourglass, ImageOff, MapPinOff, MessageSquareWarning, UserRoundSearch, type LucideIcon } from 'lucide-react';
+import { Clock3, Hourglass, ImageOff, MapPinned, MapPinOff, MessageSquareWarning, UserRoundSearch, type LucideIcon } from 'lucide-react';
 import type {
   AdminErrandBoardFilters,
   AdminErrandBoardRow,
@@ -23,13 +23,19 @@ export const FLAG_TONES: Record<'red' | 'amber', Tone> = { red: RED, amber: AMBE
 export const FLAG_META: Record<ErrandFlagKey, { label: string; hint: string; icon: LucideIcon; tone: 'red' | 'amber' }> = {
   disputed: { label: 'Open dispute', hint: 'Requester or runner raised a dispute', icon: MessageSquareWarning, tone: 'red' },
   overdue: { label: 'Past expected finish', hint: 'Running past its deadline or estimate', icon: Clock3, tone: 'red' },
+  no_zone_runners: {
+    label: 'No runners in zone',
+    hint: 'No verified runner is assigned to this errand’s service zone, so no runner can see it',
+    icon: MapPinned,
+    tone: 'red',
+  },
   stuck: { label: 'No update in 2h+', hint: 'Live errand with no status change for 2 hours', icon: Hourglass, tone: 'amber' },
   unmatched: { label: 'No runner yet', hint: 'Waiting 15+ minutes, or starting within 30', icon: UserRoundSearch, tone: 'amber' },
   tracking_lost: { label: 'Runner location stale', hint: 'No location ping for 10+ minutes while moving', icon: MapPinOff, tone: 'amber' },
   proof_rejected: { label: 'Proof rejected', hint: 'Requester rejected the completion photos', icon: ImageOff, tone: 'amber' },
 };
 
-export const FLAG_ORDER: ErrandFlagKey[] = ['disputed', 'overdue', 'stuck', 'unmatched', 'tracking_lost', 'proof_rejected'];
+export const FLAG_ORDER: ErrandFlagKey[] = ['disputed', 'overdue', 'no_zone_runners', 'stuck', 'unmatched', 'tracking_lost', 'proof_rejected'];
 
 export const PAYMENT_META: Record<ErrandPaymentState, { label: string; tone: Tone }> = {
   held: { label: 'In escrow', tone: BLUE },
