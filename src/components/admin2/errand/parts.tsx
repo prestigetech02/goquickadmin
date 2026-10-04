@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { avatarSrc, isAvatarLoaded, markAvatarLoaded } from '@/lib/avatarSrc';
 import { personInitials } from '../format';
 import type { Tone } from './errandPresentation';
 
@@ -53,15 +54,50 @@ export function Chip({ tone, label, dot = false }: { tone: Tone; label: string; 
 }
 
 export function PersonAvatar({ name, url, tone, size = 42 }: { name: string; url?: string | null; tone: Tone; size?: number }) {
-  if (url) {
-    return <img src={url} alt="" className="flex-shrink-0 rounded-full object-cover" style={{ width: size, height: size }} />;
-  }
+  const sources = useMemo(() => {
+    if (!url) return [];
+    const thumb = avatarSrc(url, size);
+    return thumb === url ? [url] : [thumb, url];
+  }, [url, size]);
+  const [attempt, setAttempt] = useState(0);
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    setAttempt(0);
+  }, [sources]);
+
+  const src = sources[attempt];
+  const ready = src ? loadedSrc === src || isAvatarLoaded(src) : false;
+
   return (
     <span
-      className="flex flex-shrink-0 items-center justify-center rounded-full text-[11px] font-bold"
-      style={{ width: size, height: size, backgroundColor: tone.bg, color: tone.color }}
+      className="relative flex flex-shrink-0 items-center justify-center overflow-hidden rounded-full text-[11px] font-bold"
+      style={{ width: size, height: size, backgroundColor: tone.bg, color: tone.color, fontSize: size >= 48 ? 15 : undefined }}
     >
-      {personInitials(name)}
+      {ready ? null : personInitials(name)}
+      {src ? (
+        <img
+          key={src}
+          ref={(el) => {
+            if (el && !ready && el.complete && el.naturalWidth > 0) {
+              markAvatarLoaded(src);
+              setLoadedSrc(src);
+            }
+          }}
+          src={src}
+          alt=""
+          width={size}
+          height={size}
+          decoding="async"
+          className="absolute inset-0 size-full object-cover"
+          style={{ opacity: ready ? 1 : 0 }}
+          onLoad={() => {
+            markAvatarLoaded(src);
+            setLoadedSrc(src);
+          }}
+          onError={() => setAttempt((n) => n + 1)}
+        />
+      ) : null}
     </span>
   );
 }

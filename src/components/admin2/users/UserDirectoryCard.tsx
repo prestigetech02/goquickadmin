@@ -25,7 +25,8 @@ import { getApiErrorMessage } from '@/lib/adminAuthApi';
 import { getAdmin2RunnerHref, getAdmin2UserHref } from '@/lib/adminNavigation';
 import { queryKeys } from '@/lib/queryKeys';
 import type { ListQueryParams, UserListItem, UsersSummary } from '@/types/api';
-import { formatCount, formatNaira, personInitials, relativeAgo } from '../format';
+import { formatCount, formatNaira, relativeAgo } from '../format';
+import { PersonAvatar } from '../errand/parts';
 import { Card, Skeleton } from '../overview/primitives';
 import { ActionMenu, type ActionMenuItem } from './ActionMenu';
 import {
@@ -518,16 +519,7 @@ export function UserDirectoryCard({
               >
                 <Checkbox state={isSelected ? 'on' : 'off'} onChange={() => toggleRow(user)} label={`Select ${name}`} />
                 <div className="flex min-w-0 items-center gap-[10px]">
-                  {user.avatar_url ? (
-                    <img src={user.avatar_url} alt="" className="size-[32px] flex-shrink-0 rounded-full object-cover" />
-                  ) : (
-                    <span
-                      className="flex size-[32px] flex-shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
-                      style={{ backgroundColor: tone.bg, color: tone.color }}
-                    >
-                      {personInitials(name)}
-                    </span>
-                  )}
+                  <PersonAvatar name={name} url={user.avatar_url} tone={tone} size={32} />
                   <div className="min-w-0">
                     <p className="truncate text-[11px] font-semibold text-[#17211b]">{name}</p>
                     <p className="truncate text-[9px] text-[#7c857f]">{contact || `User #${user.id}`}</p>

@@ -818,6 +818,8 @@ export type AdminDisputeRow = {
   type: DisputeType;
   status: DisputeStatus;
   reason: string | null;
+  category_label?: string | null;
+  evidence?: { url: string; name: string; size: number; mime: string | null }[];
   outcome: DisputeOutcome | null;
   resolution: string | null;
   settled_amount: number | null;

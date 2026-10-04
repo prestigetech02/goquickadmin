@@ -10,7 +10,8 @@ import { getApiErrorMessage } from '@/lib/adminAuthApi';
 import { canAccessPage, getAdmin2UserHref, getPageHref } from '@/lib/adminNavigation';
 import { queryKeys } from '@/lib/queryKeys';
 import type { UserListItem, UserReferralSummary } from '@/types/api';
-import { formatCount, formatNaira, personInitials } from '../format';
+import { formatCount, formatNaira } from '../format';
+import { PersonAvatar } from '../errand/parts';
 import { Skeleton } from '../overview/primitives';
 import { KycBadge, RoleBadge, StatusBadge } from './UserBadges';
 import {
@@ -159,16 +160,7 @@ export function UserDetailsDrawer({
     >
       <div className="space-y-5 font-inter">
         <div className="flex items-center gap-3">
-          {merged.avatar_url ? (
-            <img src={merged.avatar_url} alt="" className="size-[48px] rounded-full object-cover" />
-          ) : (
-            <span
-              className="flex size-[48px] items-center justify-center rounded-full text-[15px] font-bold"
-              style={{ backgroundColor: tone.bg, color: tone.color }}
-            >
-              {personInitials(name)}
-            </span>
-          )}
+          <PersonAvatar name={name} url={merged.avatar_url} tone={tone} size={48} />
           <div className="min-w-0 space-y-1.5">
             <div className="flex flex-wrap gap-1.5">
               <RoleBadge role={merged.role} />

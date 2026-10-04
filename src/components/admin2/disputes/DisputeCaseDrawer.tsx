@@ -439,9 +439,28 @@ export function DisputeCaseDrawer({
                 <Chip key={flag.key} tone={FLAG_TONES[flag.tone]} label={flag.label} />
               ))}
             </div>
+            {row.category_label ? (
+              <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-[#b84545]">{row.category_label}</p>
+            ) : null}
             <blockquote className="border-l-[3px] border-[#b84545] pl-[10px] text-[14px] font-medium leading-[1.45] text-[#17211b]">
               {row.reason?.trim() || 'No reason was given.'}
             </blockquote>
+            {row.evidence && row.evidence.length > 0 ? (
+              <div className="flex flex-wrap gap-[6px]">
+                {row.evidence.map((file) => (
+                  <a
+                    key={file.url}
+                    href={file.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex max-w-full items-center gap-[6px] rounded-[8px] border border-[#e2e8e3] bg-white px-[9px] py-[6px] text-[11px] font-medium text-[#17211b] hover:border-[#167d35]"
+                  >
+                    <FileText className="size-[12px] flex-shrink-0 text-[#7c857f]" strokeWidth={1.8} />
+                    <span className="truncate">{file.name}</span>
+                  </a>
+                ))}
+              </div>
+            ) : null}
             <p className="text-[11px] text-[#7c857f]">
               Filed by <span className="font-semibold text-[#17211b]">{row.raised_by?.name ?? 'someone'}</span>
               {row.raised_by ? ` (${ROLE_LABELS[row.raised_by.role].toLowerCase()})` : ''}
