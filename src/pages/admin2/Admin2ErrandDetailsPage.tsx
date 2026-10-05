@@ -16,7 +16,7 @@ import { RouteServiceCard } from '@/components/admin2/errand/RouteServiceCard';
 import { SummaryCards } from '@/components/admin2/errand/SummaryCards';
 import { TimelineCard } from '@/components/admin2/errand/TimelineCard';
 import { Chip } from '@/components/admin2/errand/parts';
-import { statusLabel, statusTone, watDate, watTime } from '@/components/admin2/errand/errandPresentation';
+import { isFindingRunner, statusLabel, statusTone, watDate, watTime } from '@/components/admin2/errand/errandPresentation';
 import { relativeAgo } from '@/components/admin2/format';
 import { Skeleton } from '@/components/admin2/overview/primitives';
 import { useAuth } from '@/context/AuthContext';
@@ -183,6 +183,7 @@ export function Admin2ErrandDetailsPage() {
           <NotesCard view={view} />
           <OperationalActionsCard
             canIntervene={errand.can_intervene}
+            findingRunner={isFindingRunner(errand.status)}
             canRefund={canFinance && pricing.status === 'held'}
             refundHint={refundHint}
             onAction={setModal}

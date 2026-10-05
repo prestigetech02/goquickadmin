@@ -27,6 +27,11 @@ const STATUS_LABELS: Record<string, string> = {
   failed: 'Failed',
 };
 
+/** Nobody has accepted yet: support invites a runner instead of assigning one. */
+export function isFindingRunner(status: string): boolean {
+  return status === 'pending' || status === 'searching';
+}
+
 export function statusLabel(status: string): string {
   return STATUS_LABELS[status] ?? titleCase(status);
 }

@@ -15,7 +15,7 @@ import { getAdmin2UserHref, getPagePath } from '@/lib/adminNavigation';
 import { queryKeys } from '@/lib/queryKeys';
 import type { AdminErrandView } from '@/types/api';
 import { formatNaira } from '../format';
-import { FORCEABLE_STATUSES, statusLabel } from './errandPresentation';
+import { FORCEABLE_STATUSES, isFindingRunner, statusLabel } from './errandPresentation';
 import { PersonAvatar } from './parts';
 
 export type ErrandModal = 'complete' | 'status' | 'reassign' | 'refund' | 'cancel';
@@ -123,6 +123,7 @@ export function ErrandActionModals({
   const queryClient = useQueryClient();
   const { errand, pricing, runner, requester, dispute } = view;
   const escrowHeld = pricing.status === 'held';
+  const finding = isFindingRunner(errand.status);
   const openDispute = dispute && ['open', 'under_review'].includes(dispute.status);
 
   const [reason, setReason] = useState('');
@@ -156,7 +157,7 @@ export function ErrandActionModals({
         case 'reassign':
           if (runnerId == null) throw new Error('Choose a runner first.');
           await reassignAdminErrand(errand.id, { runner_id: runnerId, reason: trimmed });
-          return 'Runner reassigned.';
+          return finding ? 'Invitation sent. The errand is assigned once the runner accepts it.' : 'Runner reassigned.';
         case 'refund':
           await refundAdminErrandEscrow(errand.id, trimmed);
           return 'Escrow refunded to the requester.';
@@ -190,14 +191,19 @@ export function ErrandActionModals({
   const confirmLabel = {
     complete: 'Mark complete',
     status: 'Change status',
-    reassign: 'Reassign runner',
+    reassign: finding ? 'Send invitation' : 'Reassign runner',
     refund: pricing.total != null ? `Refund ${formatNaira(pricing.total)}` : 'Refund escrow',
     cancel: 'Cancel errand',
   }[modal];
   const danger = modal === 'cancel' || modal === 'refund';
 
   return (
-    <Modal open onClose={() => (mutation.isPending ? undefined : onClose())} title={TITLES[modal]} size={modal === 'reassign' ? 'md' : 'sm'}>
+    <Modal
+      open
+      onClose={() => (mutation.isPending ? undefined : onClose())}
+      title={modal === 'reassign' && finding ? 'Invite a runner' : TITLES[modal]}
+      size={modal === 'reassign' ? 'md' : 'sm'}
+    >
       <form
         className="space-y-4 font-inter"
         onSubmit={(event) => {
@@ -252,9 +258,11 @@ export function ErrandActionModals({
         {modal === 'reassign' ? (
           <>
             <p className="text-[12px] text-[#45514a]">
-              {runner ? `Currently assigned to ${runner.name}.` : 'No runner is assigned yet.'} The held escrow moves to the new runner.
+              {finding
+                ? 'Nobody has accepted this errand yet. The runner gets an invitation at the listed price, and the errand is assigned to them once they accept it in the app.'
+                : `${runner ? `Currently assigned to ${runner.name}.` : 'No runner is assigned yet.'} The held escrow moves to the new runner.`}
             </p>
-            <RunnerPicker excludeId={runner?.id ?? null} value={runnerId} onChange={setRunnerId} />
+            <RunnerPicker excludeId={finding ? null : (runner?.id ?? null)} value={runnerId} onChange={setRunnerId} />
           </>
         ) : null}
 

@@ -42,22 +42,31 @@ function ActionRow({
 
 export function OperationalActionsCard({
   canIntervene,
+  findingRunner,
   canRefund,
   refundHint,
   onAction,
 }: {
   canIntervene: boolean;
+  findingRunner: boolean;
   canRefund: boolean;
   refundHint: string | null;
   onAction: (action: ErrandAction) => void;
 }) {
   const closedHint = canIntervene ? null : 'Errand is no longer in progress';
+  const assignHint = closedHint ?? (findingRunner ? 'Sends an invitation the runner accepts in the app' : null);
 
   return (
     <Card className="flex w-full flex-col gap-[10px] p-[18px]">
       <SectionHeader title="Operational actions" subtitle="Changes are recorded in the audit log" />
       <div className="flex flex-col gap-[8px]">
-        <ActionRow icon={Repeat2} label="Reassign runner" hint={closedHint} disabled={!canIntervene} onClick={() => onAction('reassign')} />
+        <ActionRow
+          icon={Repeat2}
+          label={findingRunner ? 'Invite a runner' : 'Reassign runner'}
+          hint={assignHint}
+          disabled={!canIntervene}
+          onClick={() => onAction('reassign')}
+        />
         <ActionRow icon={Receipt} label="Adjust or refund payment" hint={refundHint} disabled={!canRefund} onClick={() => onAction('refund')} />
         <ActionRow icon={CircleX} label="Cancel errand" hint={closedHint} danger disabled={!canIntervene} onClick={() => onAction('cancel')} />
       </div>

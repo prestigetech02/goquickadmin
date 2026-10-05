@@ -11,6 +11,7 @@ import {
   Building2,
   CircleHelp,
   History,
+  Images,
   Inbox,
   LayoutDashboard,
   LifeBuoy,
@@ -77,7 +78,10 @@ const SECTIONS: Array<{ title: string; items: SidebarItem[] }> = [
   },
   {
     title: 'Content',
-    items: [{ label: 'Blog', page: 'admin2-blog', icon: Newspaper }],
+    items: [
+      { label: 'Blog', page: 'admin2-blog', icon: Newspaper },
+      { label: 'Banners', page: 'admin2-banners', icon: Images },
+    ],
   },
   {
     title: 'Administration',

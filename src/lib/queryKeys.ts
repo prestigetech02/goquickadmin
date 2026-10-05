@@ -158,4 +158,7 @@ export const queryKeys = {
   search: {
     global: (query: string) => ['admin-global-search', query] as const,
   },
+  banners: {
+    all: ['admin-banners'] as const,
+  },
 } as const;

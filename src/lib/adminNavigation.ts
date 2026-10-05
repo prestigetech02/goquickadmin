@@ -20,6 +20,7 @@ export type PageKey =
   | 'admin2-settings'
   | 'admin2-blog'
   | 'admin2-blog-post'
+  | 'admin2-banners'
   | 'admin2-coupons'
   | 'admin2-support'
   | 'admin2-admins'
@@ -85,6 +86,7 @@ export const ADMIN_PAGES: AdminPageDefinition[] = [
   { key: 'admin2-settings', label: 'Settings', path: '/admin2/settings', access: 'all-admins', visibility: 'hidden' },
   { key: 'admin2-blog', label: 'Blog', path: '/admin2/blog', access: 'operations', visibility: 'hidden' },
   { key: 'admin2-blog-post', label: 'Blog post', path: '/admin2/blog/:id', access: 'operations', visibility: 'hidden' },
+  { key: 'admin2-banners', label: 'Banners', path: '/admin2/banners', access: 'operations', visibility: 'hidden' },
   { key: 'admin2-coupons', label: 'Coupons', path: '/admin2/coupons', access: 'finance', visibility: 'hidden' },
   { key: 'admin2-support', label: 'Support tickets', path: '/admin2/support', access: 'operations', visibility: 'hidden' },
   { key: 'admin2-admins', label: 'Admin Management', path: '/admin2/admins', access: 'super-admin', visibility: 'hidden' },

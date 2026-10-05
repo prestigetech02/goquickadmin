@@ -22,6 +22,7 @@ import { Admin2AnalyticsPage } from '@/pages/admin2/Admin2AnalyticsPage';
 import { Admin2SettingsPage } from '@/pages/admin2/Admin2SettingsPage';
 import { Admin2BlogPage } from '@/pages/admin2/Admin2BlogPage';
 import { Admin2BlogEditorPage } from '@/pages/admin2/Admin2BlogEditorPage';
+import { Admin2BannersPage } from '@/pages/admin2/Admin2BannersPage';
 import { Admin2CouponsPage } from '@/pages/admin2/Admin2CouponsPage';
 import { Admin2SupportPage } from '@/pages/admin2/Admin2SupportPage';
 import { Admin2AdminsPage } from '@/pages/admin2/Admin2AdminsPage';
@@ -60,6 +61,7 @@ const PAGES: Partial<Record<PageKey, () => ReactNode>> = {
   'admin2-settings': () => <Admin2SettingsPage />,
   'admin2-blog': () => <Admin2BlogPage />,
   'admin2-blog-post': () => <Admin2BlogEditorPage />,
+  'admin2-banners': () => <Admin2BannersPage />,
   'admin2-coupons': () => <Admin2CouponsPage />,
   'admin2-support': () => <Admin2SupportPage />,
   'admin2-admins': () => <Admin2AdminsPage />,

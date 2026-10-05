@@ -2853,3 +2853,53 @@ export type AdminZoneStats = {
   with_coverage?: number;
   assigned_runners?: number;
 };
+
+export type BannerAudience = 'requester' | 'runner' | 'landing';
+export type BannerLinkType = 'none' | 'url' | 'screen';
+export type BannerScreen = 'new_errand' | 'my_errands' | 'wallet' | 'referrals' | 'notifications' | 'support';
+export type BannerStatus = 'live' | 'scheduled' | 'ended' | 'paused';
+export type BannerDisplay = 'inline' | 'popup';
+export type BannerPopupFrequency = 'once' | 'daily' | 'every_open';
+
+export type AdminBanner = {
+  id: number;
+  title: string;
+  image_url: string;
+  landing_image_url: string | null;
+  display: BannerDisplay;
+  popup_frequency: BannerPopupFrequency;
+  audiences: BannerAudience[];
+  link_type: BannerLinkType;
+  link_value: string | null;
+  starts_at: string | null;
+  ends_at: string | null;
+  is_active: boolean;
+  sort_order: number;
+  status: BannerStatus;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+export type AdminBannerInput = {
+  title: string;
+  image_url: string;
+  landing_image_url: string | null;
+  display: BannerDisplay;
+  popup_frequency: BannerPopupFrequency;
+  audiences: BannerAudience[];
+  link_type: BannerLinkType;
+  link_value: string | null;
+  starts_at: string | null;
+  ends_at: string | null;
+  is_active: boolean;
+};
+
+export type AdminBannerListResponse = {
+  banners: AdminBanner[];
+  summary: {
+    total: number;
+    live: number;
+    scheduled: number;
+    live_by_audience: Record<BannerAudience, Record<BannerDisplay, number>>;
+  };
+};
