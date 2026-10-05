@@ -76,9 +76,7 @@ function ModuleEditor({ admin }: { admin: AdminAccountItem }) {
               }`}
             >
               <span className={`text-[12px] font-semibold ${on ? 'text-[#0d5e27]' : 'text-[#17211b]'}`}>{option.label}</span>
-              <span className="text-[10px] text-[#7c857f]">
-                {option.key === 'finance' ? 'Transactions, withdrawals, revenue, coupons' : 'Users, runners, errands, disputes, support'}
-              </span>
+              <span className="text-[10px] text-[#7c857f]">{option.description}</span>
             </button>
           );
         })}

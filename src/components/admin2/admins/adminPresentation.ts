@@ -1,5 +1,5 @@
 import { Laptop, Monitor, Smartphone, Tablet, type LucideIcon } from 'lucide-react';
-import type { AdminAccessFilter, AdminAccountItem } from '@/api/adminAdminsApi';
+import type { AdminAccessFilter, AdminAccountItem, AdminAccountsSummary } from '@/api/adminAdminsApi';
 import type { Tone } from '../errand/errandPresentation';
 import { titleCase } from '../errand/errandPresentation';
 
@@ -23,6 +23,9 @@ export function roleTone(admin: AdminAccountItem): Tone {
 export const MODULE_TONES: Record<string, Tone> = {
   operations: { bg: '#e8f1fb', color: '#2563a8' },
   finance: { bg: '#eaf6ed', color: '#167d35' },
+  content: { bg: '#fdf0e6', color: '#b5541c' },
+  insights: { bg: '#f1ecfb', color: '#6b46c1' },
+  administration: { bg: '#eef1ee', color: '#45514a' },
 };
 
 export type Presence = { label: string; color: string; detail: string };
@@ -44,10 +47,13 @@ export function deviceIcon(deviceType: string | null | undefined): LucideIcon {
   return Laptop;
 }
 
-export const ACCESS_TABS: Array<{ value: AdminAccessFilter | 'all'; label: string; summaryKey: 'total' | 'super_admins' | 'operations' | 'finance' | 'pending_password' }> = [
+export const ACCESS_TABS: Array<{ value: AdminAccessFilter | 'all'; label: string; summaryKey: Exclude<keyof AdminAccountsSummary, 'active_7d'> }> = [
   { value: 'all', label: 'All admins', summaryKey: 'total' },
   { value: 'super', label: 'Super admins', summaryKey: 'super_admins' },
   { value: 'operations', label: 'Operations', summaryKey: 'operations' },
   { value: 'finance', label: 'Finance', summaryKey: 'finance' },
+  { value: 'content', label: 'Content', summaryKey: 'content' },
+  { value: 'insights', label: 'Insights', summaryKey: 'insights' },
+  { value: 'administration', label: 'Administration', summaryKey: 'administration' },
   { value: 'pending', label: 'Pending setup', summaryKey: 'pending_password' },
 ];

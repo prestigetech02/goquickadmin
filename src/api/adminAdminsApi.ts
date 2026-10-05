@@ -27,13 +27,16 @@ export type AdminAccountItem = {
   last_action_at?: string | null;
 };
 
-export type AdminAccessFilter = 'super' | 'operations' | 'finance' | 'pending';
+export type AdminAccessFilter = 'super' | AdminModule | 'pending';
 
 export type AdminAccountsSummary = {
   total: number;
   super_admins: number;
   operations: number;
   finance: number;
+  content?: number;
+  insights?: number;
+  administration?: number;
   pending_password: number;
   active_7d: number;
 };

@@ -150,7 +150,7 @@ export function Admin2AdminsPage() {
           iconColor="#2563a8"
           iconBg="#e8f1fb"
           value={summary ? formatCount(summary.total) : undefined}
-          context={summary ? `${summary.operations} operations · ${summary.finance} finance` : undefined}
+          context={summary ? `${summary.super_admins} super · ${summary.total - summary.super_admins} module-scoped` : undefined}
         />
         <MetricCard
           label="Active this week"

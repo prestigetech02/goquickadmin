@@ -50,7 +50,11 @@ export type PageKey =
   | 'in-app-notifications';
 
 type PageVisibility = 'sidebar' | 'hidden';
-type PageAccess = 'all-admins' | 'operations' | 'finance' | 'super-admin' | 'personal';
+/**
+ * 'all-admins' = Operations or Finance (overview, settings, zones show ops and money data);
+ * 'any-module' = every admin, whichever modules they hold.
+ */
+type PageAccess = 'all-admins' | 'any-module' | AdminModule | 'super-admin' | 'personal';
 
 export type AdminPageDefinition = {
   key: PageKey;
@@ -61,9 +65,12 @@ export type AdminPageDefinition = {
   visibility: PageVisibility;
 };
 
-export const ADMIN_MODULE_OPTIONS: Array<{ key: AdminModule; label: string }> = [
-  { key: 'operations', label: 'Operations' },
-  { key: 'finance', label: 'Finance' },
+export const ADMIN_MODULE_OPTIONS: Array<{ key: AdminModule; label: string; description: string }> = [
+  { key: 'operations', label: 'Operations', description: 'Users, runners, verifications, errands, disputes, notifications' },
+  { key: 'finance', label: 'Finance', description: 'Withdrawals, transactions, revenue, pricing, zones' },
+  { key: 'content', label: 'Content', description: 'Blog and banners' },
+  { key: 'insights', label: 'Insights', description: 'Analytics and coupons' },
+  { key: 'administration', label: 'Administration', description: 'Support tickets' },
 ];
 
 export const ADMIN_PAGES: AdminPageDefinition[] = [
@@ -82,18 +89,18 @@ export const ADMIN_PAGES: AdminPageDefinition[] = [
   { key: 'admin2-verifications', label: 'Runner verification', path: '/admin2/verifications', access: 'operations', visibility: 'hidden' },
   { key: 'admin2-disputes', label: 'Disputes', path: '/admin2/disputes', access: 'operations', visibility: 'hidden' },
   { key: 'admin2-revenue', label: 'Company revenue', path: '/admin2/revenue', access: 'finance', visibility: 'hidden' },
-  { key: 'admin2-analytics', label: 'Analytics', path: '/admin2/analytics', access: 'operations', visibility: 'hidden' },
+  { key: 'admin2-analytics', label: 'Analytics', path: '/admin2/analytics', access: 'insights', visibility: 'hidden' },
   { key: 'admin2-settings', label: 'Settings', path: '/admin2/settings', access: 'all-admins', visibility: 'hidden' },
-  { key: 'admin2-blog', label: 'Blog', path: '/admin2/blog', access: 'operations', visibility: 'hidden' },
-  { key: 'admin2-blog-post', label: 'Blog post', path: '/admin2/blog/:id', access: 'operations', visibility: 'hidden' },
-  { key: 'admin2-banners', label: 'Banners', path: '/admin2/banners', access: 'operations', visibility: 'hidden' },
-  { key: 'admin2-coupons', label: 'Coupons', path: '/admin2/coupons', access: 'finance', visibility: 'hidden' },
-  { key: 'admin2-support', label: 'Support tickets', path: '/admin2/support', access: 'operations', visibility: 'hidden' },
+  { key: 'admin2-blog', label: 'Blog', path: '/admin2/blog', access: 'content', visibility: 'hidden' },
+  { key: 'admin2-blog-post', label: 'Blog post', path: '/admin2/blog/:id', access: 'content', visibility: 'hidden' },
+  { key: 'admin2-banners', label: 'Banners', path: '/admin2/banners', access: 'content', visibility: 'hidden' },
+  { key: 'admin2-coupons', label: 'Coupons', path: '/admin2/coupons', access: 'insights', visibility: 'hidden' },
+  { key: 'admin2-support', label: 'Support tickets', path: '/admin2/support', access: 'administration', visibility: 'hidden' },
   { key: 'admin2-admins', label: 'Admin Management', path: '/admin2/admins', access: 'super-admin', visibility: 'hidden' },
   { key: 'admin2-inbox', label: 'Inbox', path: '/admin2/inbox', access: 'personal', visibility: 'hidden' },
   { key: 'admin2-audit', label: 'Audit Log', path: '/admin2/audit-log', access: 'super-admin', visibility: 'hidden' },
   { key: 'admin2-health', label: 'System Health', path: '/admin2/system-health', access: 'super-admin', visibility: 'hidden' },
-  { key: 'admin2-help', label: 'Help & guide', path: '/admin2/help', access: 'all-admins', visibility: 'hidden' },
+  { key: 'admin2-help', label: 'Help & guide', path: '/admin2/help', access: 'any-module', visibility: 'hidden' },
   { key: 'errands', label: 'Errands', path: '/errands', section: 'Operations', access: 'operations', visibility: 'sidebar' },
   { key: 'runners', label: 'Runners', path: '/runners', section: 'Operations', access: 'operations', visibility: 'sidebar' },
   { key: 'kyc', label: 'Runner KYC', path: '/runner-kyc', section: 'Operations', access: 'operations', visibility: 'sidebar' },
@@ -101,18 +108,18 @@ export const ADMIN_PAGES: AdminPageDefinition[] = [
   { key: 'payments', label: 'Payments', path: '/payments', section: 'Financials', access: 'finance', visibility: 'sidebar' },
   { key: 'company-revenue', label: 'Company revenue', path: '/company-revenue', section: 'Financials', access: 'finance', visibility: 'sidebar' },
   { key: 'disputes', label: 'Disputes', path: '/disputes', section: 'Operations', access: 'operations', visibility: 'sidebar' },
-  { key: 'tickets', label: 'Tickets', path: '/tickets', section: 'Operations', access: 'operations', visibility: 'sidebar' },
-  { key: 'analytics', label: 'Analytics', path: '/analytics', section: 'Insights', access: 'operations', visibility: 'sidebar' },
-  { key: 'blog', label: 'Blog', path: '/blog', section: 'Content', access: 'operations', visibility: 'sidebar' },
+  { key: 'tickets', label: 'Tickets', path: '/tickets', section: 'Operations', access: 'administration', visibility: 'sidebar' },
+  { key: 'analytics', label: 'Analytics', path: '/analytics', section: 'Insights', access: 'insights', visibility: 'sidebar' },
+  { key: 'blog', label: 'Blog', path: '/blog', section: 'Content', access: 'content', visibility: 'sidebar' },
   { key: 'notifications', label: 'Notifications', path: '/notifications', section: 'Content', access: 'operations', visibility: 'sidebar' },
   { key: 'pricing', label: 'Pricing Rules', path: '/pricing', section: 'Configuration', access: 'finance', visibility: 'sidebar' },
   { key: 'zones', label: 'Service Zones', path: '/zones', section: 'Configuration', access: 'finance', visibility: 'sidebar' },
-  { key: 'coupons', label: 'Coupons', path: '/coupons', section: 'Configuration', access: 'finance', visibility: 'sidebar' },
+  { key: 'coupons', label: 'Coupons', path: '/coupons', section: 'Configuration', access: 'insights', visibility: 'sidebar' },
   { key: 'settings', label: 'Settings', path: '/settings', section: 'Configuration', access: 'all-admins', visibility: 'sidebar' },
   { key: 'user-management', label: 'User Management', path: '/user-management', section: 'System', access: 'super-admin', visibility: 'sidebar' },
   { key: 'system-logs', label: 'System Health', path: '/system-health', section: 'System', access: 'super-admin', visibility: 'sidebar' },
   { key: 'audit-logs', label: 'Audit Log', path: '/audit-log', section: 'System', access: 'super-admin', visibility: 'sidebar' },
-  { key: 'support', label: 'Help & Support', path: '/support', section: 'System', access: 'all-admins', visibility: 'sidebar' },
+  { key: 'support', label: 'Help & Support', path: '/support', section: 'System', access: 'any-module', visibility: 'sidebar' },
   { key: 'in-app-notifications', label: 'My Notifications', path: '/my-notifications', access: 'personal', visibility: 'hidden' },
 ];
 
@@ -187,7 +194,25 @@ export function getAdmin2BlogPostHref(id: number | 'new'): string {
 }
 
 export function isAdminModule(value: string): value is AdminModule {
-  return value === 'operations' || value === 'finance';
+  return ADMIN_MODULE_OPTIONS.some((option) => option.key === value);
+}
+
+export function hasAdminModule(user: AdminUser | null | undefined, module: AdminModule): boolean {
+  if (!user) return false;
+  const { permissions } = user;
+  if (permissions.is_super_admin) return true;
+  switch (module) {
+    case 'operations':
+      return permissions.can_manage_operations;
+    case 'finance':
+      return permissions.can_manage_finance;
+    case 'content':
+      return Boolean(permissions.can_manage_content);
+    case 'insights':
+      return Boolean(permissions.can_manage_insights);
+    case 'administration':
+      return Boolean(permissions.can_manage_administration);
+  }
 }
 
 export function canAccessPage(user: AdminUser | null | undefined, page: PageKey): boolean {
@@ -199,20 +224,21 @@ export function canAccessPage(user: AdminUser | null | undefined, page: PageKey)
 
   switch (definition.access) {
     case 'all-admins':
-      return user.permissions.can_manage_operations || user.permissions.can_manage_finance;
-    case 'operations':
-      return user.permissions.can_manage_operations;
-    case 'finance':
-      return user.permissions.can_manage_finance;
+      return hasAdminModule(user, 'operations') || hasAdminModule(user, 'finance');
+    case 'any-module':
+      return ADMIN_MODULE_OPTIONS.some((option) => hasAdminModule(user, option.key));
     case 'super-admin':
       return false;
     default:
-      return false;
+      return hasAdminModule(user, definition.access);
   }
 }
 
+/** Landing page after sign-in: the overview, else the first module page this admin can open. */
+const DEFAULT_PAGE_ORDER: PageKey[] = ['admin2', 'admin2-support', 'admin2-blog', 'admin2-banners', 'admin2-analytics', 'admin2-coupons'];
+
 export function getDefaultPageForUser(user: AdminUser): PageKey {
-  return canAccessPage(user, 'admin2') ? 'admin2' : 'admin2-inbox';
+  return DEFAULT_PAGE_ORDER.find((page) => canAccessPage(user, page)) ?? 'admin2-inbox';
 }
 
 /** Retired classic pages and the admin2 page that replaced each one. */

@@ -83,7 +83,7 @@ export function InviteAdminModal({ open, onClose }: { open: boolean; onClose: ()
           </label>
           <fieldset className="space-y-1.5">
             <legend className="text-[11px] font-semibold text-[#45514a]">Module access</legend>
-            <div className="flex flex-wrap gap-2 pt-1">
+            <div className="grid grid-cols-1 gap-2 pt-1 sm:grid-cols-2">
               {ADMIN_MODULE_OPTIONS.map((option) => {
                 const checked = modules.includes(option.key);
                 return (
@@ -92,11 +92,12 @@ export function InviteAdminModal({ open, onClose }: { open: boolean; onClose: ()
                     type="button"
                     onClick={() => toggleModule(option.key)}
                     aria-pressed={checked}
-                    className={`h-[32px] rounded-full border px-[12px] text-[11px] font-semibold transition-colors ${
-                      checked ? 'border-[#167d35] bg-[#eaf6ed] text-[#0d5e27]' : 'border-[#d4ddd6] bg-white text-[#45514a]'
+                    className={`flex flex-col items-start gap-[2px] rounded-[10px] border px-[12px] py-[9px] text-left transition-colors ${
+                      checked ? 'border-[#167d35] bg-[#eaf6ed]' : 'border-[#d4ddd6] bg-white hover:bg-[#f8faf8]'
                     }`}
                   >
-                    {option.label}
+                    <span className={`text-[12px] font-semibold ${checked ? 'text-[#0d5e27]' : 'text-[#17211b]'}`}>{option.label}</span>
+                    <span className="text-[10px] text-[#7c857f]">{option.description}</span>
                   </button>
                 );
               })}

@@ -4,7 +4,7 @@ import { ChevronDown, HelpCircle, LogOut, Menu, Settings } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { GlobalSearch } from '@/components/GlobalSearch';
 import { NotificationsPopover } from '@/components/NotificationsPopover';
-import { canAccessPage, getPagePath } from '@/lib/adminNavigation';
+import { canAccessPage, getPagePath, hasAdminModule } from '@/lib/adminNavigation';
 import { adminDisplayName, adminRoleLabel } from '@/lib/utils';
 import { Admin2DateRangePicker } from './Admin2DateRangePicker';
 import { personInitials } from './format';
@@ -43,10 +43,16 @@ export function Admin2TopBar({
         <Menu className="size-5" />
       </button>
 
-      <div className="hidden min-w-0 flex-1 md:block">
-        <GlobalSearch variant="admin2" />
-      </div>
-      <div className="flex-1 md:hidden" />
+      {hasAdminModule(user, 'operations') || hasAdminModule(user, 'finance') ? (
+        <>
+          <div className="hidden min-w-0 flex-1 md:block">
+            <GlobalSearch variant="admin2" />
+          </div>
+          <div className="flex-1 md:hidden" />
+        </>
+      ) : (
+        <div className="flex-1" />
+      )}
 
       <div className="hidden sm:block">
         <Admin2DateRangePicker />

@@ -1,9 +1,13 @@
-export type AdminModule = 'operations' | 'finance';
+export type AdminModule = 'operations' | 'finance' | 'content' | 'insights' | 'administration';
 
 export interface AdminPermissions {
   is_super_admin: boolean;
   can_manage_operations: boolean;
   can_manage_finance: boolean;
+  /** Missing on sessions cached before these modules existed. */
+  can_manage_content?: boolean;
+  can_manage_insights?: boolean;
+  can_manage_administration?: boolean;
 }
 
 /** Laravel admin user from /admin/auth/login and /admin/auth/me */
