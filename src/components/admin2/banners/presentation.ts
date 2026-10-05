@@ -13,19 +13,19 @@ import { dateTimeLabel, fromLocalInput, toLocalInput } from '../coupons/presenta
 export const AUDIENCES: BannerAudience[] = ['requester', 'runner', 'landing'];
 
 export const AUDIENCE_LABELS: Record<BannerAudience, string> = {
-  requester: 'Requester app',
+  requester: 'Requester app & web',
   runner: 'Runner app',
   landing: 'Landing page',
 };
 
 export const AUDIENCE_HINTS: Record<BannerDisplay, Record<BannerAudience, string>> = {
   inline: {
-    requester: 'Home screen, in place of the referral promo',
-    runner: 'Home screen, above today’s earnings',
+    requester: 'Home screen of the app (in place of the referral promo) and the web dashboard',
+    runner: 'Home screen, below today’s earnings',
     landing: 'Homepage, just below the hero, for every visitor',
   },
   popup: {
-    requester: 'Over the home screen when the app opens',
+    requester: 'Over the home screen when the app or web dashboard opens',
     runner: 'Over the home screen when the app opens',
     landing: 'Over the homepage when someone visits',
   },

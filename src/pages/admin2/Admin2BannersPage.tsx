@@ -90,7 +90,8 @@ export function Admin2BannersPage() {
       <PageHeader
         eyebrow="Content · Promotions"
         title="Banners"
-        subtitle="Show an image banner on the requester app, the runner app or the landing page. Changes reach people the next time they open the app; no app update needed."
+        actionsBesideTitle
+        subtitle="Show an image banner on the requester app and web, the runner app or the landing page. Changes reach people the next time they open the app; no app update needed."
         actions={
           <button type="button" onClick={() => setFormMode({ kind: 'create' })} className={PRIMARY_BUTTON}>
             <Plus className="size-[15px]" strokeWidth={2} />
