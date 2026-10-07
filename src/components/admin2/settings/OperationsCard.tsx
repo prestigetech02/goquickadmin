@@ -61,8 +61,8 @@ function OperationsForm({ section, saved, onSavedChange: setSaved }: { section: 
     <>
       <div className="grid grid-cols-1 gap-[14px] sm:grid-cols-2">
         <NumberField
-          label="Runner matching radius"
-          help="Runners within this distance of the pickup see new errands and get alerts. Runners in the same city can still see them."
+          label="Runner accept radius"
+          help="Runners see and get alerts for every open errand in their state, but can only accept or make offers on errands within this distance of the pickup."
           suffix="km"
           min={radius[0]}
           max={radius[1]}

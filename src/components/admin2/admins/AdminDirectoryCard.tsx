@@ -169,7 +169,7 @@ export function AdminDirectoryCard({
                     <span className="text-[10px] font-medium text-[#45514a]">All modules</span>
                   ) : admin.admin_modules.length ? (
                     admin.admin_modules.map((m) => (
-                      <Chip key={m} tone={MODULE_TONES[m] ?? { bg: '#f1f4f2', color: '#45514a' }} label={ADMIN_MODULE_OPTIONS.find((option) => option.value === m)?.label ?? m} />
+                      <Chip key={m} tone={MODULE_TONES[m] ?? { bg: '#f1f4f2', color: '#45514a' }} label={ADMIN_MODULE_OPTIONS.find((option) => option.key === m)?.label ?? m} />
                     ))
                   ) : (
                     <span className="text-[10px] text-[#b84545]">No modules</span>
