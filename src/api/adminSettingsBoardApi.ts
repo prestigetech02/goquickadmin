@@ -4,6 +4,8 @@ import {
   unwrapApiData,
   type AdminSettingsBoard,
   type OperationsSettings,
+  type OtpDeliverySettings,
+  type OtpDeliverySettingsSection,
   type PayoutSettings,
   type PayoutSettingsSection,
   type SettingsSection,
@@ -17,6 +19,11 @@ export async function fetchAdminSettingsBoard() {
 export async function updateOperationsSettings(input: OperationsSettings) {
   const { data } = await http.put<ApiResponse<SettingsSection<OperationsSettings>>>('/admin/settings/board/operations', input);
   return unwrapApiData(data, 'Failed to save operations settings.');
+}
+
+export async function updateOtpSettings(input: OtpDeliverySettings) {
+  const { data } = await http.put<ApiResponse<OtpDeliverySettingsSection>>('/admin/settings/board/otp', input);
+  return unwrapApiData(data, 'Failed to save OTP delivery settings.');
 }
 
 export async function updatePayoutSettings(input: PayoutSettings) {

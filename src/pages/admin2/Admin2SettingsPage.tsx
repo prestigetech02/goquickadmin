@@ -1,13 +1,14 @@
 import { useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bike, Gift, LayoutGrid, MapPinned, Percent, Plug, Route, ShieldCheck, Wallet } from 'lucide-react';
+import { Bike, Gift, LayoutGrid, MapPinned, MessageSquareText, Percent, Plug, Route, ShieldCheck, Wallet } from 'lucide-react';
 import { fetchAdminSettingsBoard } from '@/api/adminSettingsBoardApi';
 import { CategoriesCard } from '@/components/admin2/settings/CategoriesCard';
 import { FareRulesCard } from '@/components/admin2/settings/FareRulesCard';
 import { FeesCard } from '@/components/admin2/settings/FeesCard';
 import { IntegrationsCard } from '@/components/admin2/settings/IntegrationsCard';
 import { OperationsCard } from '@/components/admin2/settings/OperationsCard';
+import { OtpDeliveryCard } from '@/components/admin2/settings/OtpDeliveryCard';
 import { PayoutsCard } from '@/components/admin2/settings/PayoutsCard';
 import { lastChangeText, latestChange, type SettingsSectionId } from '@/components/admin2/settings/presentation';
 import { ReferralCard } from '@/components/admin2/settings/ReferralCard';
@@ -37,6 +38,7 @@ export function Admin2SettingsPage() {
       finance && { id: 'fare-rules', label: 'Fare rules', icon: Route },
       finance && { id: 'referrals', label: 'Referral program', icon: Gift },
       operations && { id: 'operations', label: 'Runner operations', icon: Bike },
+      operations && { id: 'otp', label: 'Phone OTP delivery', icon: MessageSquareText },
       finance && { id: 'payouts', label: 'Payments & payouts', icon: Wallet },
       { id: 'categories', label: 'Service categories', icon: LayoutGrid },
       finance && { id: 'zones', label: 'Service zones', icon: MapPinned },
@@ -52,7 +54,7 @@ export function Admin2SettingsPage() {
     return {
       healthy: missing === 0,
       title: missing === 0 ? 'Configuration healthy' : `${missing} ${missing === 1 ? 'service needs' : 'services need'} setup`,
-      text: lastChangeText(latestChange([board.operations?.last_change, board.payouts?.last_change])),
+      text: lastChangeText(latestChange([board.operations?.last_change, board.otp?.last_change, board.payouts?.last_change])),
     };
   }, [board]);
 
@@ -97,6 +99,8 @@ export function Admin2SettingsPage() {
               {finance ? <PayoutsCard section={board?.payouts} /> : null}
             </div>
           ) : null}
+
+          {operations ? <OtpDeliveryCard section={board?.otp} /> : null}
 
           <CategoriesCard canEdit={operations} onOpenAnalytics={go('admin2-analytics')} />
 

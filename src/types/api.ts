@@ -2324,6 +2324,21 @@ export type OperationsSettings = {
   kyc_review_sla_hours: number;
 };
 
+export type OtpPhoneProvider = 'sms' | 'meta' | 'zoho_cpaas';
+
+export type OtpDeliverySettings = {
+  otp_phone_provider: OtpPhoneProvider;
+  otp_sms_fallback: boolean;
+  otp_whatsapp_template: string;
+  otp_whatsapp_language: string;
+};
+
+export type OtpDeliveryProviderStatus = {
+  key: OtpPhoneProvider;
+  label: string;
+  configured: boolean;
+};
+
 export type PayoutSettings = {
   runner_min_withdrawal_amount: number;
   weekend_payouts_enabled: boolean;
@@ -2332,17 +2347,21 @@ export type PayoutSettings = {
   withdrawals_paused_message: string;
 };
 
-export type PayoutSettingsSection = SettingsSection<PayoutSettings> & {
-  default_withdrawals_paused_message: string;
-  withdrawals_paused_message_max: number;
-};
-
 export type SettingsLastChange = { updated_at: string | null; updated_by: string | null };
 
 export type SettingsSection<T> = {
   values: T;
   limits: Partial<Record<keyof T, [number, number]>>;
   last_change: SettingsLastChange;
+};
+
+export type OtpDeliverySettingsSection = SettingsSection<OtpDeliverySettings> & {
+  providers: OtpDeliveryProviderStatus[];
+};
+
+export type PayoutSettingsSection = SettingsSection<PayoutSettings> & {
+  default_withdrawals_paused_message: string;
+  withdrawals_paused_message_max: number;
 };
 
 export type SettingsIntegration = {
@@ -2388,6 +2407,7 @@ export type ErrandTypeInput = {
 export type AdminSettingsBoard = {
   permissions: { operations: boolean; finance: boolean; super_admin: boolean };
   operations: SettingsSection<OperationsSettings> | null;
+  otp: OtpDeliverySettingsSection | null;
   payouts: PayoutSettingsSection | null;
   integrations: SettingsIntegration[];
   environment: { app_name: string; environment: string; timezone: string };
