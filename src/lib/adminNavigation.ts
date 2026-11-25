@@ -12,6 +12,7 @@ export type PageKey =
   | 'admin2-transactions'
   | 'admin2-withdrawals'
   | 'admin2-zones'
+  | 'admin2-places'
   | 'admin2-notifications'
   | 'admin2-verifications'
   | 'admin2-disputes'
@@ -85,6 +86,7 @@ export const ADMIN_PAGES: AdminPageDefinition[] = [
   { key: 'admin2-transactions', label: 'Transactions', path: '/admin2/transactions', access: 'finance', visibility: 'hidden' },
   { key: 'admin2-withdrawals', label: 'Withdrawals', path: '/admin2/withdrawals', access: 'finance', visibility: 'hidden' },
   { key: 'admin2-zones', label: 'Service Zones', path: '/admin2/zones', access: 'all-admins', visibility: 'hidden' },
+  { key: 'admin2-places', label: 'Places Mgt', path: '/admin2/places', access: 'operations', visibility: 'hidden' },
   { key: 'admin2-notifications', label: 'Notifications', path: '/admin2/notifications', access: 'operations', visibility: 'hidden' },
   { key: 'admin2-verifications', label: 'Runner verification', path: '/admin2/verifications', access: 'operations', visibility: 'hidden' },
   { key: 'admin2-disputes', label: 'Disputes', path: '/admin2/disputes', access: 'operations', visibility: 'hidden' },

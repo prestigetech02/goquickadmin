@@ -14,6 +14,7 @@ import { Admin2RunnersPage } from '@/pages/admin2/Admin2RunnersPage';
 import { Admin2TransactionsPage } from '@/pages/admin2/Admin2TransactionsPage';
 import { Admin2WithdrawalsPage } from '@/pages/admin2/Admin2WithdrawalsPage';
 import { Admin2ZonesPage } from '@/pages/admin2/Admin2ZonesPage';
+import { Admin2PlacesPage } from '@/pages/admin2/Admin2PlacesPage';
 import { Admin2NotificationsPage } from '@/pages/admin2/Admin2NotificationsPage';
 import { Admin2VerificationsPage } from '@/pages/admin2/Admin2VerificationsPage';
 import { Admin2DisputesPage } from '@/pages/admin2/Admin2DisputesPage';
@@ -53,6 +54,7 @@ const PAGES: Partial<Record<PageKey, () => ReactNode>> = {
   'admin2-transactions': () => <Admin2TransactionsPage />,
   'admin2-withdrawals': () => <Admin2WithdrawalsPage />,
   'admin2-zones': () => <Admin2ZonesPage />,
+  'admin2-places': () => <Admin2PlacesPage />,
   'admin2-notifications': () => <Admin2NotificationsPage />,
   'admin2-verifications': () => <Admin2VerificationsPage />,
   'admin2-disputes': () => <Admin2DisputesPage />,
