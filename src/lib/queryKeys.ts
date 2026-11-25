@@ -161,4 +161,9 @@ export const queryKeys = {
   banners: {
     all: ['admin-banners'] as const,
   },
+  places: {
+    all: ['admin-places'] as const,
+    list: (params: Record<string, unknown>) => ['admin-places', 'list', params] as const,
+    categories: ['admin-places', 'categories'] as const,
+  },
 } as const;

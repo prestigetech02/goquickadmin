@@ -13,7 +13,8 @@ import {
   type AdminPlaceCategory,
   type PlaceForm,
 } from './presentation';
-import { savePlace } from './placesStore';
+import { createAdminPlace, updateAdminPlace } from '@/api/adminPlacesApi';
+import { getApiErrorMessage } from '@/lib/adminAuthApi';
 
 export type PlaceFormMode = { kind: 'create' } | { kind: 'edit'; place: AdminPlace };
 
@@ -112,18 +113,26 @@ export function PlaceFormDrawer({
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const save = () => {
+  const save = async () => {
     setTouched(true);
     const nextProblems = formProblems(form);
     if (Object.keys(nextProblems).length > 0) return;
 
+    if (form.images.some((url) => url.startsWith('data:'))) {
+      setError('Wait for photo uploads to finish, or re-add photos that failed.');
+      return;
+    }
+
     setSaving(true);
     setError(null);
     try {
-      const place = savePlace(form, mode.kind === 'edit' ? mode.place.id : undefined);
+      const place =
+        mode.kind === 'edit'
+          ? await updateAdminPlace(mode.place.id, form)
+          : await createAdminPlace(form);
       onSaved(place, mode);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not save this place.');
+      setError(getApiErrorMessage(err, 'Could not save this place.'));
     } finally {
       setSaving(false);
     }

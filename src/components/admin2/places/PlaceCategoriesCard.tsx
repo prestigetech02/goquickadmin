@@ -5,14 +5,14 @@ import { Pager } from '@/components/admin2/shared/Pager';
 import { TABLE_HEADER } from '@/components/admin2/shared/TableControls';
 import { PRIMARY_BUTTON } from '@/components/admin2/shared/PageHeader';
 import { Modal } from '@/components/ui/Modal';
+import {
+  deleteAdminPlaceCategory,
+  reorderAdminPlaceCategories,
+  setAdminPlaceCategoryActive,
+} from '@/api/adminPlacesApi';
+import { getApiErrorMessage } from '@/lib/adminAuthApi';
 import { PlaceCategoryModal } from './PlaceCategoryModal';
 import { placeCategoryIcon } from './placeCategoryIcons';
-import {
-  deletePlaceCategory,
-  loadPlaceCategories,
-  reorderPlaceCategories,
-  setPlaceCategoryActive,
-} from './placeCategoriesStore';
 import type { AdminPlace, AdminPlaceCategory } from './presentation';
 
 const PER_PAGE = 10;
@@ -29,12 +29,14 @@ export function PlaceCategoriesCard({
   busy,
   onChange,
   onNotice,
+  onError,
 }: {
   categories: AdminPlaceCategory[];
   places: AdminPlace[];
   busy: boolean;
-  onChange: (categories: AdminPlaceCategory[]) => void;
+  onChange: () => void;
   onNotice: (text: string) => void;
+  onError?: (text: string) => void;
 }) {
   const [editing, setEditing] = useState<AdminPlaceCategory | null | 'new'>(null);
   const [deleting, setDeleting] = useState<AdminPlaceCategory | null>(null);
@@ -63,20 +65,22 @@ export function PlaceCategoriesCard({
   const existingSlugs = categories.map((category) => category.slug);
   const actionBusy = busy || localBusy;
 
-  const refresh = () => onChange(loadPlaceCategories());
+  const refresh = () => onChange();
 
-  const toggle = (category: AdminPlaceCategory) => {
+  const toggle = async (category: AdminPlaceCategory) => {
     setLocalBusy(true);
     try {
-      const updated = setPlaceCategoryActive(category.id, !category.is_active);
+      const updated = await setAdminPlaceCategoryActive(category.id, !category.is_active);
       refresh();
       onNotice(updated.is_active ? `“${updated.name}” is active.` : `“${updated.name}” is paused.`);
+    } catch (err) {
+      onError?.(getApiErrorMessage(err, 'Could not update category.'));
     } finally {
       setLocalBusy(false);
     }
   };
 
-  const move = (category: AdminPlaceCategory, direction: -1 | 1) => {
+  const move = async (category: AdminPlaceCategory, direction: -1 | 1) => {
     const ids = categories.map((item) => item.id);
     const from = ids.indexOf(category.id);
     const to = from + direction;
@@ -84,13 +88,16 @@ export function PlaceCategoriesCard({
     [ids[from], ids[to]] = [ids[to], ids[from]];
     setLocalBusy(true);
     try {
-      onChange(reorderPlaceCategories(ids));
+      await reorderAdminPlaceCategories(ids);
+      refresh();
+    } catch (err) {
+      onError?.(getApiErrorMessage(err, 'Could not reorder categories.'));
     } finally {
       setLocalBusy(false);
     }
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!deleting) return;
     const used = placeCountBySlug.get(deleting.slug) ?? 0;
     if (used > 0) {
@@ -100,10 +107,12 @@ export function PlaceCategoriesCard({
     }
     setLocalBusy(true);
     try {
-      deletePlaceCategory(deleting.id);
+      await deleteAdminPlaceCategory(deleting.id);
       onNotice(`“${deleting.name}” is deleted.`);
       setDeleting(null);
       refresh();
+    } catch (err) {
+      onError?.(getApiErrorMessage(err, 'Could not delete category.'));
     } finally {
       setLocalBusy(false);
     }

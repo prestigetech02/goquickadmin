@@ -1,23 +1,29 @@
 import { useCallback, useMemo, useState } from 'react';
-import { FolderTree, Plus, RotateCcw, Store } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { FolderTree, Plus, Store } from 'lucide-react';
+import {
+  deleteAdminPlace,
+  fetchAdminPlaceCategories,
+  fetchAdminPlaces,
+  setAdminPlaceActive,
+} from '@/api/adminPlacesApi';
 import { PlaceCategoriesCard } from '@/components/admin2/places/PlaceCategoriesCard';
 import { PlaceFormDrawer, type PlaceFormMode } from '@/components/admin2/places/PlaceFormDrawer';
 import { PlaceListCard, type PlaceHandlers } from '@/components/admin2/places/PlaceListCard';
 import { PlaceViewDrawer } from '@/components/admin2/places/PlaceViewDrawer';
-import { loadPlaceCategories, resetPlaceCategoriesToSeed } from '@/components/admin2/places/placeCategoriesStore';
 import {
   categoryLabel,
   placeFullAddress,
   uniqueSorted,
   type AdminPlace,
-  type AdminPlaceCategory,
 } from '@/components/admin2/places/presentation';
-import { deletePlace, loadPlaces, resetPlacesToSeed, setPlaceActive } from '@/components/admin2/places/placesStore';
 import { MetricCard, MetricGrid } from '@/components/admin2/shared/MetricCard';
 import { MinimalToast } from '@/components/admin2/shared/MinimalToast';
-import { PageHeader, OUTLINE_BUTTON, PRIMARY_BUTTON } from '@/components/admin2/shared/PageHeader';
+import { PageHeader, PRIMARY_BUTTON } from '@/components/admin2/shared/PageHeader';
 import { CardTabs, SearchField, type Notice } from '@/components/admin2/shared/TableControls';
 import { Modal } from '@/components/ui/Modal';
+import { getApiErrorMessage } from '@/lib/adminAuthApi';
+import { queryKeys } from '@/lib/queryKeys';
 
 type PageTab = 'places' | 'categories';
 type StatusFilter = 'all' | 'active' | 'paused';
@@ -26,9 +32,8 @@ const FILTER_SELECT =
   'h-[36px] rounded-[8px] border border-[#e2e8e3] bg-white px-[10px] text-[11px] font-semibold text-[#17211b] outline-none focus:border-[#167d35]';
 
 export function Admin2PlacesPage() {
+  const queryClient = useQueryClient();
   const [tab, setTab] = useState<PageTab>('places');
-  const [places, setPlaces] = useState<AdminPlace[]>(() => loadPlaces());
-  const [categories, setCategories] = useState<AdminPlaceCategory[]>(() => loadPlaceCategories());
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<StatusFilter>('all');
   const [category, setCategory] = useState<string>('all');
@@ -39,11 +44,48 @@ export function Admin2PlacesPage() {
   const [formMode, setFormMode] = useState<PlaceFormMode | null>(null);
   const [viewing, setViewing] = useState<AdminPlace | null>(null);
   const [deleting, setDeleting] = useState<AdminPlace | null>(null);
-  const [busy, setBusy] = useState(false);
   const dismissNotice = useCallback(() => setNotice(null), []);
   const showOk = useCallback((text: string) => setNotice({ tone: 'ok', text }), []);
 
-  const refreshPlaces = () => setPlaces(loadPlaces());
+  const placesQuery = useQuery({
+    queryKey: queryKeys.places.list({ per_page: 200 }),
+    queryFn: () => fetchAdminPlaces({ per_page: 200 }),
+  });
+  const categoriesQuery = useQuery({
+    queryKey: queryKeys.places.categories,
+    queryFn: fetchAdminPlaceCategories,
+  });
+
+  const places = placesQuery.data?.places ?? [];
+  const categories = categoriesQuery.data?.categories ?? [];
+  const loading = placesQuery.isLoading || categoriesQuery.isLoading;
+
+  const invalidate = () => {
+    void queryClient.invalidateQueries({ queryKey: queryKeys.places.all });
+    void queryClient.invalidateQueries({ queryKey: queryKeys.places.categories });
+  };
+
+  const mutation = useMutation({
+    mutationFn: async (input: { action: 'toggle' | 'delete'; place: AdminPlace }) => {
+      if (input.action === 'delete') {
+        await deleteAdminPlace(input.place.id);
+        return null;
+      }
+      return setAdminPlaceActive(input.place.id, !input.place.is_active);
+    },
+    onSuccess: (result, input) => {
+      if (input.action === 'delete') {
+        setDeleting(null);
+        showOk(`“${input.place.name}” is deleted.`);
+      } else if (result) {
+        showOk(result.is_active ? `“${result.name}” is active in Explore.` : `“${result.name}” is paused.`);
+      }
+      invalidate();
+    },
+    onError: (error) => setNotice({ tone: 'error', text: getApiErrorMessage(error, 'That action failed.') }),
+  });
+
+  const busy = mutation.isPending;
 
   const stateOptions = useMemo(() => uniqueSorted(places.map((place) => place.state)), [places]);
   const cityOptions = useMemo(
@@ -105,36 +147,14 @@ export function Admin2PlacesPage() {
       setViewing(null);
       setFormMode({ kind: 'edit', place });
     },
-    toggle: (place) => {
-      setBusy(true);
-      try {
-        const updated = setPlaceActive(place.id, !place.is_active);
-        refreshPlaces();
-        showOk(updated.is_active ? `“${updated.name}” is active in Explore.` : `“${updated.name}” is paused.`);
-      } finally {
-        setBusy(false);
-      }
-    },
+    toggle: (place) => mutation.mutate({ action: 'toggle', place }),
     remove: (place) => setDeleting(place),
   };
 
   const onSaved = (place: AdminPlace, mode: PlaceFormMode) => {
     setFormMode(null);
-    refreshPlaces();
+    invalidate();
     showOk(mode.kind === 'edit' ? `“${place.name}” is updated.` : `“${place.name}” is added.`);
-  };
-
-  const confirmDelete = () => {
-    if (!deleting) return;
-    setBusy(true);
-    try {
-      deletePlace(deleting.id);
-      showOk(`“${deleting.name}” is deleted.`);
-      setDeleting(null);
-      refreshPlaces();
-    } finally {
-      setBusy(false);
-    }
   };
 
   return (
@@ -143,43 +163,24 @@ export function Admin2PlacesPage() {
         eyebrow="Operations · Explore"
         title="Places Mgt"
         actionsBesideTitle
-        subtitle="Curate shops and stops with an address and map pin. Requesters will use these to start errands from Explore."
+        subtitle="Curate shops and stops with an address and map pin. Requesters use these to start errands from Explore."
         actions={
           tab === 'places' ? (
-            <>
-              <button
-                type="button"
-                className={OUTLINE_BUTTON}
-                onClick={() => {
-                  setPlaces(resetPlacesToSeed());
-                  showOk('Places reset to sample data.');
-                }}
-              >
-                <RotateCcw className="size-[15px]" strokeWidth={2} />
-                Reset samples
-              </button>
-              <button type="button" onClick={() => setFormMode({ kind: 'create' })} className={PRIMARY_BUTTON}>
-                <Plus className="size-[15px]" strokeWidth={2} />
-                Add place
-              </button>
-            </>
-          ) : (
-            <button
-              type="button"
-              className={OUTLINE_BUTTON}
-              onClick={() => {
-                setCategories(resetPlaceCategoriesToSeed());
-                showOk('Categories reset to sample data.');
-              }}
-            >
-              <RotateCcw className="size-[15px]" strokeWidth={2} />
-              Reset samples
+            <button type="button" onClick={() => setFormMode({ kind: 'create' })} className={PRIMARY_BUTTON}>
+              <Plus className="size-[15px]" strokeWidth={2} />
+              Add place
             </button>
-          )
+          ) : null
         }
       />
 
       <MinimalToast notice={notice} onDismiss={dismissNotice} />
+
+      {(placesQuery.isError || categoriesQuery.isError) && (
+        <p className="rounded-[10px] border border-[#e5a5a5] bg-[#fdeded] px-3 py-2 text-[12px] text-[#b84545]">
+          {getApiErrorMessage(placesQuery.error ?? categoriesQuery.error, 'Could not load places.')}
+        </p>
+      )}
 
       <MetricGrid columns={4}>
         <MetricCard
@@ -187,7 +188,7 @@ export function Admin2PlacesPage() {
           icon={Store}
           iconColor="#167d35"
           iconBg="#eaf6ed"
-          value={String(places.length)}
+          value={loading ? '…' : String(places.length)}
           context={`${activeCount} active · ${pausedCount} paused`}
         />
         <MetricCard
@@ -195,7 +196,7 @@ export function Admin2PlacesPage() {
           icon={FolderTree}
           iconColor="#735ca8"
           iconBg="#f3f0fa"
-          value={String(categories.length)}
+          value={loading ? '…' : String(categories.length)}
           context={`${activeCategories} active in Explore`}
         />
         <MetricCard
@@ -203,15 +204,15 @@ export function Admin2PlacesPage() {
           icon={Store}
           iconColor="#0d5e27"
           iconBg="#eaf6ed"
-          value={String(activeCount)}
-          context="Visible in Explore when wired"
+          value={loading ? '…' : String(activeCount)}
+          context="Visible to requesters in Explore"
         />
         <MetricCard
           label="Paused places"
           icon={Store}
           iconColor="#7c857f"
           iconBg="#f1f4f2"
-          value={String(pausedCount)}
+          value={loading ? '…' : String(pausedCount)}
           context="Hidden from requesters"
         />
       </MetricGrid>
@@ -291,7 +292,7 @@ export function Admin2PlacesPage() {
           <PlaceListCard
             places={filtered}
             categories={categories}
-            busy={busy}
+            busy={busy || loading}
             handlers={handlers}
             onCreate={() => setFormMode({ kind: 'create' })}
             filterKey={`${search}|${status}|${category}|${stateFilter}|${cityFilter}|${areaFilter}`}
@@ -301,9 +302,10 @@ export function Admin2PlacesPage() {
         <PlaceCategoriesCard
           categories={categories}
           places={places}
-          busy={busy}
-          onChange={setCategories}
+          busy={busy || loading}
+          onChange={() => invalidate()}
           onNotice={showOk}
+          onError={(text) => setNotice({ tone: 'error', text })}
         />
       )}
 
@@ -331,7 +333,7 @@ export function Admin2PlacesPage() {
         {deleting ? (
           <div className="flex flex-col gap-[14px] font-inter">
             <p className="text-[12px] leading-relaxed text-[#45514a]">
-              “{deleting.name}” will be removed from this admin list. Prefer pausing so old errands keep a reference.
+              “{deleting.name}” will be removed from Explore for requesters. Prefer pausing so history stays intact.
             </p>
             <div className="flex justify-end gap-[8px]">
               <button
@@ -346,7 +348,7 @@ export function Admin2PlacesPage() {
                 <button
                   type="button"
                   onClick={() => {
-                    handlers.toggle(deleting);
+                    mutation.mutate({ action: 'toggle', place: deleting });
                     setDeleting(null);
                   }}
                   disabled={busy}
@@ -357,7 +359,7 @@ export function Admin2PlacesPage() {
               ) : null}
               <button
                 type="button"
-                onClick={confirmDelete}
+                onClick={() => mutation.mutate({ action: 'delete', place: deleting })}
                 disabled={busy}
                 className="h-[36px] rounded-[8px] bg-[#b84545] px-[14px] text-[11px] font-semibold text-white hover:bg-[#9a3434] disabled:opacity-60"
               >

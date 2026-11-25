@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { PRIMARY_BUTTON } from '@/components/admin2/shared/PageHeader';
 import { PLACE_CATEGORY_ICON_KEYS, PLACE_CATEGORY_ICONS } from './placeCategoryIcons';
-import { savePlaceCategory } from './placeCategoriesStore';
+import { createAdminPlaceCategory, updateAdminPlaceCategory } from '@/api/adminPlacesApi';
+import { getApiErrorMessage } from '@/lib/adminAuthApi';
 import {
   categoryFormProblems,
   categoryToForm,
@@ -78,7 +79,7 @@ function CategoryForm({
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const save = () => {
+  const save = async () => {
     setTouched(true);
     const nextProblems = categoryFormProblems(form, {
       existingSlugs,
@@ -95,11 +96,13 @@ function CategoryForm({
         slug: category ? category.slug : form.slug.trim() || slugifyCategory(form.name),
         description: form.description.trim(),
       };
-      const saved = savePlaceCategory(payload, category?.id);
+      const saved = category
+        ? await updateAdminPlaceCategory(category.id, payload)
+        : await createAdminPlaceCategory(payload);
       onSaved(saved, category ? 'edit' : 'create');
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not save this category.');
+      setError(getApiErrorMessage(err, 'Could not save this category.'));
     } finally {
       setSaving(false);
     }

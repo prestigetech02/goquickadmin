@@ -1,18 +1,8 @@
 import { useRef, useState, type ChangeEvent } from 'react';
 import { ImagePlus, Star, Trash2 } from 'lucide-react';
+import { uploadAdminPlaceImage } from '@/api/adminPlacesApi';
+import { getApiErrorMessage } from '@/lib/adminAuthApi';
 import { MAX_PLACE_IMAGE_BYTES, MAX_PLACE_IMAGES } from './presentation';
-
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') resolve(reader.result);
-      else reject(new Error('Could not read image.'));
-    };
-    reader.onerror = () => reject(new Error('Could not read image.'));
-    reader.readAsDataURL(file);
-  });
-}
 
 export function PlaceImageGallery({
   images,
@@ -51,15 +41,16 @@ export function PlaceImageGallery({
           continue;
         }
         if (file.size > MAX_PLACE_IMAGE_BYTES) {
-          setUploadError('Each photo must be under 1.5MB for now (local preview).');
+          setUploadError('Each photo must be under 1.5MB.');
           continue;
         }
-        next.push(await readFileAsDataUrl(file));
+        const uploaded = await uploadAdminPlaceImage(file);
+        next.push(uploaded.url);
       }
       if (next.length > 0) onChange([...images, ...next]);
       if (files.length > room) setUploadError(`Only ${room} more photo${room === 1 ? '' : 's'} can be added.`);
-    } catch {
-      setUploadError('Upload failed.');
+    } catch (err) {
+      setUploadError(getApiErrorMessage(err, 'Upload failed.'));
     } finally {
       setBusy(false);
     }

@@ -45,6 +45,7 @@ export type AdminPlaceCategory = {
   icon: string;
   is_active: boolean;
   sort_order: number;
+  places_count?: number;
   created_at: string;
   updated_at: string;
 };
