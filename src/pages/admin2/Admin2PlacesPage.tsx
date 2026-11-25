@@ -48,8 +48,8 @@ export function Admin2PlacesPage() {
   const showOk = useCallback((text: string) => setNotice({ tone: 'ok', text }), []);
 
   const placesQuery = useQuery({
-    queryKey: queryKeys.places.list({ per_page: 200 }),
-    queryFn: () => fetchAdminPlaces({ per_page: 200 }),
+    queryKey: queryKeys.places.list({ per_page: 100 }),
+    queryFn: () => fetchAdminPlaces({ per_page: 100 }),
   });
   const categoriesQuery = useQuery({
     queryKey: queryKeys.places.categories,
