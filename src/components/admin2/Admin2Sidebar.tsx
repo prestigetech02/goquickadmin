@@ -62,6 +62,7 @@ const SECTIONS: Array<{ title: string; items: SidebarItem[] }> = [
       { label: 'Transactions', page: 'admin2-transactions', icon: ArrowLeftRight },
       { label: 'Service Zones', page: 'admin2-zones', icon: MapPin },
       { label: 'Places Mgt', page: 'admin2-places', icon: MapPinned },
+      { label: 'Organizations Mgt', page: 'admin2-organizations', icon: Building2 },
       { label: 'Notifications', page: 'admin2-notifications', icon: Bell },
     ],
   },

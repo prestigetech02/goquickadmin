@@ -166,4 +166,9 @@ export const queryKeys = {
     list: (params: Record<string, unknown>) => ['admin-places', 'list', params] as const,
     categories: ['admin-places', 'categories'] as const,
   },
+  organizations: {
+    all: ['admin-organizations'] as const,
+    list: (params: Record<string, unknown>) => ['admin-organizations', 'list', params] as const,
+    detail: (id: number) => ['admin-organizations', 'detail', id] as const,
+  },
 } as const;

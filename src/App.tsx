@@ -15,6 +15,7 @@ import { Admin2TransactionsPage } from '@/pages/admin2/Admin2TransactionsPage';
 import { Admin2WithdrawalsPage } from '@/pages/admin2/Admin2WithdrawalsPage';
 import { Admin2ZonesPage } from '@/pages/admin2/Admin2ZonesPage';
 import { Admin2PlacesPage } from '@/pages/admin2/Admin2PlacesPage';
+import { Admin2OrganizationsPage } from '@/pages/admin2/Admin2OrganizationsPage';
 import { Admin2NotificationsPage } from '@/pages/admin2/Admin2NotificationsPage';
 import { Admin2VerificationsPage } from '@/pages/admin2/Admin2VerificationsPage';
 import { Admin2DisputesPage } from '@/pages/admin2/Admin2DisputesPage';
@@ -41,6 +42,8 @@ import {
 } from '@/lib/adminNavigation';
 import { LoginPage } from '@/pages/LoginPage';
 import { ChangePasswordPage } from '@/pages/ChangePasswordPage';
+import { MfaChallengePage } from '@/pages/MfaChallengePage';
+import { SetupMfaPage } from '@/pages/SetupMfaPage';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 const PAGES: Partial<Record<PageKey, () => ReactNode>> = {
@@ -55,6 +58,7 @@ const PAGES: Partial<Record<PageKey, () => ReactNode>> = {
   'admin2-withdrawals': () => <Admin2WithdrawalsPage />,
   'admin2-zones': () => <Admin2ZonesPage />,
   'admin2-places': () => <Admin2PlacesPage />,
+  'admin2-organizations': () => <Admin2OrganizationsPage />,
   'admin2-notifications': () => <Admin2NotificationsPage />,
   'admin2-verifications': () => <Admin2VerificationsPage />,
   'admin2-disputes': () => <Admin2DisputesPage />,
@@ -74,9 +78,12 @@ const PAGES: Partial<Record<PageKey, () => ReactNode>> = {
 };
 
 function AppContent() {
-  const { user, loading } = useAuth();
+  const { user, loading, mfaPending } = useAuth();
   const location = useLocation();
   const page = getPageFromPathname(location.pathname);
+  const mustSetupMfa =
+    !!user &&
+    (user.must_setup_two_factor === true || user.two_factor_confirmed === false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
@@ -90,6 +97,15 @@ function AppContent() {
           <p className="text-sm text-ink-400">Loading...</p>
         </div>
       </div>
+    );
+  }
+
+  if (mfaPending) {
+    return (
+      <Routes>
+        <Route path="/mfa" element={<MfaChallengePage />} />
+        <Route path="*" element={<Navigate to="/mfa" replace />} />
+      </Routes>
     );
   }
 
@@ -107,6 +123,15 @@ function AppContent() {
       <Routes>
         <Route path="/change-password" element={<ChangePasswordPage />} />
         <Route path="*" element={<Navigate to="/change-password" replace />} />
+      </Routes>
+    );
+  }
+
+  if (mustSetupMfa) {
+    return (
+      <Routes>
+        <Route path="/setup-mfa" element={<SetupMfaPage />} />
+        <Route path="*" element={<Navigate to="/setup-mfa" replace />} />
       </Routes>
     );
   }

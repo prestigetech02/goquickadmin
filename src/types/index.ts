@@ -21,6 +21,9 @@ export interface AdminUser {
   admin_role: string | null;
   admin_modules: AdminModule[];
   must_change_password: boolean;
+  /** Present after MFA rollout; treat missing as not enrolled. */
+  two_factor_confirmed?: boolean;
+  must_setup_two_factor?: boolean;
   permissions: AdminPermissions;
 }
 

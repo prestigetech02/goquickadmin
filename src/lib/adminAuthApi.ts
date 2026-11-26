@@ -3,10 +3,24 @@ import { http } from './http';
 import type { AdminUser, ApiResponse } from '@/types';
 
 export type AdminLoginResult = {
-  token: string;
+  mfa_required?: boolean;
+  token?: string;
+  challenge_token?: string;
   token_type: string;
   expires_in_minutes?: number;
   user: AdminUser;
+};
+
+export type MfaSetupResult = {
+  secret: string;
+  otpauth_url: string;
+  issuer: string;
+  account: string;
+};
+
+export type MfaConfirmResult = {
+  user: AdminUser;
+  recovery_codes: string[];
 };
 
 export async function loginAdmin(email: string, password: string) {
@@ -15,8 +29,33 @@ export async function loginAdmin(email: string, password: string) {
     password,
   });
 
-  if (!data.success || !data.data?.token) {
+  if (!data.success || !data.data) {
     throw new Error(data.error?.message || data.message || 'Login failed.');
+  }
+
+  if (data.data.mfa_required) {
+    if (!data.data.challenge_token) {
+      throw new Error('Two-factor challenge missing from server response.');
+    }
+    return data.data;
+  }
+
+  if (!data.data.token) {
+    throw new Error(data.error?.message || data.message || 'Login failed.');
+  }
+
+  return data.data;
+}
+
+export async function verifyAdminMfa(challengeToken: string, code: string) {
+  const { data } = await http.post<ApiResponse<AdminLoginResult>>(
+    '/admin/auth/mfa/verify',
+    { code: code.trim() },
+    { headers: { Authorization: `Bearer ${challengeToken}` } },
+  );
+
+  if (!data.success || !data.data?.token) {
+    throw new Error(data.error?.message || data.message || 'Invalid authenticator code.');
   }
 
   return data.data;
@@ -44,6 +83,24 @@ export async function changeAdminPassword(input: {
     throw new Error(data.error?.message || data.message || 'Failed to update password.');
   }
   return data.data.user;
+}
+
+export async function setupAdminMfa() {
+  const { data } = await http.post<ApiResponse<MfaSetupResult>>('/admin/auth/mfa/setup');
+  if (!data.success || !data.data?.secret) {
+    throw new Error(data.error?.message || data.message || 'Could not start MFA setup.');
+  }
+  return data.data;
+}
+
+export async function confirmAdminMfa(code: string) {
+  const { data } = await http.post<ApiResponse<MfaConfirmResult>>('/admin/auth/mfa/confirm', {
+    code: code.trim(),
+  });
+  if (!data.success || !data.data?.user) {
+    throw new Error(data.error?.message || data.message || 'Could not confirm MFA.');
+  }
+  return data.data;
 }
 
 export function getApiErrorMessage(error: unknown, fallback = 'Something went wrong'): string {

@@ -17,7 +17,8 @@ export const http = axios.create({
 
 http.interceptors.request.use((config) => {
   const token = getAdminToken();
-  if (token) {
+  // Keep an explicit Authorization header (e.g. MFA challenge token) intact.
+  if (token && !config.headers.Authorization) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
