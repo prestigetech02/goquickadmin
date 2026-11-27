@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Building2, Plus } from 'lucide-react';
 import {
@@ -7,13 +8,13 @@ import {
   type AdminOrganization,
   type CreateAdminOrganizationPayload,
 } from '@/api/adminOrganizationsApi';
-import { OrganizationViewDrawer } from '@/components/admin2/organizations/OrganizationViewDrawer';
 import { MetricCard, MetricGrid } from '@/components/admin2/shared/MetricCard';
 import { MinimalToast } from '@/components/admin2/shared/MinimalToast';
 import { PageHeader, PRIMARY_BUTTON } from '@/components/admin2/shared/PageHeader';
 import { SearchField, type Notice } from '@/components/admin2/shared/TableControls';
 import { Modal } from '@/components/ui/Modal';
 import { getApiErrorMessage } from '@/lib/adminAuthApi';
+import { getAdmin2OrganizationHref } from '@/lib/adminNavigation';
 import { queryKeys } from '@/lib/queryKeys';
 import { useDebounced } from '@/components/admin2/shared/useDebounced';
 
@@ -50,11 +51,11 @@ function statusBadge(status: string) {
 
 export function Admin2OrganizationsPage() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounced(search, 350);
   const [status, setStatus] = useState<StatusFilter>('all');
   const [notice, setNotice] = useState<Notice | null>(null);
-  const [openId, setOpenId] = useState<number | null>(null);
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState<CreateAdminOrganizationPayload>(EMPTY_FORM);
 
@@ -95,7 +96,7 @@ export function Admin2OrganizationsPage() {
       setForm(EMPTY_FORM);
       void queryClient.invalidateQueries({ queryKey: queryKeys.organizations.all });
       setNotice({ tone: 'ok', text: `“${org.name}” created and owner attached.` });
-      setOpenId(org.id);
+      navigate(getAdmin2OrganizationHref(org.id));
     },
     onError: (error) =>
       setNotice({ tone: 'error', text: getApiErrorMessage(error, 'Could not create business.') }),
@@ -164,7 +165,7 @@ export function Admin2OrganizationsPage() {
           <SearchField
             value={search}
             onChange={setSearch}
-            placeholder="Search name, phone, CAC, city, or owner"
+            placeholder="Search name, GQORG…, phone, CAC, city, or owner"
           />
           <select
             value={status}
@@ -204,20 +205,12 @@ export function Admin2OrganizationsPage() {
                   </td>
                 </tr>
               ) : (
-                orgs.map((org) => <OrgRow key={org.id} org={org} onOpen={() => setOpenId(org.id)} />)
+                orgs.map((org) => <OrgRow key={org.id} org={org} />)
               )}
             </tbody>
           </table>
         </div>
       </div>
-
-      {openId != null ? (
-        <OrganizationViewDrawer
-          organizationId={openId}
-          onClose={() => setOpenId(null)}
-          onNotice={(tone, text) => setNotice({ tone, text })}
-        />
-      ) : null}
 
       {creating ? (
         <Modal
@@ -329,7 +322,8 @@ export function Admin2OrganizationsPage() {
   );
 }
 
-function OrgRow({ org, onOpen }: { org: AdminOrganization; onOpen: () => void }) {
+function OrgRow({ org }: { org: AdminOrganization }) {
+  const href = getAdmin2OrganizationHref(org.id);
   const owner =
     org.owner?.name?.trim() ||
     [org.owner?.first_name, org.owner?.last_name].filter(Boolean).join(' ').trim() ||
@@ -339,12 +333,14 @@ function OrgRow({ org, onOpen }: { org: AdminOrganization; onOpen: () => void })
   return (
     <tr className="border-b border-[#eef2ef] text-[12px] text-[#17211b] hover:bg-[#f8faf8]">
       <td className="px-2 py-3">
-        <button type="button" onClick={onOpen} className="text-left">
+        <Link to={href} className="text-left">
           <span className="font-semibold hover:text-[#167d35]">{org.name}</span>
           <span className="mt-0.5 block text-[11px] text-[#6b6f66]">
+            {org.code || `GQORG${String(org.id).padStart(5, '0')}`}
+            {' · '}
             {[org.city, org.state].filter(Boolean).join(', ') || org.slug}
           </span>
-        </button>
+        </Link>
       </td>
       <td className="px-2 py-3">
         <span className="block font-medium">{owner}</span>
@@ -360,13 +356,9 @@ function OrgRow({ org, onOpen }: { org: AdminOrganization; onOpen: () => void })
       <td className="px-2 py-3">{org.locations_count}</td>
       <td className="px-2 py-3">{org.errands_count}</td>
       <td className="px-2 py-3 text-right">
-        <button
-          type="button"
-          onClick={onOpen}
-          className="text-[12px] font-semibold text-[#167d35] hover:underline"
-        >
+        <Link to={href} className="text-[12px] font-semibold text-[#167d35] hover:underline">
           View
-        </button>
+        </Link>
       </td>
     </tr>
   );

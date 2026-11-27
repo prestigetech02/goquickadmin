@@ -4,6 +4,26 @@ import type { ApiResponse } from '@/types';
 
 export type AdminOrgStatus = 'pending' | 'active' | 'suspended' | string;
 export type AdminOrgFulfillmentMode = 'managed' | 'marketplace';
+export type AdminOrgRateCardMode = 'marketplace' | 'uplift' | 'fixed';
+
+export type AdminOrgRateCardZone = {
+  id?: number;
+  zone_id: number;
+  zone_name?: string | null;
+  zone_city?: string | null;
+  zone_state?: string | null;
+  fixed_amount: number;
+  is_active?: boolean;
+};
+
+export type AdminOrgRateCard = {
+  enabled: boolean;
+  mode: AdminOrgRateCardMode | string;
+  uplift_percent: number;
+  fixed_amount: number | null;
+  minimum_amount: number | null;
+  zones?: AdminOrgRateCardZone[];
+};
 
 export type AdminOrgOwner = {
   id: number;
@@ -29,11 +49,27 @@ export type AdminOrgLocation = {
 
 export type AdminOrganization = {
   id: number;
+  code?: string;
   name: string;
   slug: string;
   status: AdminOrgStatus;
   fulfillment_mode?: AdminOrgFulfillmentMode | string;
   partner_api_enabled?: boolean;
+  rate_card?: AdminOrgRateCard | null;
+  kyb?: {
+    status: string;
+    address_status: string;
+    failure_reason?: string | null;
+    director_id_type?: string | null;
+    director_id_number?: string | null;
+    lga?: string | null;
+    identity_provider_ref?: string | null;
+    address_provider_ref?: string | null;
+    identity_verified_at?: string | null;
+    submitted_at?: string | null;
+    director_id_url?: string | null;
+    proof_of_address_url?: string | null;
+  } | null;
   contact_phone?: string | null;
   contact_email?: string | null;
   address?: string | null;
@@ -88,6 +124,16 @@ export type CreateAdminOrganizationPayload = {
   status?: 'pending' | 'active';
   fulfillment_mode?: AdminOrgFulfillmentMode;
   partner_api_enabled?: boolean;
+  rate_card_enabled?: boolean;
+  rate_card_mode?: AdminOrgRateCardMode;
+  rate_card_uplift_percent?: number | null;
+  rate_card_fixed_amount?: number | null;
+  rate_card_minimum_amount?: number | null;
+  rate_card_zones?: Array<{
+    zone_id: number;
+    fixed_amount: number;
+    is_active?: boolean;
+  }>;
   owner_user_id?: number | null;
   owner_phone?: string | null;
 };

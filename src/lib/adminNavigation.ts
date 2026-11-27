@@ -14,6 +14,7 @@ export type PageKey =
   | 'admin2-zones'
   | 'admin2-places'
   | 'admin2-organizations'
+  | 'admin2-organization'
   | 'admin2-b2b-errands'
   | 'admin2-notifications'
   | 'admin2-verifications'
@@ -90,6 +91,7 @@ export const ADMIN_PAGES: AdminPageDefinition[] = [
   { key: 'admin2-zones', label: 'Service Zones', path: '/admin2/zones', access: 'all-admins', visibility: 'hidden' },
   { key: 'admin2-places', label: 'Places Mgt', path: '/admin2/places', access: 'operations', visibility: 'hidden' },
   { key: 'admin2-organizations', label: 'Organizations Mgt', path: '/admin2/organizations', access: 'operations', visibility: 'hidden' },
+  { key: 'admin2-organization', label: 'Organization details', path: '/admin2/organizations/:id', access: 'operations', visibility: 'hidden' },
   { key: 'admin2-b2b-errands', label: 'B2B Errands', path: '/admin2/b2b-errands', access: 'operations', visibility: 'hidden' },
   { key: 'admin2-notifications', label: 'Notifications', path: '/admin2/notifications', access: 'operations', visibility: 'hidden' },
   { key: 'admin2-verifications', label: 'Runner verification', path: '/admin2/verifications', access: 'operations', visibility: 'hidden' },
@@ -151,6 +153,7 @@ export function getPageHref(key: PageKey, options?: { openId?: number | null }):
 const ADMIN2_ERRAND_PATH = /^\/admin2\/errands\/(\d+)\/?$/;
 const ADMIN2_USER_PATH = /^\/admin2\/users\/(\d+)\/?$/;
 const ADMIN2_RUNNER_PATH = /^\/admin2\/runners\/(\d+)\/?$/;
+const ADMIN2_ORGANIZATION_PATH = /^\/admin2\/organizations\/(\d+)\/?$/;
 const ADMIN2_BLOG_POST_PATH = /^\/admin2\/blog\/(new|\d+)\/?$/;
 
 export function getPageFromPathname(pathname: string): PageKey | null {
@@ -158,6 +161,7 @@ export function getPageFromPathname(pathname: string): PageKey | null {
   if (ADMIN2_ERRAND_PATH.test(pathname)) return 'admin2-errand';
   if (ADMIN2_USER_PATH.test(pathname)) return 'admin2-user';
   if (ADMIN2_RUNNER_PATH.test(pathname)) return 'admin2-runner';
+  if (ADMIN2_ORGANIZATION_PATH.test(pathname)) return 'admin2-organization';
   return PAGE_BY_PATH[pathname]?.key ?? null;
 }
 
@@ -186,6 +190,15 @@ export function getAdmin2ErrandId(pathname: string): number | null {
 
 export function getAdmin2ErrandHref(id: number): string {
   return `${getPagePath('admin2-errands')}/${id}`;
+}
+
+export function getAdmin2OrganizationId(pathname: string): number | null {
+  const match = ADMIN2_ORGANIZATION_PATH.exec(pathname);
+  return match ? Number(match[1]) : null;
+}
+
+export function getAdmin2OrganizationHref(id: number): string {
+  return `${getPagePath('admin2-organizations')}/${id}`;
 }
 
 /** Post id from /admin2/blog/:id, or 'new' for the create screen. */

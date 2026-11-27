@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   BriefcaseBusiness,
   Building2,
@@ -50,11 +50,13 @@ const ASSIGNMENT_OPTIONS = [
 
 export function Admin2B2BErrandsPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<B2BErrandTab>('needs_assign');
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounced(search, 350);
-  const [organizationId, setOrganizationId] = useState('');
+  const initialOrgId = searchParams.get('organization_id')?.replace(/\D/g, '') ?? '';
+  const [organizationId, setOrganizationId] = useState(initialOrgId);
   const [assignment, setAssignment] = useState('');
   const [notice, setNotice] = useState<Notice | null>(null);
   const [action, setAction] = useState<BoardActionTarget | null>(null);
