@@ -187,7 +187,7 @@ export function Admin2OrganizationsPage() {
                 <th className="px-2 py-2">Status</th>
                 <th className="px-2 py-2">Branches</th>
                 <th className="px-2 py-2">Errands</th>
-                <th className="px-2 py-2" />
+                <th className="px-2 py-2 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>

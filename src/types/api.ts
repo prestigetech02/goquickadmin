@@ -2364,6 +2364,27 @@ export type PayoutSettingsSection = SettingsSection<PayoutSettings> & {
   withdrawals_paused_message_max: number;
 };
 
+export type PartnerApiMode = 'live' | 'sandbox' | 'dual';
+
+export type PartnerApiSettings = {
+  partner_api_mode: PartnerApiMode;
+  partner_sandbox_wallet_balance: number;
+};
+
+export type PartnerApiModeOption = {
+  key: PartnerApiMode;
+  label: string;
+  help: string;
+};
+
+export type PartnerApiSettingsSection = SettingsSection<PartnerApiSettings> & {
+  modes: PartnerApiModeOption[];
+  env_defaults: {
+    partner_api_mode: string;
+    partner_sandbox_wallet_balance: number;
+  };
+};
+
 export type SettingsIntegration = {
   key: string;
   label: string;
@@ -2408,6 +2429,7 @@ export type AdminSettingsBoard = {
   permissions: { operations: boolean; finance: boolean; super_admin: boolean };
   operations: SettingsSection<OperationsSettings> | null;
   otp: OtpDeliverySettingsSection | null;
+  partner: PartnerApiSettingsSection | null;
   payouts: PayoutSettingsSection | null;
   integrations: SettingsIntegration[];
   environment: { app_name: string; environment: string; timezone: string };

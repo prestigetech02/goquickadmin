@@ -6,8 +6,12 @@ import {
   reactivateAdminOrganization,
   setAdminOrganizationOwner,
   suspendAdminOrganization,
+  updateAdminOrganization,
   type AdminOrganization,
+  type AdminOrgFulfillmentMode,
 } from '@/api/adminOrganizationsApi';
+import { OrganizationPartnerApiSection } from '@/components/admin2/organizations/OrganizationPartnerApiSection';
+import { OrganizationPartnerWebhookSection } from '@/components/admin2/organizations/OrganizationPartnerWebhookSection';
 import { PRIMARY_BUTTON } from '@/components/admin2/shared/PageHeader';
 import { Drawer } from '@/components/ui/Drawer';
 import { getApiErrorMessage } from '@/lib/adminAuthApi';
@@ -81,6 +85,21 @@ export function OrganizationViewDrawer({
     onError: (error) => onNotice('error', getApiErrorMessage(error, 'That action failed.')),
   });
 
+  const fulfillmentMutation = useMutation({
+    mutationFn: (mode: AdminOrgFulfillmentMode) =>
+      updateAdminOrganization(organizationId, { fulfillment_mode: mode }),
+    onSuccess: (updated) => {
+      invalidate();
+      onNotice(
+        'ok',
+        updated.fulfillment_mode === 'marketplace'
+          ? 'New jobs from this business will appear on the open runner feed.'
+          : 'New jobs from this business stay managed — assign from B2B Errands.',
+      );
+    },
+    onError: (error) => onNotice('error', getApiErrorMessage(error, 'Could not update fulfillment mode.')),
+  });
+
   return (
     <Drawer
       open
@@ -144,7 +163,9 @@ export function OrganizationViewDrawer({
           suspendReason={suspendReason}
           setSuspendReason={setSuspendReason}
           onSetOwner={() => action.mutate('owner')}
-          busy={action.isPending}
+          onFulfillmentChange={(mode) => fulfillmentMutation.mutate(mode)}
+          onNotice={onNotice}
+          busy={action.isPending || fulfillmentMutation.isPending}
         />
       ) : null}
     </Drawer>
@@ -158,6 +179,8 @@ function OrgBody({
   suspendReason,
   setSuspendReason,
   onSetOwner,
+  onFulfillmentChange,
+  onNotice,
   busy,
 }: {
   org: AdminOrganization;
@@ -166,12 +189,16 @@ function OrgBody({
   suspendReason: string;
   setSuspendReason: (v: string) => void;
   onSetOwner: () => void;
+  onFulfillmentChange: (mode: AdminOrgFulfillmentMode) => void;
+  onNotice: (tone: 'ok' | 'error', text: string) => void;
   busy: boolean;
 }) {
   const ownerName =
     org.owner?.name?.trim() ||
     [org.owner?.first_name, org.owner?.last_name].filter(Boolean).join(' ').trim() ||
     '—';
+  const fulfillmentMode: AdminOrgFulfillmentMode =
+    org.fulfillment_mode === 'marketplace' ? 'marketplace' : 'managed';
 
   return (
     <div className="flex flex-col gap-[18px] font-inter">
@@ -191,6 +218,47 @@ function OrgBody({
           </div>
         ) : null}
       </section>
+
+      <section className="flex flex-col gap-[10px] rounded-[12px] border border-[#e2e8e3] p-[14px]">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.4px] text-[#7c857f]">Fulfillment</p>
+        <p className="text-[12px] text-[#45514a]">
+          {fulfillmentMode === 'managed'
+            ? 'Managed: new jobs stay off the open runner feed. Assign or invite from B2B Errands.'
+            : 'Marketplace: new jobs broadcast to eligible runners like consumer errands.'}
+        </p>
+        <div className="flex flex-wrap gap-[8px]">
+          <button
+            type="button"
+            disabled={busy || fulfillmentMode === 'managed'}
+            onClick={() => onFulfillmentChange('managed')}
+            className={`h-[34px] rounded-[8px] px-[12px] text-[12px] font-semibold ${
+              fulfillmentMode === 'managed'
+                ? 'bg-[#167d35] text-white'
+                : 'border border-[#d4ddd6] bg-white text-[#17211b] hover:bg-[#f8faf8] disabled:opacity-50'
+            }`}
+          >
+            Managed
+          </button>
+          <button
+            type="button"
+            disabled={busy || fulfillmentMode === 'marketplace'}
+            onClick={() => onFulfillmentChange('marketplace')}
+            className={`h-[34px] rounded-[8px] px-[12px] text-[12px] font-semibold ${
+              fulfillmentMode === 'marketplace'
+                ? 'bg-[#167d35] text-white'
+                : 'border border-[#d4ddd6] bg-white text-[#17211b] hover:bg-[#f8faf8] disabled:opacity-50'
+            }`}
+          >
+            Marketplace
+          </button>
+        </div>
+        <p className="text-[10px] text-[#7c857f]">
+          Changing mode applies to newly created jobs only. In-flight errands keep the mode they were created with.
+        </p>
+      </section>
+
+      <OrganizationPartnerApiSection org={org} onNotice={onNotice} />
+      <OrganizationPartnerWebhookSection org={org} onNotice={onNotice} />
 
       <section className="flex flex-col gap-[10px] rounded-[12px] border border-[#e2e8e3] p-[14px]">
         <p className="text-[11px] font-semibold uppercase tracking-[0.4px] text-[#7c857f]">Owner</p>
@@ -244,7 +312,15 @@ function OrgBody({
         </label>
       ) : null}
 
-      <section className="grid grid-cols-3 gap-[10px]">
+      <section className="grid grid-cols-2 gap-[10px] sm:grid-cols-4">
+        <Stat
+          label="Wallet"
+          value={
+            org.wallet
+              ? `₦${Number(org.wallet.balance).toLocaleString('en-NG', { maximumFractionDigits: 0 })}`
+              : '—'
+          }
+        />
         <Stat label="Branches" value={String(org.locations_count ?? org.locations?.length ?? 0)} />
         <Stat label="Errands" value={String(org.errand_stats?.total ?? org.errands_count ?? 0)} />
         <Stat label="Completed" value={String(org.errand_stats?.completed ?? 0)} />

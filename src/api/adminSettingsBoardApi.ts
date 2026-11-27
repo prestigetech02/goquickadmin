@@ -6,6 +6,8 @@ import {
   type OperationsSettings,
   type OtpDeliverySettings,
   type OtpDeliverySettingsSection,
+  type PartnerApiSettings,
+  type PartnerApiSettingsSection,
   type PayoutSettings,
   type PayoutSettingsSection,
   type SettingsSection,
@@ -24,6 +26,11 @@ export async function updateOperationsSettings(input: OperationsSettings) {
 export async function updateOtpSettings(input: OtpDeliverySettings) {
   const { data } = await http.put<ApiResponse<OtpDeliverySettingsSection>>('/admin/settings/board/otp', input);
   return unwrapApiData(data, 'Failed to save OTP delivery settings.');
+}
+
+export async function updatePartnerApiSettings(input: PartnerApiSettings) {
+  const { data } = await http.put<ApiResponse<PartnerApiSettingsSection>>('/admin/settings/board/partner', input);
+  return unwrapApiData(data, 'Failed to save Partner API settings.');
 }
 
 export async function updatePayoutSettings(input: PayoutSettings) {

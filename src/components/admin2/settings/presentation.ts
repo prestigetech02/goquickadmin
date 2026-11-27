@@ -7,6 +7,7 @@ export type SettingsSectionId =
   | 'referrals'
   | 'operations'
   | 'otp'
+  | 'partner'
   | 'payouts'
   | 'categories'
   | 'zones'

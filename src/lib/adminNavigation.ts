@@ -14,6 +14,7 @@ export type PageKey =
   | 'admin2-zones'
   | 'admin2-places'
   | 'admin2-organizations'
+  | 'admin2-b2b-errands'
   | 'admin2-notifications'
   | 'admin2-verifications'
   | 'admin2-disputes'
@@ -68,7 +69,7 @@ export type AdminPageDefinition = {
 };
 
 export const ADMIN_MODULE_OPTIONS: Array<{ key: AdminModule; label: string; description: string }> = [
-  { key: 'operations', label: 'Operations', description: 'Users, runners, verifications, errands, disputes, places, organizations, notifications' },
+  { key: 'operations', label: 'Operations', description: 'Users, runners, verifications, errands, B2B errands, disputes, places, organizations, notifications' },
   { key: 'finance', label: 'Finance', description: 'Withdrawals, transactions, revenue, pricing, zones' },
   { key: 'content', label: 'Content', description: 'Blog and banners' },
   { key: 'insights', label: 'Insights', description: 'Analytics and coupons' },
@@ -89,6 +90,7 @@ export const ADMIN_PAGES: AdminPageDefinition[] = [
   { key: 'admin2-zones', label: 'Service Zones', path: '/admin2/zones', access: 'all-admins', visibility: 'hidden' },
   { key: 'admin2-places', label: 'Places Mgt', path: '/admin2/places', access: 'operations', visibility: 'hidden' },
   { key: 'admin2-organizations', label: 'Organizations Mgt', path: '/admin2/organizations', access: 'operations', visibility: 'hidden' },
+  { key: 'admin2-b2b-errands', label: 'B2B Errands', path: '/admin2/b2b-errands', access: 'operations', visibility: 'hidden' },
   { key: 'admin2-notifications', label: 'Notifications', path: '/admin2/notifications', access: 'operations', visibility: 'hidden' },
   { key: 'admin2-verifications', label: 'Runner verification', path: '/admin2/verifications', access: 'operations', visibility: 'hidden' },
   { key: 'admin2-disputes', label: 'Disputes', path: '/admin2/disputes', access: 'operations', visibility: 'hidden' },

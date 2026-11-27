@@ -36,6 +36,11 @@ export const queryKeys = {
     boardOverview: (params: Record<string, unknown>) => ['admin-errands', 'board-overview', params] as const,
     board: (params: Record<string, unknown>) => ['admin-errands', 'board', params] as const,
   },
+  b2bErrands: {
+    all: ['admin-b2b-errands'] as const,
+    overview: ['admin-b2b-errands', 'overview'] as const,
+    list: (params: Record<string, unknown>) => ['admin-b2b-errands', 'list', params] as const,
+  },
   runners: {
     all: ['admin-runners'] as const,
     metrics: ['admin-runners', 'metrics'] as const,
@@ -170,5 +175,9 @@ export const queryKeys = {
     all: ['admin-organizations'] as const,
     list: (params: Record<string, unknown>) => ['admin-organizations', 'list', params] as const,
     detail: (id: number) => ['admin-organizations', 'detail', id] as const,
+    apiKeys: (id: number) => ['admin-organizations', 'api-keys', id] as const,
+    webhook: (id: number) => ['admin-organizations', 'webhook', id] as const,
+    webhookDeliveries: (id: number, params: Record<string, unknown>) =>
+      ['admin-organizations', 'webhook-deliveries', id, params] as const,
   },
 } as const;
